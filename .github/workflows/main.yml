@@ -14,6 +14,6 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Perform CI test on GitHub
-      run: docker build . --file base/Dockerfile --tag dns_docker:$(date +%s)
+      run: ls -l ; docker build . --file base/Dockerfile --tag dns_docker:$(date +%s)
 
 ## https://github.com/marketplace/actions/webhook-post-action
