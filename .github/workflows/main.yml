@@ -17,6 +17,7 @@ jobs:
       run: docker build base --file base/Dockerfile --tag dns_docker:$(date +%s)
   base_trigger_dockerhub:
     needs: base_github_test
+    runs-on: ubuntu-latest
     steps:
       ## https://github.com/marketplace/actions/webhook-post-action
       - uses: muinmomin/webhook-action@v1.0.0
