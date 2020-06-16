@@ -35,5 +35,6 @@ jobs:
           password: ${{ secrets.HUB_TOKEN }}
           repository: rootwyrm/dns_base
           path: base
+          dockerfile: base/Dockerfile.test
 
 # vim:ft=yaml:sw=2:ts=2:et
