@@ -1,8 +1,8 @@
 FROM	rootwyrm/dns_base:latest
 
 ## Set up our labels
-LABEL	maintainer="Phillip 'RootWyrm' Jaenke <prj+docker@rootwyrm.com>"
-LABEL   com.rootwyrm.project="dns_docker/dnsdist" \
+LABEL	maintainer="Phillip 'RootWyrm' Jaenke <prj+docker@rootwyrm.com>" \
+        com.rootwyrm.project="dns_docker/dnsdist" \
         com.rootwyrm.product="PowerDNS dnsdist" \
 		com.rootwyrm.vcs-type="github" \
 		com.rootwyrm.changelog-url="" \

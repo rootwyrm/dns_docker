@@ -1,7 +1,7 @@
 FROM    alpine:3.12
 
-LABEL   maintainer="Phillip 'RootWyrm' Jaenke <prj+docker@rootwyrm.com>"
-LABEL   com.rootwyrm.project="dns_docker" \
+LABEL   maintainer="Phillip 'RootWyrm' Jaenke <prj+docker@rootwyrm.com>" \
+        com.rootwyrm.project="dns_docker" \
         com.rootwyrm.vcs-type="github" \
         com.rootwyrm.changelog-url="" \
         com.rootwyrm.docker.base="alpine:3.12" \
@@ -38,8 +38,8 @@ RUN mkdir -p /opt/rootwyrm && \
     sed -i -e '/^::ctrlalt*/d' /etc/inittab && \
     sed -i -e '/.*salute$/d' /etc/inittab 
 
-ONBUILD COPY [ "application/", "/opt/rootwyrm" ]
-ONBUILD COPY [ "sv/", "/etc/sv" ]
+ONBUILD ADD [ "application/", "/opt/rootwyrm" ]
+ONBUILD ADD [ "sv/", "/etc/sv" ]
 ONBUILD RUN touch /firstboot && \
     for sv in `ls /etc/sv`; do \
         ln -s /etc/sv/$sv /etc/service/ ; \
