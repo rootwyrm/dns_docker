@@ -1,0 +1,19 @@
+## Base Image
+name: dns_docker Base Image
+on:
+  push:
+    branches: [ master ]
+    paths: 'base/*'
+  pull_request:
+    branches: [ master ]
+    paths: 'base/*'
+jobs:
+  ## Doesn't have hooks, so don't push.
+  base_github_test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Perform CI test on GitHub
+      run: docker build . --file base/Dockerfile --tag dns_docker:$(date +%s)
+
+## https://github.com/marketplace/actions/webhook-post-action
