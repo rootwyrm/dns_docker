@@ -23,7 +23,7 @@ LABEL   maintainer="Phillip 'RootWyrm' Jaenke <prj+docker@rootwyrm.com>" \
         org.opencontainers.image.source="https://github.com/rootwyrm/dns_docker" \
         org.opencontainers.image.version="%%VCS_REF%%"
        
-COPY [ "application/", "/opt/rootwyrm" ]
+COPY [ "appbase/", "/opt/rootwyrm" ]
 COPY [ "service/", "/etc/service" ]
 
 VOLUME  [ "/run" ]
