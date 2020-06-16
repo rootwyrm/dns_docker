@@ -1,0 +1,21 @@
+!/bin/sh
+## firstboot
+
+if [ -f /firstboot ]; then
+	echo "[RootWyrm] Running firstboot procedures..."
+else
+	rm -rf /etc/service/firstboot
+	exit 0
+fi
+
+## Actually execute the firstboot scripts
+if [ -d /opt/rootwyrm/firstboot ]; then
+	for s in `ls /opt/rootwyrm/firstboot`; do
+		if [ -x $s ]; then
+			/opt/rootwyrm/firstboot/$s
+		fi
+	done
+fi
+
+## Prevent re-running.
+rm -f /firstboot

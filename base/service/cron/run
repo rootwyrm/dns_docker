@@ -1,0 +1,11 @@
+#!/bin/sh
+
+if [ ! -z $PERIODIC ]; then
+	SYSTEM_TAB="-s $PERIODIC"
+fi
+
+if [ ! -z $USERCRON ]; then
+	USER_TAB="-c $USERCRON"
+fi
+
+exec /usr/sbin/crond -f -l 3 -L /var/log/cron.log $SYSTEM_TAB $USER_TAB

@@ -1,0 +1,7 @@
+#!/bin/sh
+
+kill -SIGTERM $(cat /var/run/dcron.pid)
+
+if [ -f /var/run/dcron.pid ]; then
+	rm /var/run/dcrond.pid
+fi
