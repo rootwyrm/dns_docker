@@ -15,5 +15,11 @@ jobs:
     - uses: actions/checkout@v2
     - name: Perform CI test on GitHub
       run: docker build base --file base/Dockerfile --tag dns_docker:$(date +%s)
+  base_trigger_dockerhub:
+    needs: base_github_test
+    steps:
+      ## https://github.com/marketplace/actions/webhook-post-action
+      - uses: muinmomin/webhook-action@v1.0.0
+        with:
+          url: ${{ secrets.HUB_BASE_WEBHOOK }}
 
-## https://github.com/marketplace/actions/webhook-post-action
