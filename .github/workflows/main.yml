@@ -16,7 +16,7 @@ jobs:
     - name: Perform CI test on GitHub
       run: docker build base --file base/Dockerfile --tag dns_docker:$(date +%s)
   base_image_build:
-    needs: base_github_test
+    needs: base_validate
     runs-on: ubuntu-latest
     steps:
       - name: Check out from HEAD
