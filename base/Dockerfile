@@ -31,22 +31,22 @@ VOLUME  [ "/run" ]
 RUN mkdir -p /opt/rootwyrm && \
     mkdir -p /usr/local/src && \
     apk update && apk upgrade && \
-    apk add --no-cache runit file dcron apk-cron openssl ; \
+    apk add --no-cache runit file dcron apk-cron openssl bash; \
     rm -rf /etc/init.d && \
     sed -i -e '/^tty*/d' /etc/inittab && \
     sed -i -e '/^# Set up*/d' /etc/inittab && \
     sed -i -e '/^::ctrlalt*/d' /etc/inittab && \
     sed -i -e '/.*salute$/d' /etc/inittab 
 
+ONBUILD COPY [ "application/", "/opt/rootwyrm" ]
+ONBUILD COPY [ "sv/", "/etc/sv" ]
 ONBUILD RUN touch /firstboot && \
     for sv in `ls /etc/sv`; do \
         ln -s /etc/sv/$sv /etc/service/ ; \
     done && \
     echo "$(date '+%FT%T.%N%:z') [BUILD] phase beginning..." ; \
     for bld in `ls /opt/rootwyrm/build/ | sort`; do \
-        if [ -x $bld ]; then \
-            /opt/rootwyrm/build/$bld ; \
-        fi \
+        /opt/rootwyrm/build/$bld ; \
     done && \
     echo "$(date '+%FT%T.%N%:z') [BUILD] phase complete..." 
 
