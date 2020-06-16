@@ -1,0 +1,10 @@
+#!/bin/sh
+## dnsdist
+
+dduser=dnsdist
+ddgroup=dnsdist
+
+echo "Starting dnsdist as $dduser:$ddgroup"
+echo " "
+
+exec /usr/bin/dnsdist -C /etc/dnsdist/dnsdist.conf -u $dduser -g $dduser --supervised

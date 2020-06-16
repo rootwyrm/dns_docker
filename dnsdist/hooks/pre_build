@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+export VCS_REF=$(git rev-parse HEAD)
+export RW_VCSHASH=$(git rev-parse --short HEAD)
+export RW_BUILDDATE=$(date '+%FT%T.%N%:z')
+
+sed -i -e 's/%%VCS_REF%%/'$VCS_REF'/g' ./Dockerfile
+sed -i -e 's/%%RW_VCSHASH%%/'$RW_VCSHASH'/g' ./Dockerfile
+sed -i -e 's/%%RW_BUILDDATE%%/'$RW_BUILDDATE'/g' ./Dockerfile

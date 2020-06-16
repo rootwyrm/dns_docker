@@ -24,3 +24,29 @@ jobs:
         with:
           url: ${{ secrets.HUB_BASE_WEBHOOK }}
 
+name: dns_docker dnsdist Image
+on:
+  push:
+    branches: [ master ]
+    paths: 'dnsdist/*'
+  pull_request:
+    branches: [ master ]
+    paths: 'dnsdist/*'
+jobs:
+  dnsdist:
+    runs-on: ubuntu-latest
+    needs: base_github_test
+    steps:
+    - name: Check out from HEAD
+      uses: actions/checkout@v1
+    - name: Build from HEAD and push as latest
+      uses: docker/build-push-action@v1.1.0
+      with:
+        always_pull: true
+        add_git_labels: true
+        tag_with_ref: true
+        username: ${{ secrets.HUB_USER }}
+        password: ${{ secrets.HUB_TOKEN }}
+        repository: rootwyrm/dnsdist
+        dockerfile: Dockerfile
+        path: dnsdist
