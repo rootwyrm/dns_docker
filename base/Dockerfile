@@ -40,14 +40,14 @@ RUN mkdir -p /opt/rootwyrm && \
 
 ONBUILD RUN touch /firstboot && \
     for sv in `ls /etc/sv`; do \
-        ln -s /etc/sv/$sv /etc/service/ ;\
+        ln -s /etc/sv/$sv /etc/service/ ; \
     done && \
     echo "$(date '+%FT%T.%N%:z') [BUILD] phase beginning..." ; \
     for bld in `ls /opt/rootwyrm/build/ | sort`; do \
         if [ -x $bld ]; then \
             /opt/rootwyrm/build/$bld ; \
         fi \
-    done \
+    done && \
     echo "$(date '+%FT%T.%N%:z') [BUILD] phase complete..." 
 
 CMD [ "/sbin/runsvdir", "-P", "/etc/service" ]
