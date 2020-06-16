@@ -9,7 +9,6 @@ on:
 jobs:
   dnsdist:
     runs-on: ubuntu-latest
-    needs: base_github_test
     steps:
     - name: Check out from HEAD
       uses: actions/checkout@v1
