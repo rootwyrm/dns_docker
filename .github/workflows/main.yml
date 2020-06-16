@@ -1,5 +1,5 @@
 ## Base Image
-name: dns_docker Base Image
+name: Base Image
 on:
   push:
     branches: [ master ]
@@ -8,18 +8,32 @@ on:
     branches: [ master ]
     paths: 'base/*'
 jobs:
-  ## Doesn't have hooks, so don't push.
-  base_github_test:
+  ## Validate on GitHub, which is faster.
+  base_validate:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
     - name: Perform CI test on GitHub
       run: docker build base --file base/Dockerfile --tag dns_docker:$(date +%s)
-  base_trigger_dockerhub:
+  base_image_build:
     needs: base_github_test
     runs-on: ubuntu-latest
     steps:
-      ## https://github.com/marketplace/actions/webhook-post-action
-      - uses: muinmomin/webhook-action@v1.0.0
+      - name: Check out from HEAD
+        uses: actions/checkout@v2
+      ## Establish fixed point in time.
+      - shell: bash
+        run: |
+          date '+%FT%T.%N%:z' > timestamp ; export RW_BUILDDATE=$(cat timestamp)
+      - name: Build from HEAD and push as latest
+        uses: docker/build-push-action@v1.1.0
         with:
-          url: ${{ secrets.HUB_BASE_WEBHOOK }}
+          always_pull: true
+          add_git_labels: true
+          tag_with_ref: true
+          username: ${{ secrets.HUB_USER }}
+          password: ${{ secrets.HUB_TOKEN }}
+          repository: rootwyrm/dns_base
+          path: base
+
+# vim:ft=yaml:sw=2:ts=2:et
