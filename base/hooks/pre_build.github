@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+
+## If CONTAINER is unset, bail quick.
+if [ -z $CONTAINER ]; then
+	echo "No CONTAINER set in environment."
+	exit 0
+fi
+
+export RW_BUILDDATE=$(date '+%FT%T.%N%:z')
+if [ -z $GITHUB_REF ]; then
+	export REF="HEAD"
+fi
+if [ -z $GITHUB_SHA ]; then
+	export VCS_REF=$(git rev-parse $REF)
+else
+	export VCS_REF=$GITHUB_SHA
+fi
+
+if [ -z $GITHUB_SHA ]; then
+	export RW_VCSHASH=$(git rev-parse --short $REF)
+else
+	export RW_VCSHASH=$(echo $GITHUB_SHA | awk -F\| '$r > 0 { print substr($r,1,8)}')
+fi
+
+TGT="$GITHUB_WORKSPACE/$CONTAINER/Dockerfile.test"
+sed -i -e 's/%%VCS_REF%%/'$VCS_REF'/g' $TGT
+sed -i -e 's/%%RW_VCSHASH%%/'$RW_VCSHASH'/g' $TGT
+sed -i -e 's/%%RW_BUILDDATE%%/'$RW_BUILDDATE'/g' $TGT
+sed -i -e 's/%%GITHUB_ACTION%%/'$GITHUB_ACTION'/g' $TGT

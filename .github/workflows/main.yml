@@ -18,20 +18,15 @@ jobs:
   base_image_build:
     needs: base_validate
     runs-on: ubuntu-latest
+    env:
+      CONTAINER: base
     steps:
       - name: Check out from HEAD
         uses: actions/checkout@v2
       ## Establish fixed point in time.
       - shell: bash
         run: |
-          export RW_BUILDDATE=$(date '+%FT%T.%N%:z') 
-      - shell: bash
-        run: |
-          echo "RW_BUILDDATE $RW_BUILDDATE"
-          echo "GITHUB_WORKFLOW $GITHUB_ACTION"
-          echo "GITHUB_REF $GITHUB_REF"
-          echo "GITHUB_WORKSPACE $GITHUB_WORKSPACE"
-          echo "HOME $HOME"
+          $GITHUB_WORKSPACE/$CONTAINER/hooks/pre_build.github
       - name: Build from HEAD and push as latest
         uses: docker/build-push-action@v1.1.0
         with:
