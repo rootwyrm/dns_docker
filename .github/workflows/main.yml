@@ -38,6 +38,6 @@ jobs:
           repository: rootwyrm/dns_base
           path: base
           dockerfile: base/Dockerfile.test
-          labels: com.rootwyrm.docker.auto="$GITHUB_WORKFLOW",com.rootwyrm.dns_docker.version="$GITHUB_REF",org.label-schema.vcs-ref="$GITHUB_SHA",org.label-schema.version="$GITHUB_SHA",org.label-schema.build-date="$RW_BUILDDATE"
+          #labels: com.rootwyrm.docker.auto="$GITHUB_WORKFLOW",com.rootwyrm.dns_docker.version="$GITHUB_REF",org.label-schema.vcs-ref="$GITHUB_SHA",org.label-schema.version="$GITHUB_SHA",org.label-schema.build-date="$RW_BUILDDATE"
 
 # vim:ft=yaml:sw=2:ts=2:et
