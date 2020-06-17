@@ -22,7 +22,7 @@ else
 	export RW_VCSHASH=$(echo $GITHUB_SHA | awk -F\| '$r > 0 { print substr($r,1,8)}')
 fi
 
-TGT="$GITHUB_WORKSPACE/$CONTAINER/Dockerfile.test"
+TGT="$GITHUB_WORKSPACE/$CONTAINER/Dockerfile"
 sed -i -e 's/%%VCS_REF%%/'$VCS_REF'/g' $TGT
 sed -i -e 's/%%RW_VCSHASH%%/'$RW_VCSHASH'/g' $TGT
 sed -i -e 's/%%RW_BUILDDATE%%/'$RW_BUILDDATE'/g' $TGT
