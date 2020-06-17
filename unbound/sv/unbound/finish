@@ -1,0 +1,9 @@
+#!/bin/sh
+
+pidfile="/usr/local/etc/unbound/unbound.pid"
+
+kill -SIGTERM $(cat $pidfile)
+
+if [ -f $pidfile ]; then
+	rm $pidfile
+fi

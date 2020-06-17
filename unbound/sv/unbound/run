@@ -1,0 +1,25 @@
+#!/bin/sh
+## unbound
+
+if [ -f /firstboot ]; then
+	## Don't start it before things are ready.
+	sleep 60
+fi
+unboundconf="/usr/local/etc/unbound/unbound.conf"
+
+if [ ! -f $unboundconf ]; then
+	echo "No unbound configuration present!"
+	exit 1
+else
+	echo "[unbound] Testing configuration..."
+	/usr/local/sbin/unbound-checkconf ${nsdconf}
+	if [ $? -ne 0 ]; then
+		RC=$?
+		echo "[unbound] Configuration test failed - $RC"
+		exit $RC
+	fi
+fi
+
+echo "[unbound] Starting unbound..."
+echo " "
+exec /usr/local/sbin/unbound -c $unboundconf -d
