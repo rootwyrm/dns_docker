@@ -36,5 +36,6 @@ jobs:
           repository: rootwyrm/dns_base
           path: base
           dockerfile: base/Dockerfile.test
+          build_args: GITHUB_SHA=$GITHUB_SHA,GITHUB_REF=$GITHUB_REF,RW_BUILDDATE=$RW_BUILDDATE,GITHUB_WORKFLOW=$GITHUB_WORKFLOW
 
 # vim:ft=yaml:sw=2:ts=2:et
