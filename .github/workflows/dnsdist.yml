@@ -9,9 +9,14 @@ on:
 jobs:
   dnsdist:
     runs-on: ubuntu-latest
+    env:
+      CONTAINER: dnsdist
     steps:
     - name: Check out from HEAD
       uses: actions/checkout@v2
+    - shell: bash
+      run: |
+        $GITHUB_WORKSPACE/ci/hooks/pre_build
     - name: Build from HEAD and push as latest
       uses: docker/build-push-action@v1.1.0
       with:
@@ -22,3 +27,5 @@ jobs:
         password: ${{ secrets.HUB_TOKEN }}
         repository: rootwyrm/dnsdist
         path: dnsdist
+
+# vim:ft=yaml:sw=2:ts=2:et

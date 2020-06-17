@@ -26,7 +26,7 @@ jobs:
       ## Establish fixed point in time.
       - shell: bash
         run: |
-          $GITHUB_WORKSPACE/$CONTAINER/hooks/pre_build.github
+          $GITHUB_WORKSPACE/ci/hooks/pre_build
       - name: Build from HEAD and push as latest
         uses: docker/build-push-action@v1.1.0
         with:
@@ -37,7 +37,5 @@ jobs:
           password: ${{ secrets.HUB_TOKEN }}
           repository: rootwyrm/dns_base
           path: base
-          dockerfile: base/Dockerfile.test
-          #labels: com.rootwyrm.docker.auto="$GITHUB_WORKFLOW",com.rootwyrm.dns_docker.version="$GITHUB_REF",org.label-schema.vcs-ref="$GITHUB_SHA",org.label-schema.version="$GITHUB_SHA",org.label-schema.build-date="$RW_BUILDDATE"
 
 # vim:ft=yaml:sw=2:ts=2:et
