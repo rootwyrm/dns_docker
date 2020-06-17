@@ -24,12 +24,14 @@ jobs:
       ## Establish fixed point in time.
       - shell: bash
         run: |
-          date '+%FT%T.%N%:z' > timestamp ; export RW_BUILDDATE=$(cat timestamp)
+          export RW_BUILDDATE=$(date '+%FT%T.%N%:z') 
       - shell: bash
         run: |
           echo "RW_BUILDDATE $RW_BUILDDATE"
-          echo "GITHUB_WORKFLOW $GITHUB_WORKFLOW"
+          echo "GITHUB_WORKFLOW $GITHUB_ACTION"
           echo "GITHUB_REF $GITHUB_REF"
+          echo "GITHUB_WORKSPACE $GITHUB_WORKSPACE"
+          echo "HOME $HOME"
       - name: Build from HEAD and push as latest
         uses: docker/build-push-action@v1.1.0
         with:
@@ -41,6 +43,6 @@ jobs:
           repository: rootwyrm/dns_base
           path: base
           dockerfile: base/Dockerfile.test
-          labels: com.rootwyrm.docker.auto=$GITHUB_WORKFLOW,com.rootwyrm.dns_docker.version=$GITHUB_REF,org.label-schema.vcs-ref=$GITHUB_SHA,org.label-schema.version=$GITHUB_SHA,org.label-schema.build-date=$RW_BUILDDATE
+          labels: com.rootwyrm.docker.auto="$GITHUB_WORKFLOW",com.rootwyrm.dns_docker.version="$GITHUB_REF",org.label-schema.vcs-ref="$GITHUB_SHA",org.label-schema.version="$GITHUB_SHA",org.label-schema.build-date="$RW_BUILDDATE"
 
 # vim:ft=yaml:sw=2:ts=2:et
