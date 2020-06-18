@@ -34,9 +34,12 @@ jobs:
       shell: bash
       run: |
         $GITHUB_WORKSPACE/ci/hooks/pre_build
+    ## XXX: include an apt-get upgrade to deal with possible qemu problems
     - name: Set up architectures
       shell: bash
       run: |
+        apt-get update
+        apt-get upgrade
         docker run --rm --privileged docker/binfmt:$BINFMT
         docker buildx create --name $CONTAINER
         docker buildx use $CONTAINER
@@ -59,9 +62,12 @@ jobs:
       shell: bash
       run: |
         $GITHUB_WORKSPACE/ci/hooks/pre_build
+    ## XXX: include an apt-get upgrade to deal with possible qemu problems
     - name: Set up architectures
       shell: bash
       run: |
+        apt-get update
+        apt-get upgrade
         docker run --rm --privileged docker/binfmt:$BINFMT
         docker buildx create --name $CONTAINER
         docker buildx use $CONTAINER
@@ -84,9 +90,12 @@ jobs:
       shell: bash
       run: |
         $GITHUB_WORKSPACE/ci/hooks/pre_build
+    ## XXX: include an apt-get upgrade to deal with possible qemu problems
     - name: Set up architectures
       shell: bash
       run: |
+        apt-get update
+        apt-get upgrade
         docker run --rm --privileged docker/binfmt:$BINFMT
         docker buildx create --name $CONTAINER
         docker buildx use $CONTAINER

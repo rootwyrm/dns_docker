@@ -1,16 +1,16 @@
-name: dnsdist build 
+name: base build 
 on:
   push:
     branches: [ master ]
-    paths: 'dnsdist/*'
+    paths: 'base/*'
   pull_request:
     branches: [ master ]
-    paths: 'dnsdist/*'
+    paths: 'base/*'
 jobs:
-  dnsdist:
+  unbound:
     runs-on: ubuntu-latest
     env:
-      CONTAINER: dnsdist
+      CONTAINER: base
     steps:
     - name: Check out from HEAD
       uses: actions/checkout@v2
@@ -18,6 +18,6 @@ jobs:
       run: |
         $GITHUB_WORKSPACE/ci/hooks/pre_build
     - name: Test build from HEAD
-      run: docker build $CONTAINER --pull --tag $CONTAINER:$(date +%s)
+      run: docker build $CONTAINER --pull --tag dns_${CONTAINER}:$(date +%s)
 
 # vim:ft=yaml:sw=2:ts=2:et

@@ -1,16 +1,16 @@
-name: dnsdist build 
+name: nsd build 
 on:
   push:
     branches: [ master ]
-    paths: 'dnsdist/*'
+    paths: 'nsd/*'
   pull_request:
     branches: [ master ]
-    paths: 'dnsdist/*'
+    paths: 'nsd/*'
 jobs:
-  dnsdist:
+  unbound:
     runs-on: ubuntu-latest
     env:
-      CONTAINER: dnsdist
+      CONTAINER: nsd 
     steps:
     - name: Check out from HEAD
       uses: actions/checkout@v2
