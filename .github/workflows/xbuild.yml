@@ -52,18 +52,18 @@ jobs:
         docker login -u ${{ secrets.HUB_USER }} -p ${{ secrets.HUB_TOKEN }}
         docker buildx build --platform linux/amd64,linux/386,linux/arm64,linux/arm/v6,linux/arm/v7 --tag $RW_TAG $CONTAINER --push
   validate_dnsdist:
+    needs: base
     runs-on: ubuntu-20.04
     steps:
     - uses: actions/checkout@v2
     - name: Validate container integrity
-      run: docker build base --file dnsdist/Dockerfile --tag dnsdist:$(date +%s)
+      run: docker build dnsdist --tag dnsdist:$(date +%s)
   dnsdist:
     needs: validate_dnsdist
     runs-on: ubuntu-20.04
     env:
       CONTAINER: dnsdist
       BINFMT: a7996909642ee92942dcd6cff44b9b95f08dad64
-      RW_TAG: rootwyrm/dnsdist
     steps:
     - name: Check out from HEAD
       uses: actions/checkout@v2
