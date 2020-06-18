@@ -5,8 +5,10 @@ Complete DNS suite for use in Docker
 
 ---
 # CI Status
-| Component | Status               |
-|-----------|----------------------|
-| Base      | ![Base Image](https://github.com/rootwyrm/dns_docker/workflows/Base%20Image/badge.svg)![Docker Image Size (latest by date)](https://img.shields.io/docker/image-size/rootwyrm/dns_base?sort=date) |
-| dnsdist   | ![dns_docker dnsdist Image](https://github.com/rootwyrm/dns_docker/workflows/dns_docker%20dnsdist%20Image/badge.svg)![Docker Image Size (latest by date)](https://img.shields.io/docker/image-size/rootwyrm/dnsdist?sort=date) |
+| Component   | Status               |
+|-------------|----------------------|
+| Build Train | ![Production Build Train](https://github.com/rootwyrm/dns_docker/workflows/Production%20Build%20Train/badge.svg) |
+| dnsdist     | ![dnsdist build](https://github.com/rootwyrm/dns_docker/workflows/dnsdist%20build/badge.svg) ![Docker Image Size (latest semver)](https://img.shields.io/docker/image-size/rootwyrm/dnsdist) |
+| unbound     | ![unbound build](https://github.com/rootwyrm/dns_docker/workflows/unbound%20build/badge.svg) ![Docker Image Size (latest semver)](https://img.shields.io/docker/image-size/rootwyrm/unbound) |
+| nsd         | ![nsd build](https://github.com/rootwyrm/dns_docker/workflows/nsd%20build/badge.svg) ![Docker Image Size (latest semver)](https://img.shields.io/docker/image-size/rootwyrm/nsd) |
 |  |  |
