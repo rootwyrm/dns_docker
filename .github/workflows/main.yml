@@ -37,13 +37,6 @@ jobs:
           password: ${{ secrets.HUB_TOKEN }}
           repository: rootwyrm/dns_base
           path: base
-      - name: Check for docker buildx
-        run: |
-          docker buildx
-          echo ::set-output name=docker_buildx::$(docker buildx)
-      - name: Show if it's there
-        run: |
-          echo "docker buildx result ${{ steps.amd64.docker_buildx }}"
   aarch64:
     needs: base_validate
     runs-on: ubuntu-latest
