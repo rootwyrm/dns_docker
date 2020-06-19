@@ -25,11 +25,11 @@ jobs:
           docker buildx create --name $CONTAINER
           docker buildx use $CONTAINER
       - name: Execute platform builds
-        - name: amd64
+        name: amd64
           shell: bash
           run: |
             docker buildx build --platform linux/amd64 --tag rootwyrm/$CONTAINER $CONTAINER --pull
-        - name: 386
+        name: 386
           shell: bash
             docker buildx build --platform linux/386 --tag rootwyrm/$CONTAINER $CONTAINER --pull
 
