@@ -24,15 +24,13 @@ jobs:
           docker run --rm --privileged docker/binfmt:$BINFMT
           docker buildx create --name $CONTAINER
           docker buildx use $CONTAINER
-      - name: Execute platform builds
-        steps:
-          - name: amd64
-            shell: bash
-            run: |
-              docker buildx build --platform linux/amd64 --tag rootwyrm/$CONTAINER $CONTAINER --pull
-          - name: 386
-            shell: bash
-            run: |
-              docker buildx build --platform linux/386 --tag rootwyrm/$CONTAINER $CONTAINER --pull
+      - name: Build linux/amd64
+        shell: bash
+        run: |
+          docker buildx build --platform linux/amd64 --tag rootwyrm/$CONTAINER $CONTAINER --pull
+      - name: Build linux/386
+        shell: bash
+        run: |
+          docker buildx build --platform linux/386 --tag rootwyrm/$CONTAINER $CONTAINER --pull
 
 # vim:ts=2:sw=2:et
