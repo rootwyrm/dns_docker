@@ -72,9 +72,8 @@ jobs:
     - name: Set up buildx
       shell: bash
       run: |
-        echo "consumer is ${{ matrix.consumer }}"
-        docker run --rm --privileged docker/binfmt:$BINFMT
-        docker buildx create --name ${{ matrix.consumer }}
+        docker run --rm --privileged docker/binfmt:$BINFMT ; \
+        docker buildx create --name ${{ matrix.consumer }} ; \
         docker buildx use ${{ matrix.consumer }}
     - name: Build ${{ matrix.consumer }} ${{ matrix.platform }}
       shell: bash
