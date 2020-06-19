@@ -72,13 +72,14 @@ jobs:
     - name: Set up buildx
       shell: bash
       run: |
+        echo "consumer is ${{ matrix.consumer }}"
         docker run --rm --privileged docker/binfmt:$BINFMT
-        docker buildx create --name $CONTAINER
-        docker buildx use $CONTAINER
+        docker buildx create --name ${{ matrix.consumer }}
+        docker buildx use ${{ matrix.consumer }}
     - name: Build ${{ matrix.consumer }} ${{ matrix.platform }}
       shell: bash
       run: |
         docker login -u ${{ secrets.HUB_USER }} -p ${{ secrets.HUB_TOKEN }}
-        docker buildx build --platform ${{ matrix.platform }} --tag rootwyrm/$CONTAINER $CONTAINER --pull --push
+        docker buildx build --platform ${{ matrix.platform }} --tag rootwyrm/${{ matrix.consumer }} ${{ matrix.consumer }} --pull --push
 
 # vim:ts=2:sw=2:et
