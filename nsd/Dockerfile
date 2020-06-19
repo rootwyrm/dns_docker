@@ -1,4 +1,4 @@
-FROM    rootwyrm/dns_base
+FROM    rootwyrm/dns_base:latest
 
 ## Set up our labels
 LABEL   maintainer="Phillip 'RootWyrm' Jaenke <prj+docker@rootwyrm.com>" \
@@ -25,7 +25,6 @@ LABEL   maintainer="Phillip 'RootWyrm' Jaenke <prj+docker@rootwyrm.com>" \
         org.opencontainers.image.vendor="RootWyrm" \
         org.opencontainers.image.licenses="CC-BY-NC-3.0" \
         org.opencontainers.image.version="%%RW_VCSHASH%%"
-
 
 EXPOSE    53/tcp
 EXPOSE    53/udp
