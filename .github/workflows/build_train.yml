@@ -1,5 +1,5 @@
 ## Full crossbuild
-name: Build
+name: Build - All
 on:
   push:
     branches: [ master ]
