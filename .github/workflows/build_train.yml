@@ -4,7 +4,6 @@ on:
   push:
     branches: [ master ]
     paths: 
-      - '*/workflows/*'
       - '*/ci/*'
       - 'base/*'
   pull_request:
@@ -21,6 +20,7 @@ jobs:
     - name: Validate container integrity
       run: docker build base --file base/Dockerfile --tag dns_base:$(date +%s)
   base:
+    name: Base Container
     needs: validate_base
     runs-on: ubuntu-20.04
     env:
@@ -30,7 +30,7 @@ jobs:
     steps:
     - name: Check out from HEAD
       uses: actions/checkout@v2
-    - name: Set container tags on $CONTAINER
+    - name: Set container tags on ${{ <jobs.job_id> }}
       shell: bash
       run: |
         $GITHUB_WORKSPACE/ci/hooks/pre_build
@@ -47,6 +47,7 @@ jobs:
         docker login -u ${{ secrets.HUB_USER }} -p ${{ secrets.HUB_TOKEN }}
         docker buildx build --platform linux/amd64,linux/386,linux/arm64,linux/arm/v6,linux/arm/v7 --tag $RW_TAG $CONTAINER --push
   dnsdist:
+    name: dnsdist Container
     needs: base
     runs-on: ubuntu-20.04
     env:
@@ -55,7 +56,7 @@ jobs:
     steps:
     - name: Check out from HEAD
       uses: actions/checkout@v2
-    - name: Set container tags on $CONTAINER
+    - name: Set container tags on ${{ <jobs.job_id> }}
       shell: bash
       run: |
         $GITHUB_WORKSPACE/ci/hooks/pre_build
@@ -72,6 +73,7 @@ jobs:
         docker login -u ${{ secrets.HUB_USER }} -p ${{ secrets.HUB_TOKEN }}
         docker buildx build --platform linux/amd64,linux/386,linux/arm64,linux/arm/v6,linux/arm/v7 --tag rootwyrm/$CONTAINER $CONTAINER --pull --push
   unbound:
+    name: Unbound Container
     needs: base
     runs-on: ubuntu-20.04
     env:
@@ -80,7 +82,33 @@ jobs:
     steps:
     - name: Check out from HEAD
       uses: actions/checkout@v2
-    - name: Set container tags on $CONTAINER
+    - name: Set container tags on ${{ <jobs.job_id> }}
+      shell: bash
+      run: |
+        $GITHUB_WORKSPACE/ci/hooks/pre_build
+    - name: Set up architectures
+      shell: bash
+      run: |
+        docker run --rm --privileged docker/binfmt:$BINFMT
+        docker buildx create --name $CONTAINER
+        docker buildx use $CONTAINER
+        docker buildx inspect --bootstrap
+    - name: Build for platforms
+      shell: bash
+      run: |
+        docker login -u ${{ secrets.HUB_USER }} -p ${{ secrets.HUB_TOKEN }}
+        docker buildx build --platform linux/amd64,linux/386,linux/arm64,linux/arm/v6,linux/arm/v7 --tag rootwyrm/$CONTAINER $CONTAINER --pull --push
+  nsd:
+    name: nsd Container
+    needs: base
+    runs-on: ubuntu-20.04
+    env:
+      CONTAINER: nsd
+      BINFMT: a7996909642ee92942dcd6cff44b9b95f08dad64
+    steps:
+    - name: Check out from HEAD
+      uses: actions/checkout@v2
+    - name: Set container tags on ${{ <jobs.job_id> }}
       shell: bash
       run: |
         $GITHUB_WORKSPACE/ci/hooks/pre_build
