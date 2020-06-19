@@ -7,7 +7,7 @@ on:
     branches: [ master ]
     paths: 'nsd/*'
 jobs:
-  unbound:
+  nsd:
     runs-on: ubuntu-latest
     env:
       CONTAINER: nsd 
