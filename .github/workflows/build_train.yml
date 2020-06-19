@@ -1,5 +1,5 @@
-## Crossbuild
-name: Production Build Train
+## Full crossbuild
+name: Build
 on:
   push:
     branches: [ master ]
@@ -17,12 +17,16 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
     - uses: actions/checkout@v2
-    - name: Validate container integrity
+    - name: Validate basic container integrity
       run: docker build base --file base/Dockerfile --tag dns_base:$(date +%s)
   base:
-    name: Base Container
+    strategy:
+      matrix:
+        runs-on: [ ubuntu-20.04 ]
+        platform: [ linux/amd64, linux/386, linux/arm64, linux/arm/v6, linux/arm/v7 ]
+    name: Base Container - ${{ matrix.platform }}
     needs: validate_base
-    runs-on: ubuntu-20.04
+    runs-on: ${{ matrix.runs-on }}
     env:
       CONTAINER: base
       BINFMT: a7996909642ee92942dcd6cff44b9b95f08dad64
@@ -45,13 +49,18 @@ jobs:
       shell: bash
       run: |
         docker login -u ${{ secrets.HUB_USER }} -p ${{ secrets.HUB_TOKEN }}
-        docker buildx build --platform linux/amd64,linux/386,linux/arm64,linux/arm/v6,linux/arm/v7 --tag $RW_TAG $CONTAINER --push
-  dnsdist:
-    name: dnsdist Container
+        docker buildx build --platform ${{ matrix.platform }} --tag $RW_TAG $CONTAINER --push
+  consumers:
+    strategy:
+      matrix:
+        runs-on: [ ubuntu-20.04 ]
+        consumer: [ dnsdist, unbound, nsd ]
+        platform: [ linux/amd64, linux/386, linux/arm64, linux/arm/v6, linux/arm/v7 ]
+    name: ${{ matrix.consumer }} - ${{ matrix.platform }}
     needs: base
-    runs-on: ubuntu-20.04
+    runs-on: ${{ matrix.runs-on }}
     env:
-      CONTAINER: dnsdist
+      CONTAINER: ${{ matrix.consumer }}
       BINFMT: a7996909642ee92942dcd6cff44b9b95f08dad64
     steps:
     - name: Check out from HEAD
@@ -60,69 +69,16 @@ jobs:
       shell: bash
       run: |
         $GITHUB_WORKSPACE/ci/hooks/pre_build
-    - name: Set up architectures
+    - name: Set up buildx
       shell: bash
       run: |
         docker run --rm --privileged docker/binfmt:$BINFMT
         docker buildx create --name $CONTAINER
         docker buildx use $CONTAINER
-        docker buildx inspect --bootstrap
-    - name: Build for platforms
+    - name: Build ${{ matrix.consumer }} ${{ matrix.platform }}
       shell: bash
       run: |
         docker login -u ${{ secrets.HUB_USER }} -p ${{ secrets.HUB_TOKEN }}
-        docker buildx build --platform linux/amd64,linux/386,linux/arm64,linux/arm/v6,linux/arm/v7 --tag rootwyrm/$CONTAINER $CONTAINER --pull --push
-  unbound:
-    name: Unbound Container
-    needs: base
-    runs-on: ubuntu-20.04
-    env:
-      CONTAINER: unbound
-      BINFMT: a7996909642ee92942dcd6cff44b9b95f08dad64
-    steps:
-    - name: Check out from HEAD
-      uses: actions/checkout@v2
-    - name: Set container tags on unbound
-      shell: bash
-      run: |
-        $GITHUB_WORKSPACE/ci/hooks/pre_build
-    - name: Set up architectures
-      shell: bash
-      run: |
-        docker run --rm --privileged docker/binfmt:$BINFMT
-        docker buildx create --name $CONTAINER
-        docker buildx use $CONTAINER
-        docker buildx inspect --bootstrap
-    - name: Build for platforms
-      shell: bash
-      run: |
-        docker login -u ${{ secrets.HUB_USER }} -p ${{ secrets.HUB_TOKEN }}
-        docker buildx build --platform linux/amd64,linux/386,linux/arm64,linux/arm/v6,linux/arm/v7 --tag rootwyrm/$CONTAINER $CONTAINER --pull --push
-  nsd:
-    name: nsd Container
-    needs: base
-    runs-on: ubuntu-20.04
-    env:
-      CONTAINER: nsd
-      BINFMT: a7996909642ee92942dcd6cff44b9b95f08dad64
-    steps:
-    - name: Check out from HEAD
-      uses: actions/checkout@v2
-    - name: Set container tags on nsd
-      shell: bash
-      run: |
-        $GITHUB_WORKSPACE/ci/hooks/pre_build
-    - name: Set up architectures
-      shell: bash
-      run: |
-        docker run --rm --privileged docker/binfmt:$BINFMT
-        docker buildx create --name $CONTAINER
-        docker buildx use $CONTAINER
-        docker buildx inspect --bootstrap
-    - name: Build for platforms
-      shell: bash
-      run: |
-        docker login -u ${{ secrets.HUB_USER }} -p ${{ secrets.HUB_TOKEN }}
-        docker buildx build --platform linux/amd64,linux/386,linux/arm64,linux/arm/v6,linux/arm/v7 --tag rootwyrm/$CONTAINER $CONTAINER --pull --push
+        docker buildx build --platform ${{ matrix.platform }} --tag rootwyrm/$CONTAINER $CONTAINER --pull --push
 
 # vim:ts=2:sw=2:et
