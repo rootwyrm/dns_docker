@@ -31,8 +31,8 @@ jobs:
     - name: Set up architectures
       shell: bash
       run: |
-        docker run --rm --privileged docker/binfmt:$BINFMT
-        docker buildx create --name $CONTAINER
+        docker run --rm --privileged docker/binfmt:$BINFMT ; \
+        docker buildx create --name $CONTAINER ; \
         docker buildx use $CONTAINER
     - name: Build for ${{ matrix.platform }}
       shell: bash
