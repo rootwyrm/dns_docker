@@ -1,0 +1,40 @@
+## base
+name: Build - base
+on:
+  push:
+    branches: [ master ]
+    paths:
+      - 'base/*'
+  pull_request:
+    branches: [ master ]
+    paths:
+      - 'base/*'
+
+## Rebuild
+jobs:
+  base:
+    strategy:
+      matrix:
+        platform: [ linux/amd64, linux/386, linux/arm64, linux/arm/v6, linux/arm/v7 ]
+    name: base - ${{ matrix.platform }}
+    runs-on: ubuntu-20.04
+    env:
+      CONTAINER: base
+      BINFMT: a7996909642ee92942dcd6cff44b9b95f08dad64
+    steps:
+    - name: Check out from HEAD
+      uses: actions/checkout@v2
+    - name: Run pre_build hooks
+      run: |
+        $GITHUB_WORKSPACE/ci/hooks/pre_build
+    - name: Set up architectures
+      run: |
+        docker run --rm --privileged docker/binfmt:$BINFMT 
+        docker buildx create --name $CONTAINER 
+        docker buildx use $CONTAINER
+    - name: Build for ${{ matrix.platform }}
+      run: |
+        docker login -u ${{ secrets.HUB_USER }} -p ${{ secrets.HUB_TOKEN }}
+        docker buildx build --platform ${{ matrix.platform }} --tag rootwyrm/$CONTAINER $CONTAINER --pull --push
+
+# vim:ts=2:sw=2:et
