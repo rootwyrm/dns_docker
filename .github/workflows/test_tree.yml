@@ -5,11 +5,12 @@ on:
     branches: [ master ] 
 
 jobs:
-  nsd_test:
-    name: nsd Tree Test
+  nsd_build_amd64:
+    name: nsd - build amd64
     runs-on: ubuntu-20.04
     env:
       CONTAINER: nsd
+      ARCH_BUILD: amd64
       BINFMT: a7996909642ee92942dcd6cff44b9b95f08dad64
     steps:
       - name: Check out from HEAD
@@ -24,20 +25,33 @@ jobs:
           docker run --rm --privileged docker/binfmt:$BINFMT
           docker buildx create --name $CONTAINER
           docker buildx use $CONTAINER
-  nsd_build:
-    name: nsd Build Tree
+      - name: Build linux/${{ ARCH_BUILD }}
+        shell: bash
+        run: |
+          docker buildx build --platform linux/$ARCH_BUILD --tag rootwyrm/$CONTAINER $CONTAINER --pull
+  nsd_build_386:
+    name: nsd - build 386
     runs-on: ubuntu-20.04
     env:
       CONTAINER: nsd
+      ARCH_BUILD: 386
       BINFMT: a7996909642ee92942dcd6cff44b9b95f08dad64
     steps:
-      - name: Build linux/amd64
+      - name: Check out from HEAD
+        uses: actions/checkout@v2
+      - name: Run pre_build hooks
         shell: bash
         run: |
-          docker buildx build --platform linux/amd64 --tag rootwyrm/$CONTAINER $CONTAINER --pull
-      - name: Build linux/386
+          $GITHUB_WORKSPACE/ci/hooks/pre_build
+      - name: Set up architectures
         shell: bash
         run: |
-          docker buildx build --platform linux/386 --tag rootwyrm/$CONTAINER $CONTAINER --pull
+          docker run --rm --privileged docker/binfmt:$BINFMT
+          docker buildx create --name $CONTAINER
+          docker buildx use $CONTAINER
+      - name: Build linux/${{ ARCH_BUILD }}
+        shell: bash
+        run: |
+          docker buildx build --platform linux/$ARCH_BUILD --tag rootwyrm/$CONTAINER $CONTAINER --pull
 
 # vim:ts=2:sw=2:et
