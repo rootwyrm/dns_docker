@@ -1,0 +1,22 @@
+#!/bin/sh
+## nsd
+
+nsdconf="/etc/nsd/nsd.conf"
+
+if [ ! -f $nsdconf ]; then
+	echo "No nsd configuration present!"
+	exit 1
+else
+	echo "[nsd] Testing configuration..."
+	/usr/sbin/nsd-checkconf ${nsdconf}
+	if [ $? -ne 0 ]; then
+		RC=$?
+		echo "[nsd] Configuration test failed - $RC"
+		exit $RC
+	fi
+fi
+
+echo "[nsd] Starting nsd..."
+echo " "
+exec /usr/sbin/nsd -c $nsdconf -d -u nsd -l /var/log/nsd.log
+# -t /var/db/nsd
