@@ -5,12 +5,14 @@ on:
     branches: [ master ]
     paths: 
       - '*/ci/*'
-      - 'base/*'
   pull_request:
     branches: [ master ]
     paths: 
       - '*/ci/*'
-      - 'base/*'
+  pull_request_review:
+    types: [ submitted, edited ]
+  schedule:
+    - cron: '0 22 * * *'
 ## Rebuild all whenever we bump base...
 jobs:
   validate_base:
