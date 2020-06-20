@@ -5,18 +5,20 @@ on:
     branches: [ master ]
     paths: 
       - 'ci/*'
+      - 'base/*'
+      - '.github/workflows/build_train.yml'
   pull_request:
     branches: [ master ]
     paths: 
       - 'ci/*'
+      - 'base/*'
+      - '.github/workflows/build_train.yml'
   pull_request_review:
     types: [ submitted, edited ]
   schedule:
     - cron: '0 4,16 * * *'
 
 jobs:
-  env:
-    BINFMT: a7996909642ee92942dcd6cff44b9b95f08dad64
 ################################################################################
 # Base Container
 ################################################################################
@@ -42,6 +44,7 @@ jobs:
     needs: validate_base
     runs-on: ubuntu-20.04
     env:
+      BINFMT: a7996909642ee92942dcd6cff44b9b95f08dad64
       CONTAINER: base
       PLATFORM: "linux/amd64,linux/386,linux/arm64,linux/arm/v7"
       RW_TAG: rootwyrm/dns_base
@@ -75,6 +78,7 @@ jobs:
         platform: [ linux/amd64, linux/386, linux/arm64, linux/arm/v7 ]
     env: 
       CONTAINER: nsd
+      BINFMT: a7996909642ee92942dcd6cff44b9b95f08dad64
     name: nsd - ${{ matrix.platform }}
     runs-on: ubuntu-20.04
     steps:
@@ -102,6 +106,7 @@ jobs:
         platform: [ linux/amd64, linux/386, linux/arm64, linux/arm/v7 ]
     env: 
       CONTAINER: unbound
+      BINFMT: a7996909642ee92942dcd6cff44b9b95f08dad64
     name: unbound - ${{ matrix.platform }}
     runs-on: ubuntu-20.04
     steps:
@@ -129,6 +134,7 @@ jobs:
         platform: [ linux/amd64, linux/386, linux/arm64, linux/arm/v7 ]
     env: 
       CONTAINER: dnsdist
+      BINFMT: a7996909642ee92942dcd6cff44b9b95f08dad64
     name: unbound - ${{ matrix.platform }}
     runs-on: ubuntu-20.04
     steps:
