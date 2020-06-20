@@ -28,11 +28,6 @@ jobs:
     - name: Checkout from ${{ github.ref }} triggered by ${{ github.actor }}
       uses: actions/checkout@v2
       id: checkout
-    - name: Lint Dockerfile
-      id: lint
-      run: |
-        npm install -g dockerfile_lint
-        dockerfile_lint -f base/Dockerfile
     - name: Validate base container integrity
       id: validate
       run: |
