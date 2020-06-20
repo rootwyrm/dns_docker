@@ -56,7 +56,6 @@ jobs:
         docker run --rm --privileged docker/binfmt:$BINFMT
         docker buildx create --name rootwyrm --use
     - name: Build for platforms
-      shell: bash
       run: |
         docker login -u ${{ secrets.HUB_USER }} -p ${{ secrets.HUB_TOKEN }}
         docker buildx build --platform $PLATFORM --pull --push \
@@ -86,7 +85,7 @@ jobs:
         docker buildx create --name rootwyrm --use
     - name: Build nsd - ${{ matrix.platform }}
       run: |
-        echo ${{ secrets.HUB_TOKEN }} | docker login docker.io -u ${{ secrets.HUG_USER }} --password-stdin
+        docker login -u ${{ secrets.HUB_USER }} -p ${{ secrets.HUB_TOKEN }}
         docker buildx build --platform ${{ matrix.platform }} \
         --tag rootwyrm/nsd:${{ matrix.platform }} \
         --pull --push nsd
@@ -99,7 +98,7 @@ jobs:
         uses: actions/checkout@v2
       - name: Ship nsd manifest
         run: |
-          echo ${{ secrets.HUB_TOKEN }} | docker login docker.io -u ${{ secrets.HUG_USER }} --password-stdin
+          docker login -u ${{ secrets.HUB_USER }} -p ${{ secrets.HUB_TOKEN }}
           ${GITHUB_WORKSPACE}/ci/tools/manifest.sh nsd
 
 # vim:ts=2:sw=2:et
