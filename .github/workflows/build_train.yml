@@ -23,6 +23,7 @@ jobs:
 # Base Container
 ################################################################################
   validate_base:
+    name: Validate base image
     runs-on: ubuntu-20.04
     steps:
     - name: Checkout from ${{ github.ref }} triggered by ${{ github.actor }}
@@ -130,7 +131,7 @@ jobs:
     env: 
       CONTAINER: dnsdist
       BINFMT: a7996909642ee92942dcd6cff44b9b95f08dad64
-    name: unbound - ${{ matrix.platform }}
+    name: dnsdist - ${{ matrix.platform }}
     runs-on: ubuntu-20.04
     steps:
     - name: Check out from ${{ github.ref }}
@@ -143,7 +144,7 @@ jobs:
       run: |
         docker run --rm --privileged docker/binfmt:$BINFMT
         docker buildx create --name rootwyrm --use
-    - name: Build unbound - ${{ matrix.platform }}
+    - name: Build dnsdist - ${{ matrix.platform }}
       run: |
         docker login -u ${{ secrets.HUB_USER }} -p ${{ secrets.HUB_TOKEN }}
         PLATFORM_TAG=$(echo ${{ matrix.platform }} | sed -e 's,linux/,,' | sed -e 's,/,,g')
@@ -183,7 +184,7 @@ jobs:
     steps:
       - name: Check out from ${{ github.ref }}
         uses: actions/checkout@v2
-      - name: Ship unbound manifest
+      - name: Ship dnsdist manifest
         run: |
           docker login -u ${{ secrets.HUB_USER }} -p ${{ secrets.HUB_TOKEN }}
           ${GITHUB_WORKSPACE}/ci/tools/manifest.sh dnsdist

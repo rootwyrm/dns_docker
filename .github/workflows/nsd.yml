@@ -1,25 +1,25 @@
-## dnsdist
-name: Build - dnsdist
+## nsd
+name: Build - nsd
 on:
   push:
     branches: [ master ]
     paths:
-      - 'dnsdist/*'
+      - 'nsd/*'
   pull_request:
     branches: [ master ]
     paths:
-      - 'dnsdist/*'
+      - 'nsd/*'
 
 ## Rebuild
 jobs:
-  dnsdist:
+  nsd:
     strategy:
       matrix:
         platform: [ linux/amd64, linux/386, linux/arm64, linux/arm/v7 ]
-    name: dnsdist - ${{ matrix.platform }}
+    name: nsd - ${{ matrix.platform }}
     runs-on: ubuntu-20.04
     env:
-      CONTAINER: dnsdist
+      CONTAINER: nsd
       BINFMT: a7996909642ee92942dcd6cff44b9b95f08dad64
     steps:
     - name: Check out from ${{ github.ref }} triggered by ${{ github.actor }}
@@ -41,16 +41,16 @@ jobs:
         docker buildx build --platform ${{ matrix.platform }} \
         --tag rootwyrm/$CONTAINER:$PLATFORM_TAG \
         --pull --push $CONTAINER
-  dnsdist_package:
-    needs: dnsdist
-    name: Package and ship dnsdist
+  nsd_package:
+    needs: nsd
+    name: Package and ship nsd
     runs-on: ubuntu-20.04
     steps:
       - name: Check out from ${{ github.ref }}
         uses: actions/checkout@v2
-      - name: Ship dnsdist manifest
+      - name: Ship nsd manifest
         run: |
           docker login -u ${{ secrets.HUB_USER }} -p ${{ secrets.HUB_TOKEN }}
-          ${GITHUB_WORKSPACE}/ci/tools/manifest.sh dnsdist
+          ${GITHUB_WORKSPACE}/ci/tools/manifest.sh nsd
 
 # vim:ts=2:sw=2:et

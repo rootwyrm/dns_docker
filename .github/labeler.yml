@@ -1,0 +1,10 @@
+dndsist:
+- 'dnsdist/**/*'
+unbound:
+- 'unbound/**/*'
+nsd:
+- 'nsd/**/*'
+base:
+- 'base/**/*'
+ci-suite:
+- 'ci/**/*'
