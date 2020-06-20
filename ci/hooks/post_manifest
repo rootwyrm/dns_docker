@@ -22,7 +22,7 @@ function docker_login()
 	   	-H "Accept: application/json" \
 	   	-d '{"username":"'$1'","password":"'$2'"}' \
 	   	https://hub.docker.com/v2/users/login \
-	   	-o ${GITHUB_WORKSPACE}/ci/login.json )
+	   	-o ${GITHUB_WORKSPACE}/ci/login.json
 	export token=$(jq .token ${GITHUB_WORKSPACE}/ci/login.json -r)
 }
 
