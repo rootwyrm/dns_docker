@@ -1,0 +1,25 @@
+## unbound/manifest.yml
+image: docker.io/rootwyrm/unbound:latest
+manifests:
+  -
+    image: docker.io/rootwyrm/unbound:amd64
+    platform:
+      architecture: amd64
+      os: linux
+  -
+    image: docker.io/rootwyrm/unbound:arm64
+    platform:
+      architecture: arm64
+      os: linux
+  -
+    image: docker.io/rootwyrm/unbound:armv7
+    platform:
+      architecture: arm/v7
+      os: linux
+  -
+    image: docker.io/rootwyrm/unbound:386
+    platform:
+      architecture: "386"
+      os: linux
+
+# vim:ts=2:sw=2:et

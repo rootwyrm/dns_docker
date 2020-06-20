@@ -8,13 +8,30 @@ target "base" {
 	context = "base/"
 	platforms = [ "linux/amd64", "linux/arm64", "linux/386" ]
 	progress = "plain"
-	output = [ "type=registry,dest=localhost:5000" ]
-	#output = [ "type=local,dest=image" ]
 }
 
 target "nsd" {
 	targets = [ "nsd" ]
 	tags = ["docker.io/rootwyrm/nsd"]
 	context = "nsd/"
-	platforms = [ "linux/amd64", "linux/arm64", "linux/386" ]
+	platforms = [ "linux/amd64", "linux/arm64", "linux/arm/v7", "linux/386" ]
+	progress = "plain"
 }
+
+target "unbound" {
+	targets = [ "unbound" ]
+	tags = ["docker.io/rootwyrm/unbound"]
+	context = "unbound/"
+	platforms = [ "linux/amd64", "linux/arm64", "linux/arm/v7", "linux/386" ]
+	progress = "plain"
+}
+
+target "dnsdist" {
+	targets = [ "dnsdist" ]
+	tags = ["docker.io/rootwyrm/dnsdist"]
+	context = "dnsdist/"
+	platforms = [ "linux/amd64", "linux/arm64", "linux/arm/v7", "linux/386" ]
+	progress = "plain"
+}
+
+

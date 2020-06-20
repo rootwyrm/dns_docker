@@ -13,20 +13,24 @@ on:
     types: [ submitted, edited ]
   schedule:
     - cron: '0 4,16 * * *'
-## Rebuild all whenever we bump base...
+
 jobs:
+  env:
+    BINFMT: a7996909642ee92942dcd6cff44b9b95f08dad64
+################################################################################
+# Base Container
+################################################################################
   validate_base:
     runs-on: ubuntu-20.04
     steps:
     - name: Checkout from ${{ github.ref }} triggered by ${{ github.actor }}
       uses: actions/checkout@v2
       id: checkout
-    #- name: Lint Dockerfile
-    #  id: lint
-    #  run: |
-    #    docker run -it --rm -v $PWD:/root/ \
-    #    projectatomic/dockerfile-lint \
-    #    dockerfile_lint -f base/Dockerfile
+    - name: Lint Dockerfile
+      id: lint
+      run: |
+        npm install -g dockerfile_lint
+        dockerfile_lint -f base/Dockerfile
     - name: Validate base container integrity
       id: validate
       run: |
@@ -39,7 +43,6 @@ jobs:
     runs-on: ubuntu-20.04
     env:
       CONTAINER: base
-      BINFMT: a7996909642ee92942dcd6cff44b9b95f08dad64
       PLATFORM: "linux/amd64,linux/386,linux/arm64,linux/arm/v7"
       RW_TAG: rootwyrm/dns_base
     steps:
@@ -61,6 +64,10 @@ jobs:
         docker buildx build --platform $PLATFORM --pull --push \
         --tag $RW_TAG:latest \
         $CONTAINER 
+
+################################################################################
+# Consumers
+################################################################################
   nsd:
     needs: base
     strategy:
@@ -68,14 +75,12 @@ jobs:
         platform: [ linux/amd64, linux/386, linux/arm64, linux/arm/v7 ]
     env: 
       CONTAINER: nsd
-      BINFMT: a7996909642ee92942dcd6cff44b9b95f08dad64
     name: nsd - ${{ matrix.platform }}
     runs-on: ubuntu-20.04
     steps:
-    - name: Check out from HEAD
+    - name: Check out from ${{ github.ref }}
       uses: actions/checkout@v2
-    - name: Set container tags on dnsdist
-      shell: bash
+    - name: Run pre-build hooks
       run: |
         $GITHUB_WORKSPACE/ci/hooks/pre_build
     - name: Set up build environment
@@ -88,8 +93,66 @@ jobs:
         docker login -u ${{ secrets.HUB_USER }} -p ${{ secrets.HUB_TOKEN }}
         PLATFORM_TAG=$(echo ${{ matrix.platform }} | sed -e 's,linux/,,' | sed -e 's,/,,g')
         docker buildx build --platform ${{ matrix.platform }} \
-        --tag rootwyrm/nsd:$PLATFORM_TAG \
-        --pull --push nsd
+        --tag rootwyrm/$CONTAINER:$PLATFORM_TAG \
+        --pull --push $CONTAINER
+  unbound:
+    needs: base
+    strategy:
+      matrix:
+        platform: [ linux/amd64, linux/386, linux/arm64, linux/arm/v7 ]
+    env: 
+      CONTAINER: unbound
+    name: unbound - ${{ matrix.platform }}
+    runs-on: ubuntu-20.04
+    steps:
+    - name: Check out from ${{ github.ref }}
+      uses: actions/checkout@v2
+    - name: Run pre-build hooks
+      run: |
+        $GITHUB_WORKSPACE/ci/hooks/pre_build
+    - name: Set up build environment
+      id: buildenv
+      run: |
+        docker run --rm --privileged docker/binfmt:$BINFMT
+        docker buildx create --name rootwyrm --use
+    - name: Build unbound - ${{ matrix.platform }}
+      run: |
+        docker login -u ${{ secrets.HUB_USER }} -p ${{ secrets.HUB_TOKEN }}
+        PLATFORM_TAG=$(echo ${{ matrix.platform }} | sed -e 's,linux/,,' | sed -e 's,/,,g')
+        docker buildx build --platform ${{ matrix.platform }} \
+        --tag rootwyrm/$CONTAINER:$PLATFORM_TAG \
+        --pull --push $CONTAINER
+  dnsdist:
+    needs: base
+    strategy:
+      matrix:
+        platform: [ linux/amd64, linux/386, linux/arm64, linux/arm/v7 ]
+    env: 
+      CONTAINER: dnsdist
+    name: unbound - ${{ matrix.platform }}
+    runs-on: ubuntu-20.04
+    steps:
+    - name: Check out from ${{ github.ref }}
+      uses: actions/checkout@v2
+    - name: Run pre-build hooks
+      run: |
+        $GITHUB_WORKSPACE/ci/hooks/pre_build
+    - name: Set up build environment
+      id: buildenv
+      run: |
+        docker run --rm --privileged docker/binfmt:$BINFMT
+        docker buildx create --name rootwyrm --use
+    - name: Build unbound - ${{ matrix.platform }}
+      run: |
+        docker login -u ${{ secrets.HUB_USER }} -p ${{ secrets.HUB_TOKEN }}
+        PLATFORM_TAG=$(echo ${{ matrix.platform }} | sed -e 's,linux/,,' | sed -e 's,/,,g')
+        docker buildx build --platform ${{ matrix.platform }} \
+        --tag rootwyrm/$CONTAINER:$PLATFORM_TAG \
+        --pull --push $CONTAINER
+
+################################################################################
+# Packagers
+################################################################################
   nsd_package:
     needs: nsd
     name: Package nsd
@@ -101,5 +164,27 @@ jobs:
         run: |
           docker login -u ${{ secrets.HUB_USER }} -p ${{ secrets.HUB_TOKEN }}
           ${GITHUB_WORKSPACE}/ci/tools/manifest.sh nsd
+  unbound_package:
+    needs: unbound
+    name: Package unbound
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Check out from ${{ github.ref }}
+        uses: actions/checkout@v2
+      - name: Ship unbound manifest
+        run: |
+          docker login -u ${{ secrets.HUB_USER }} -p ${{ secrets.HUB_TOKEN }}
+          ${GITHUB_WORKSPACE}/ci/tools/manifest.sh unbound
+  dnsdist_package:
+    needs: dnsdist
+    name: Package dnsdist
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Check out from ${{ github.ref }}
+        uses: actions/checkout@v2
+      - name: Ship unbound manifest
+        run: |
+          docker login -u ${{ secrets.HUB_USER }} -p ${{ secrets.HUB_TOKEN }}
+          ${GITHUB_WORKSPACE}/ci/tools/manifest.sh dnsdist
 
 # vim:ts=2:sw=2:et
