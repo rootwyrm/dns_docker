@@ -12,6 +12,9 @@
 export HOST=$(uname)
 export ARCH=$(uname -m)
 export MANIFEST="manifest.yml"
+if [ -z ${GITHUB_WORKSPACE} ]; then
+	export GITHUB_WORKSPACE=${PWD}
+fi
 
 install_manifest_tool()
 {
@@ -24,12 +27,14 @@ install_manifest_tool()
 		*)
 			;;
 	esac
-	curl --cert-status -L --silent https://github.com/estesp/manifest-tool/releases/download/v${VERSION}/manifest-tool-${HOST,,}-${ARCH,,} -o ${GITHUB_WORKSPACE}/ci/manifest-tool 
+	printf 'Downloading manifest-tool\n'
+	curl -o ${GITHUB_WORKSPACE}/ci/manifest-tool --silent -L https://github.com/estesp/manifest-tool/releases/download/v${VERSION}/manifest-tool-${HOST,,}-${ARCH,,} 
 	chmod +x ${GITHUB_WORKSPACE}/ci/manifest-tool
 }
 
 push_from_spec()
 {
+	printf 'Pushing from spec %s/%s/%s\n' "${GITHUB_WORKSPACE}" "$1" "${MANIFEST}"
 	${GITHUB_WORKSPACE}/ci/manifest-tool push from-spec ${GITHUB_WORKSPACE}/$1/${MANIFEST}
 }
 
