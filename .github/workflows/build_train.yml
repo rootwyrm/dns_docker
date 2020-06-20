@@ -4,11 +4,11 @@ on:
   push:
     branches: [ master ]
     paths: 
-      - '*/ci/*'
+      - 'ci/*'
   pull_request:
     branches: [ master ]
     paths: 
-      - '*/ci/*'
+      - 'ci/*'
   pull_request_review:
     types: [ submitted, edited ]
   schedule:
