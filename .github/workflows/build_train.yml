@@ -65,7 +65,7 @@ jobs:
     needs: base
     strategy:
       matrix:
-        platform: [ linux/amd64, linux/386, linux/arm64, linux/arm/v6, linux/arm/v7 ]
+        platform: [ linux/amd64, linux/386, linux/arm64, linux/arm/v7 ]
     env: 
       CONTAINER: nsd
       BINFMT: a7996909642ee92942dcd6cff44b9b95f08dad64
@@ -86,8 +86,9 @@ jobs:
     - name: Build nsd - ${{ matrix.platform }}
       run: |
         docker login -u ${{ secrets.HUB_USER }} -p ${{ secrets.HUB_TOKEN }}
+        PLATFORM_TAG=$(echo ${{ matrix.platform }} | sed -e 's,linux/,,' | sed -e 's,/,,g')
         docker buildx build --platform ${{ matrix.platform }} \
-        --tag rootwyrm/nsd:${{ matrix.platform }} \
+        --tag rootwyrm/nsd:$PLATFORM_TAG \
         --pull --push nsd
   nsd_package:
     needs: nsd
