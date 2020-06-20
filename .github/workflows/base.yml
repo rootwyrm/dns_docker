@@ -35,6 +35,10 @@ jobs:
     - name: Build for ${{ matrix.platform }}
       run: |
         docker login -u ${{ secrets.HUB_USER }} -p ${{ secrets.HUB_TOKEN }}
-        docker buildx build --platform ${{ matrix.platform }} --tag rootwyrm/$CONTAINER $CONTAINER --pull --push
+        docker buildx build --platform ${{ matrix.platform }} --tag rootwyrm/$CONTAINER dns_$CONTAINER --pull 
+    - name: Push images
+      run: |
+
+        --push
 
 # vim:ts=2:sw=2:et

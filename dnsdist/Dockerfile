@@ -1,4 +1,4 @@
-FROM	rootwyrm/dns_base:latest
+FROM	rootwyrm/dns_base
 
 ## Set up our labels
 LABEL	maintainer="Phillip 'RootWyrm' Jaenke <prj+docker@rootwyrm.com>" \

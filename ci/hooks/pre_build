@@ -15,7 +15,6 @@ if [ -z $GITHUB_SHA ]; then
 else
 	export VCS_REF=$GITHUB_SHA
 fi
-
 if [ -z $GITHUB_SHA ]; then
 	export RW_VCSHASH=$(git rev-parse --short $REF)
 else
@@ -26,4 +25,6 @@ TGT="$GITHUB_WORKSPACE/$CONTAINER/Dockerfile"
 sed -i -e 's/%%VCS_REF%%/'$VCS_REF'/g' $TGT
 sed -i -e 's/%%RW_VCSHASH%%/'$RW_VCSHASH'/g' $TGT
 sed -i -e 's/%%RW_BUILDDATE%%/'$RW_BUILDDATE'/g' $TGT
+sed -i -e 's/%%GITHUB_SHA%%/'$GITHUB_SHA'/g' $TGT
+sed -i -e 's/%%GITHUB_REPOSITORY%%/'$GITHUB_REPOSITORY'/g' $TGT
 sed -i -e 's/%%GITHUB_ACTION%%/'$GITHUB_ACTION'/g' $TGT

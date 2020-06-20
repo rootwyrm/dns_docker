@@ -12,8 +12,11 @@
 
 . /opt/rootwyrm/lib/deploy.lib.sh
 
-#export IFS=$'\n'
 export BUILDNAME="dnsdist"
+export DISTSITE="https://downloads.powerdns.com/releases"
+if [ -z ${DISTVER} ]; then
+	export DISTVER="1.5.0-rc3"
+fi
 
 ## Build
 export vbpkg="dnsdist_build"
@@ -23,9 +26,6 @@ export vrpkg="dnsdist_run"
 export vrpkg_content="curl gettext openssl luajit libedit libsodium boost h2o lmdb libprotobuf libprotoc protoc re2 fstrm" 
 
 export curl_cmd="/usr/bin/curl --tlsv1.2 --cert-status -L --silent"
-if [ -z $dnsdistv ]; then
-	export dnsdistv="1.5.0-rc2"
-fi
 	
 ######################################################################
 ## Install runtime packages first.
@@ -62,15 +62,16 @@ user()
 ######################################################################
 build()
 {
-	echo "$(date '+%b %d %H:%M:%S') [${BUILDNAME}] Retrieving $dnsdistv"
+	echo "$(date '+%b %d %H:%M:%S') [${BUILDNAME}] Retrieving ${DISTVER}"
 	if [ ! -d /usr/local/src ]; then
 		mkdir /usr/local/src
 	fi
 	cd /usr/local/src
-	$curl_cmd https://downloads.powerdns.com/releases/dnsdist-$dnsdistv.tar.bz2 > dnsdist-$dnsdistv.tar.bz2
-	tar xf dnsdist-$dnsdistv.tar.bz2
-	rm dnsdist-$dnsdistv.tar.bz2
-	cd dnsdist-$dnsdistv
+	local DISTFILE="${BUILDNAME}-${DISTVER}.tar.bz2"
+	$curl_cmd ${DISTSITE}/${DISTFILE} > ${DISTFILE}
+	tar xf ${DISTFILE}
+	rm ${DISTFILE}
+	cd ${BUILDNAME}-${DISTVER}
 	## XXX: Work around a bug.
 	mkdir ibdir
 
@@ -102,7 +103,7 @@ clean()
 	echo "$(date '+%b %d %H:%M:%S') [${BUILDNAME}] Cleaning up build."
 	make clean
 	cd /root
-	rm -rf /usr/local/src/dnsdist-$dnsdistv
+	rm -rf /usr/local/src/dnsdist-${DISTVER}
 	CHECK_ERROR $? "dnsdist_clean_delete_source"
 	/sbin/apk --no-cache del $vbpkg
 	CHECK_ERROR $? "dnsdist_clean_apk"
@@ -114,5 +115,5 @@ user
 build
 clean
 
-echo "$(date '+%b %d %H:%M:%S') [${BUILDNAME}] Build and install of $dnsdistv complete."
+echo "$(date '+%b %d %H:%M:%S') [${BUILDNAME}] Build and install of ${DISTVER} complete."
 exit 0 
