@@ -12,7 +12,7 @@ on:
   pull_request_review:
     types: [ submitted, edited ]
   schedule:
-    - cron: '0 /12 * * *'
+    - cron: '0 4,16 * * *'
 ## Rebuild all whenever we bump base...
 jobs:
   validate_base:
