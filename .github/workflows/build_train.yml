@@ -21,12 +21,12 @@ jobs:
     - name: Checkout from ${{ github.ref }} triggered by ${{ github.actor }}
       uses: actions/checkout@v2
       id: checkout
-    - name: Lint Dockerfile
-      id: lint
-      run: |
-        docker run -it --rm -v $PWD:/root/ \
-        projectatomic/dockerfile-lint \
-        dockerfile_lint -f base/Dockerfile
+    #- name: Lint Dockerfile
+    #  id: lint
+    #  run: |
+    #    docker run -it --rm -v $PWD:/root/ \
+    #    projectatomic/dockerfile-lint \
+    #    dockerfile_lint -f base/Dockerfile
     - name: Validate base container integrity
       id: validate
       run: |
