@@ -35,10 +35,13 @@ EXPOSE	80/tcp
 EXPOSE	443/tcp
 EXPOSE	8053/tcp
 
+ADD [ "conf", "/usr/local/etc/dnsdist" ]
 ADD [ "application", "/opt/rootwyrm" ]
 
 VOLUME [ "/run" ]
-VOLUME [ "/usr/local/etc/dnsdist" ]
+VOLUME [ "/usr/local/etc/dnsdist/conf.d" ]
+VOLUME [ "/usr/local/etc/dnsdist/lua" ]
+VOLUME [ "/usr/local/etc/dnsdist/maps" ]
 
 CMD [ "/sbin/runsvdir", "-P", "/etc/service" ]
 

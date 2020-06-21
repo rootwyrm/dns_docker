@@ -4,6 +4,18 @@
 dduser=dnsdist
 ddgroup=dnsdist
 
+if [ -f /firstboot ]; then
+	## Wait for firstboot to complete.
+	echo "firstboot still in process, waiting 60 seconds..."
+	sleep 60
+	## Trigger restart
+	exit -1
+fi
+if [ -f /dnsdist.disable ]; then
+	echo "dnsdist lockout found, refusing to start."
+	exit 0
+fi
+
 echo "Starting dnsdist as $dduser:$ddgroup"
 echo " "
 
