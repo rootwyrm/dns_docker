@@ -44,7 +44,7 @@ function delete_tags()
 		https://hub.docker.com/v2/repositories/${GITHUB_ACTOR}/${CONTAINER}/tags/ \
 		-o ${GITHUB_WORKSPACE}/ci/tags.json
 	## XXX: jq '.[].name' tags.json doesn't work on CentOS 8.
-	readarray tags < <(jq '.[].name' ${GITHUB_WORKSPACE}/ci/tags.json)
+	readarray tags < <(jq '.results[].name' ${GITHUB_WORKSPACE}/ci/tags.json -r)
 
 	for t in ${tags[@]}; do
 		case $t in
@@ -53,7 +53,7 @@ function delete_tags()
 				;;
 			*)
 				printf 'Deleting %s:%s...\n' "$1" "${t}"
-				curl -i --fail -X DELETE \
+				curl --fail -X DELETE \
 					-H "Accept: application/json" \
 					-H "Authorization: JWT $token" \
 					"https://hub.docker.com/v2/repositories/${GITHUB_ACTOR}/${CONTAINER}/tags/${t}/"
