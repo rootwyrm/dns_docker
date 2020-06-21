@@ -44,7 +44,7 @@ function delete_tags()
 		https://hub.docker.com/v2/repositories/${GITHUB_ACTOR}/${CONTAINER}/tags/ \
 		-o ${GITHUB_WORKSPACE}/ci/tags.json
 	## XXX: jq '.[].name' tags.json doesn't work on CentOS 8.
-	readarray tags < <(jq '.[].name' ${GITHUB_WORKSPACE}/ci/tags.json -r)
+	readarray tags < <(jq '.[].name' ${GITHUB_WORKSPACE}/ci/tags.json)
 
 	for t in ${tags[@]}; do
 		case $t in
