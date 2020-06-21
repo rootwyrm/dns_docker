@@ -4,11 +4,11 @@ on:
   push:
     branches: [ master ]
     paths:
-      - 'dnsdist/*'
+      - 'dnsdist/**/*'
   pull_request:
     branches: [ master ]
     paths:
-      - 'dnsdist/*'
+      - 'dnsdist/**/*'
 
 ## Rebuild
 jobs:
