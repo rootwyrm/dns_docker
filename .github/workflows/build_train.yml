@@ -4,14 +4,14 @@ on:
   push:
     branches: [ master ]
     paths: 
-      - 'ci/*'
-      - 'base/*'
+      - 'ci/**/*'
+      - 'base/**/*'
       - '.github/workflows/build_train.yml'
   pull_request:
     branches: [ master ]
     paths: 
-      - 'ci/*'
-      - 'base/*'
+      - 'ci/**/*'
+      - 'base/**/*'
       - '.github/workflows/build_train.yml'
   pull_request_review:
     types: [ submitted, edited ]
