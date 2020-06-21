@@ -35,7 +35,7 @@ EXPOSE	80/tcp
 EXPOSE	443/tcp
 EXPOSE	8053/tcp
 
-ADD [ "conf", "/usr/local/etc/dnsdist" ]
+ADD [ "conf/", "/usr/local/etc/dnsdist" ]
 ADD [ "application", "/opt/rootwyrm" ]
 
 VOLUME [ "/run" ]
