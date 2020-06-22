@@ -8,8 +8,6 @@ if [ -f /firstboot ]; then
 	## Wait for firstboot to complete.
 	echo "firstboot still in process, waiting 60 seconds..."
 	sleep 60
-	## Trigger restart
-	exit -1
 fi
 if [ -f /dnsdist.disable ]; then
 	echo "dnsdist lockout found, refusing to start."
@@ -19,4 +17,4 @@ fi
 echo "Starting dnsdist as $dduser:$ddgroup"
 echo " "
 
-exec /usr/local/bin/dnsdist -C /usr/local/etc/dnsdist/dnsdist.conf -u $dduser -g $dduser --supervised
+/usr/local/bin/dnsdist -C /usr/local/etc/dnsdist/dnsdist.conf -u $dduser -g $dduser --supervised

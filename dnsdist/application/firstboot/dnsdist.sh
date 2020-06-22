@@ -19,7 +19,7 @@ function ipaddress()
 	fi
 	
 	export SYSTEM_LOCALIP6=$(ifconfig eth0 | grep inet6 | grep -v Link | awk '{print $3}')
-	if [ $SYSTEM_LOCALIP6 == '' ]; then
+	if [[ $SYSTEM_LOCALIP6 == '' ]]; then
 		unset SYSTEM_LOCALIP6
 	else
 		export DNSDIST_LOCALIP6=$SYSTEM_LOCALIP6
@@ -74,7 +74,10 @@ function config()
 	## Password
 	sed -i -e 's/%%DNSDIST_PASSWD%%/'$DNSDIST_PASSWD'/g' $CONFIG
 	printf 'dnsdist Web Password: admin:%s\n' "$DNSDIST_PASSWD"
+	printf '**********************************************************************\n'
+	printf '[dnsdist] firstboot tasks complete.\n'
 }
 
+printf '[dnsdist] Performing firstboot tasks...\n'
 ipaddress
 config

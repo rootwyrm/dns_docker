@@ -2,8 +2,8 @@ FROM	rootwyrm/dns_base
 
 ## Set up our labels
 LABEL	maintainer="Phillip 'RootWyrm' Jaenke <prj+docker@rootwyrm.com>" \
-        com.rootwyrm.project="dns_docker/nsd" \
-        com.rootwyrm.product="NLnet nsd" \
+        com.rootwyrm.project="dns_docker/dnsdist" \
+        com.rootwyrm.product="PowerDNS dnsdist" \
         com.rootwyrm.vcs-type="github" \
         com.rootwyrm.url="%%GITHUB_REPOSITORY%%" \
         com.rootwyrm.docker.base="rootwyrm/dns_base:latest" \
@@ -14,7 +14,7 @@ LABEL	maintainer="Phillip 'RootWyrm' Jaenke <prj+docker@rootwyrm.com>" \
         ## label-schema.org
         org.label-schema.schema-version="1.0.0-rc1" \
         org.label-schema.vendor="RootWyrm" \
-        org.label-schema.name="dns_docker/base" \
+        org.label-schema.name="dns_docker/dnsdist" \
         org.label-schema.url="%%GITHUB_REPOSITORY%%" \
         org.label-schema.vcs-ref="%%VCS_REF%%" \
         org.label-schema.version="%%REF%%" \
