@@ -34,6 +34,7 @@ EXPOSE  853/udp
 EXPOSE  853/tcp
 
 ## Create common elements
+ADD [ "conf/", "/usr/local/etc/unbound" ]
 ADD [ "application/", "/opt/rootwyrm" ]
 
 VOLUME [ "/run" ]

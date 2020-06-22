@@ -19,10 +19,10 @@ export DISTVER="1.10.1"
 
 ## Build
 export vbpkg="${BUILDNAME}_build"
-export vbpkg_content="gcc g++ make openssl-dev expat-dev protobuf-c-dev fstrm-dev libsodium-dev libmnl-dev linux-headers"
+export vbpkg_content="gcc g++ make openssl-dev expat-dev protobuf-c-dev fstrm-dev libsodium-dev libmnl-dev libevent-dev linux-headers"
 ## Runtime
 export vrpkg="${BUILDNAME}_run"
-export vrpkg_content="curl openssl expat protobuf-c fstrm libsodium libmnl"
+export vrpkg_content="curl openssl expat protobuf-c fstrm libsodium libmnl libevent"
 
 export curl_cmd="/usr/bin/curl --tlsv1.2 -L --silent"
 
@@ -70,6 +70,7 @@ build()
 	echo "$(date '+%b %d %H:%M:%S') [${BUILDNAME}] Configuring..."
 	## XXX: Need to test for tcp_fast_open
 	./configure --prefix=/usr/local \
+		--with-libevent=/usr \
 		--enable-pie --enable-relro-now --enable-subnet \
 		--enable-tfo-client --enable-tfo-server \
 		--enable-dnstap --enable-dnscrypt --enable-cachedb \

@@ -1,8 +1,7 @@
 #!/bin/sh
 
 pidfile="/usr/local/etc/unbound/unbound.pid"
-
-kill -SIGTERM $(cat $pidfile)
+echo "[unbound] Stopping unbound..."
 
 if [ -f $pidfile ]; then
 	rm $pidfile

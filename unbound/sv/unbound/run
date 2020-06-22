@@ -22,4 +22,6 @@ fi
 
 echo "[unbound] Starting unbound..."
 echo " "
+## Set ulimits before executing
+ulimit -n 65535 ; ulimit -c 1024 
 exec /usr/local/sbin/unbound -c $unboundconf -d
