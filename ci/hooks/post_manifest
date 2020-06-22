@@ -46,11 +46,7 @@ function delete_tags()
 	## XXX: jq '.[].name' tags.json doesn't work on CentOS 8.
 	#readarray tags < <(jq '.results[].name' ${GITHUB_WORKSPACE}/ci/tags.json -r)
 
-	tags="amd64"
-	tags+="386"
-	tags+="arm64"
-	tags+="armv7"
-	for t in ${tags[@]}; do
+	for t in amd64 386 arm64 armv7; do
 		case $t in
 			latest)
 				## Don't delete latest ever
