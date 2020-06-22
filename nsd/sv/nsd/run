@@ -1,14 +1,19 @@
 #!/bin/sh
 ## nsd
 
-nsdconf="/etc/nsd/nsd.conf"
+nsdconf="/usr/local/etc/nsd/nsd.conf"
+
+if [ -f /firstboot ]; then
+	echo "[nsd] Waiting for firstboot scripts..."
+	sleep 60
+fi
 
 if [ ! -f $nsdconf ]; then
-	echo "No nsd configuration present!"
-	exit 1
+	echo "[nsd] No configuration present!"
+	exit -1
 else
 	echo "[nsd] Testing configuration..."
-	/usr/sbin/nsd-checkconf ${nsdconf}
+	/usr/local/sbin/nsd-checkconf ${nsdconf}
 	if [ $? -ne 0 ]; then
 		RC=$?
 		echo "[nsd] Configuration test failed - $RC"
@@ -18,5 +23,4 @@ fi
 
 echo "[nsd] Starting nsd..."
 echo " "
-exec /usr/sbin/nsd -c $nsdconf -d -u nsd -l /var/log/nsd.log
-# -t /var/db/nsd
+exec /usr/local/sbin/nsd -c $nsdconf -d -u nsd -P /var/db/nsd/nsd.pid -l /dev/stdout

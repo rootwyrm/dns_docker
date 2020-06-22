@@ -1,0 +1,120 @@
+################################################################################
+## nsd.conf
+################################################################################
+
+server:
+    server-count:   %%NSD_NCPU%%
+    ip-address:     0.0.0.0
+    reuseport:      yes
+    do-ip4:         yes     # %%NSD_LOCALIP4%%
+    do-ip6:         yes     # %%NSD_LOCALIP6%%
+
+    username:   nsd
+
+    zonesdir:       "/usr/local/etc/nsd/zones"
+    zonelistfile:   "/var/db/nsd/zone.list"
+    logfile:        "/var/db/nsd/nsd.log"
+
+    xfrdir:         "/var/db/nsd"
+    xfrdfile:       "/var/db/nsd/xfrd.state"
+
+    version:    "dns_docker by RootWyrm - authoritative"
+    identity:   "dns_docker by RootWyrm - authoritative"
+
+    zonefiles-check:    yes
+    zonefiles-write:    3600
+include:    "/usr/local/etc/nsd/conf.d/server.conf"
+
+remote-control:
+    control-enable:     yes
+    control-interface:  /run/nsd.control.sock
+include:    "/usr/local/etc/nsd/conf.d/remote-control.conf"
+
+pattern:
+    name: "localroot"
+    allow-axfr-fallback:    yes
+    multi-master-check:     yes
+    min-refresh-time:   3600
+    min-retry-time:     300
+    zonefile: "/usr/local/etc/nsd/localroot/%s"
+
+    request-xfr:    UDP %%LAX.XFR%% NOKEY
+    allow-notify:   %%LAX.XFR%% NOKEY
+    request-xfr:    UDP %%IAD.XFR%% NOKEY
+    allow-notify:   %%IAD.XFR%% NOKEY
+include:    "/usr/local/etc/nsd/conf.d/pattern.conf"
+
+zone:
+    name: "root-servers.net"
+    include-pattern: "localroot"
+zone:
+    name: "arpa"
+    include-pattern: "localroot"
+zone:
+    name: "in-addr.arpa"
+    include-pattern: "localroot"
+zone:
+    name: "ipv4only.arpa"
+    include-pattern: "localroot"
+zone:
+    name: "ip6.arpa"
+    include-pattern: "localroot"
+zone:
+    name: "ip6-servers.arpa"
+    include-pattern: "localroot"
+zone:
+    name: "mcast.net"
+    include-pattern: "localroot"
+zone:
+    name: "224.in-addr.arpa"
+    include-pattern: "localroot"
+zone:
+    name: "225.in-addr.arpa"
+    include-pattern: "localroot"
+zone:
+    name: "226.in-addr.arpa"
+    include-pattern: "localroot"
+zone:
+    name: "227.in-addr.arpa"
+    include-pattern: "localroot"
+zone:
+    name: "228.in-addr.arpa"
+    include-pattern: "localroot"
+zone:
+    name: "229.in-addr.arpa"
+    include-pattern: "localroot"
+zone:
+    name: "230.in-addr.arpa"
+    include-pattern: "localroot"
+zone:
+    name: "231.in-addr.arpa"
+    include-pattern: "localroot"
+zone:
+    name: "232.in-addr.arpa"
+    include-pattern: "localroot"
+zone:
+    name: "233.in-addr.arpa"
+    include-pattern: "localroot"
+zone:
+    name: "234.in-addr.arpa"
+    include-pattern: "localroot"
+zone:
+    name: "235.in-addr.arpa"
+    include-pattern: "localroot"
+zone:
+    name: "236.in-addr.arpa"
+    include-pattern: "localroot"
+zone:
+    name: "237.in-addr.arpa"
+    include-pattern: "localroot"
+zone:
+    name: "238.in-addr.arpa"
+    include-pattern: "localroot"
+zone:
+    name: "239.in-addr.arpa"
+    include-pattern: "localroot"
+
+
+include:    "/usr/local/etc/nsd/conf.d/zone.conf"
+
+# vim:ts=4:sw=4:et

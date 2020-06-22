@@ -23,7 +23,7 @@ export vbpkg="${BUILDNAME}_build"
 export vbpkg_content="gcc g++ make libevent-dev openssl-dev protobuf-c-dev fstrm-dev"
 ## Runtime
 export vrpkg="${BUILDNAME}_run"
-export vrpkg_content="curl libevent openssl protobuf-c fstrm"
+export vrpkg_content="curl libevent openssl protobuf-c fstrm bind-tools"
 
 export curl_cmd="/usr/bin/curl --tlsv1.2 -L --silent"
 
@@ -69,8 +69,11 @@ build()
 	cd ${BUILDNAME}-${DISTVER}
 
 	echo "$(date '+%b %d %H:%M:%S') [${BUILDNAME}] Configuring..."
-	## XXX: Need to test for tcp_fast_open
+	## NOTE: Must be extremely explicit with paths for nsd
 	./configure \
+		--with-configdir=/usr/local/etc/nsd \
+		--with-pidfile=/run/nsd.pid \
+		--with-xfrdir=/var/db/nsd \
 		--enable-pie --enable-relro-now --enable-root-server \
 		--enable-ratelimit-default-is-off --enable-dnstap \
 		--enable-tcp-fastopen
@@ -91,7 +94,7 @@ build()
 clean()
 {
 	######################################################################
-	## Clean up after ourselves, because seriously, this is batshit huge.
+	## Clean up after ourselves.
 	######################################################################
 	echo "$(date '+%b %d %H:%M:%S') [${BUILDNAME}] Cleaning up build."
 	make clean

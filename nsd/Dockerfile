@@ -1,4 +1,5 @@
-FROM    rootwyrm/dns_base:latest
+#FROM    rootwyrm/dns_base:latest
+FROM    basetest
 
 ## Set up our labels
 LABEL   maintainer="Phillip 'RootWyrm' Jaenke <prj+docker@rootwyrm.com>" \
@@ -32,10 +33,13 @@ EXPOSE    53/tcp
 EXPOSE    53/udp
 
 ## Create common elements
+ADD     [ "conf/", "/usr/local/etc/nsd" ]
 ADD     [ "application/", "/opt/rootwyrm" ]
 
 VOLUME [ "/run" ]
-VOLUME [ "/usr/local/etc/nsd", "/var/db/nsd" ]
+VOLUME [ "/var/db/nsd" ]
+VOLUME [ "/usr/local/etc/nsd/conf.d" ]
+VOLUME [ "/usr/local/etc/nsd/zones" ]
 
 CMD [ "/sbin/runsvdir", "-P", "/etc/service" ]
 
