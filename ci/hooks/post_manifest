@@ -40,12 +40,16 @@ function delete_tags()
 		echo "Did not receive tags to delete."
 		exit 1
 	fi
-	curl -sb --fail -X GET \
-		https://hub.docker.com/v2/repositories/${GITHUB_ACTOR}/${CONTAINER}/tags/ \
-		-o ${GITHUB_WORKSPACE}/ci/tags.json
+	#curl -sb --fail -X GET \
+	#	https://hub.docker.com/v2/repositories/${GITHUB_ACTOR}/${CONTAINER}/tags/ \
+	#	-o ${GITHUB_WORKSPACE}/ci/tags.json
 	## XXX: jq '.[].name' tags.json doesn't work on CentOS 8.
-	readarray tags < <(jq '.results[].name' ${GITHUB_WORKSPACE}/ci/tags.json -r)
+	#readarray tags < <(jq '.results[].name' ${GITHUB_WORKSPACE}/ci/tags.json -r)
 
+	tags="amd64"
+	tags+="386"
+	tags+="arm64"
+	tags+="armv7"
 	for t in ${tags[@]}; do
 		case $t in
 			latest)
