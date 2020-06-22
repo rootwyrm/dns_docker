@@ -3,19 +3,15 @@
 
 if [ -f /firstboot ]; then
 	echo "[RootWyrm] Running firstboot procedures..."
+	## Actually execute the firstboot scripts
+	if [ -d /opt/rootwyrm/firstboot ]; then
+		echo "[RootWyrm] Found application-specific firstboot..."
+		for s in `ls /opt/rootwyrm/firstboot`; do
+			/opt/rootwyrm/firstboot/$s
+		done
+		rm -f /firstboot
+	fi
 else
-	rm -rf /etc/service/firstboot
+	sv d firstboot
 	exit 0
 fi
-
-## Actually execute the firstboot scripts
-if [ -d /opt/rootwyrm/firstboot ]; then
-	for s in `ls /opt/rootwyrm/firstboot`; do
-		if [ -x $s ]; then
-			/opt/rootwyrm/firstboot/$s
-		fi
-	done
-fi
-
-## Prevent re-running.
-rm -f /firstboot
