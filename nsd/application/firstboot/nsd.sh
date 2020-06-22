@@ -56,7 +56,9 @@ function config()
 	fi
 	
 	## Fix permissions
-	chown nsd:nsd /var/db/nsd
+	/usr/local/sbin/nsd-control-setup
+	chown -R nsd:nsd /var/db/nsd
+	chown -R nsd:nsd /usr/local/etc/nsd
 
 	printf '**********************************************************************\n'
 	printf 'System IPv4 Address: %s\n' "$SYSTEM_LOCALIP4"
