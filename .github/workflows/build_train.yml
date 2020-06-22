@@ -5,13 +5,11 @@ on:
     branches: [ master ]
     paths: 
       - 'ci/**/*'
-      - 'base/**/*'
       - '.github/workflows/build_train.yml'
   pull_request:
     branches: [ master ]
     paths: 
       - 'ci/**/*'
-      - 'base/**/*'
       - '.github/workflows/build_train.yml'
   pull_request_review:
     types: [ submitted, edited ]
