@@ -9,6 +9,8 @@ on:
     branches: [ master ]
     paths:
       - 'nsd/**/*'
+  repository_dispatch:
+    types: [ nsd ]
 
 ## Rebuild
 jobs:
