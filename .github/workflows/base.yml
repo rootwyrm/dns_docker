@@ -43,9 +43,11 @@ jobs:
         consumers: [ nsd ]
     env:
       RW_PROJECT: dns_docker
+    steps:
     - name: Trigger consumers
       run: |
-        curl -u rootwyrm:${{ secrets.FLOW_TOKEN }} \
+        curl -u ${{ github.actor }}:${{ secrets.FLOW_TOKEN }} \
+          https://api.github.com/repos/rootwyrm/$RW_PROJECT/dispatches \
           -H 'User-Agent: rootwyrm/dnsdocker/.github/workflows '${{ github.actor }}'' \
           --data '{ "event_type": "'${{ matrix.consumer }}'", "client_payload": { "build": "true" } }'
 
