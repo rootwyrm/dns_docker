@@ -53,6 +53,7 @@ function delete_tags()
 				;;
 			*)
 				printf 'Deleting %s:%s...\n' "$1" "${t}"
+				echo 'URL: https://hub.docker.com/v2/repositories/${GITHUB_ACTOR}/${CONTAINER}/tags/${t}/\n'
 				curl --fail -X DELETE \
 					-H "Accept: application/json" \
 					-H "Authorization: JWT $token" \
