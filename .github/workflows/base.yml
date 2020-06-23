@@ -38,6 +38,7 @@ jobs:
         --tag rootwyrm/dns_$CONTAINER $CONTAINER 
   consumers:
     needs: base
+    runs-on: ubuntu-20.04
     strategy:
       matrix:
         consumers: [ nsd ]
