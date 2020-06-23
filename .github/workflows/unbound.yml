@@ -9,6 +9,8 @@ on:
     branches: [ master ]
     paths:
       - 'unbound/**/*'
+  repository_dispatch:
+    types: [ unbound ]
 
 ## Rebuild
 jobs:

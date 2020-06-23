@@ -9,6 +9,8 @@ on:
     branches: [ master ]
     paths:
       - 'dnsdist/**/*'
+  repository_dispatch:
+    types: [ dnsdist ]
 
 ## Rebuild
 jobs:

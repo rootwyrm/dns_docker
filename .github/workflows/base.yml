@@ -41,7 +41,7 @@ jobs:
     runs-on: ubuntu-20.04
     strategy:
       matrix:
-        consumers: [ nsd ]
+        consumers: [ nsd, unbound, dnsdist ]
     env:
       RW_PROJECT: dns_docker
     steps:
