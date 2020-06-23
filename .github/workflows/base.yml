@@ -47,9 +47,10 @@ jobs:
     steps:
     - name: Trigger consumers
       run: |
+        CONSUMER=${{ matrix.consumer }}
         curl -u ${{ github.actor }}:${{ secrets.FLOW_TOKEN }} \
           https://api.github.com/repos/rootwyrm/$RW_PROJECT/dispatches \
-          -H 'User-Agent: rootwyrm/dnsdocker/.github/workflows ${{ github.actor }}' \
-          --data '{ "event_type": "${{ matrix.consumer }}", "client_payload": { "build": "true" } }'
+          -H 'User-Agent: rootwyrm/dnsdocker/.github/workflows' \
+          --data '{ "event_type": "'$CONSUMER'", "client_payload": { "build": "true" } }'
 
 # vim:ts=2:sw=2:et
