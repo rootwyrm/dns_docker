@@ -57,7 +57,7 @@ jobs:
       ## Holy hell, I have to set up an entire python3 venv. WTF.
       - name: Install python virtual environment
         run: |
-          pyvenv-3 --system-site-packages ${GITHUB_WORKSPACE}
+          python3 -m venv --system-site-packages ${GITHUB_WORKSPACE}
           . ${GITHUB_WORKSPACE}/bin/activate
           pip install --upgrade pip
           pip install requests
