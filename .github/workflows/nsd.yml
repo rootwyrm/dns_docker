@@ -55,13 +55,9 @@ jobs:
           docker login -u ${{ secrets.HUB_USER }} -p ${{ secrets.HUB_TOKEN }}
           ${GITHUB_WORKSPACE}/ci/tools/manifest.sh nsd
       ## Can't do a Python3 venv, not installed.
-      - name: Install requests
-        run: |
-          pip3 install requests
+      ## Doesn't print correctly due to python3 flux. 
       - name: Run manifest cleaning tool
         run: |
-          curl -q -o ${GITHUB_WORKSPACE}/ci/hooks/post_manifest.py https://raw.githubusercontent.com/rootwyrm/rootcore/master/ci/tools/docker_hub_tag_cleaner.py 
-          chmod +x ${GITHUB_WORKSPACE}/ci/hooks/post_manifest.py
-          ${GITHUB_WORKSPACE}/ci/hooks/post_manifest.py -u ${{ secrets.HUB_USER }} -p ${{ secrets.HUB_TOKEN }} -c nsd -t ${GITHUB_WORKSPACE}/nsd/tags
+          ${GITHUB_WORKSPACE}/ci/hooks/manifest_clean.py -u ${{ secrets.HUB_USER }} -p ${{ secrets.HUB_TOKEN }} -c nsd -t ${GITHUB_WORKSPACE}/nsd/tags
 
 # vim:ts=2:sw=2:et
