@@ -1,0 +1,32 @@
+## nsd
+name: Manifest Cleanup
+on:
+  push:
+    branches: [ master ]
+    paths:
+      - 'nsd/**/*'
+  pull_request:
+    branches: [ master ]
+    paths:
+      - 'nsd/**/*'
+  repository_dispatch:
+    types: [ manifest ]
+
+## Rebuild
+jobs:
+  manifest_clean:
+    name: Manifest Cleaning Test
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Check out from ${{ github.ref }}
+        uses: actions/checkout@v2
+      - name: Ship nsd manifest
+        run: |
+          docker login -u ${{ secrets.HUB_USER }} -p ${{ secrets.HUB_TOKEN }}
+          ${GITHUB_WORKSPACE}/ci/tools/manifest.sh nsd
+      ## Can't do a Python3 venv, not installed.
+      - name: Run manifest cleaning tool
+        run: |
+          ${GITHUB_WORKSPACE}/ci/tools/docker_hub_tag_cleaner.py -u ${{ secrets.HUB_USER }} -p ${{ secrets.HUB_TOKEN }} -c nsd -t ${GITHUB_WORKSPACE}/nsd/tags
+
+# vim:ts=2:sw=2:et
