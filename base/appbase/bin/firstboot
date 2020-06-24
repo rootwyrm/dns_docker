@@ -1,9 +1,6 @@
 #!/bin/sh
 ## firstboot
 
-## Stop making noise
-sv o firstboot
-
 if [ -f /firstboot ]; then
 	echo "[RootWyrm] Running firstboot procedures..."
 	## Actually execute the firstboot scripts
@@ -15,6 +12,5 @@ if [ -f /firstboot ]; then
 		rm -f /firstboot
 	fi
 else
-	mv /etc/service/firstboot/run /etc/service/firstboot/disable.run
 	exit 0
 fi
