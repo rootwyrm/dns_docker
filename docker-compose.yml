@@ -1,5 +1,6 @@
 ## docker-compose.yml
-
+  
+## XXX: version 3.x does not support IPv6
 version: "2.4"
 services:
   dnsdist:
@@ -46,7 +47,7 @@ services:
       - /run
       - /tmp
     volumes:
-      - "/opt/rootwyrm/etc/nsd:/usr/local/etc/nsd"
+      - "/opt/rootwyrm/etc/nsd:/usr/local/etc/nsd/conf.d"
     cap_add:
       - NET_ADMIN
       - NET_BIND_SERVICE
@@ -75,9 +76,8 @@ services:
       - NET_BIND_SERVICE
 
 networks:
-  ## XXX: version 3.x does not support IPv6
   dns:
-    enable_ipv6: true
+    #enable_ipv6: true
     ipam:
       config:
         - subnet: "172.16.53.0/24"
