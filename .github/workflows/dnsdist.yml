@@ -56,6 +56,6 @@ jobs:
           ${GITHUB_WORKSPACE}/ci/tools/manifest.sh dnsdist
       - name: Run manifest cleaning tool
         run: |
-          ${GITHUB_WORKSPACE}/ci/hooks/manifest_clean.py -u ${{ secrets.HUB_USER }} -p ${{ secrets.HUB_TOKEN }} -c dnsdist -t ${GITHUB_WORKSPACE}/dnsdist/tags
+          ${GITHUB_WORKSPACE}/ci/tools/manifest_clean.py -u ${{ secrets.HUB_USER }} -p ${{ secrets.HUB_TOKEN }} -c dnsdist -t ${GITHUB_WORKSPACE}/dnsdist/tags
 
 # vim:ts=2:sw=2:et

@@ -58,6 +58,6 @@ jobs:
       ## Doesn't print correctly due to python3 flux. 
       - name: Run manifest cleaning tool
         run: |
-          ${GITHUB_WORKSPACE}/ci/hooks/manifest_clean.py -u ${{ secrets.HUB_USER }} -p ${{ secrets.HUB_TOKEN }} -c nsd -t ${GITHUB_WORKSPACE}/nsd/tags
+          ${GITHUB_WORKSPACE}/ci/tools/manifest_clean.py -u ${{ secrets.HUB_USER }} -p ${{ secrets.HUB_TOKEN }} -c nsd -t ${GITHUB_WORKSPACE}/nsd/tags
 
 # vim:ts=2:sw=2:et
