@@ -1,2 +1,0 @@
-#!/bin/sh
-mv /etc/service/firstboot /etc/sv

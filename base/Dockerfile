@@ -28,6 +28,7 @@ LABEL   maintainer="Phillip 'RootWyrm' Jaenke <prj+docker@rootwyrm.com>" \
        
 COPY [ "appbase/", "/opt/rootwyrm" ]
 COPY [ "service/", "/etc/service" ]
+COPY [ "runit/", "/etc/runit" ]
 
 VOLUME  [ "/run" ]
 
@@ -53,6 +54,6 @@ ONBUILD RUN touch /firstboot && \
     done && \
     echo "$(date '+%FT%T.%N%:z') [BUILD] phase complete..." 
 
-CMD [ "/sbin/runsvdir", "-P", "/etc/service" ]
+ENTRYPOINT [ "/sbin/runit-init" ]
 
 # vim:ts=4:sw=4:et
