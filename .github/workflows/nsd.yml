@@ -54,11 +54,18 @@ jobs:
         run: |
           docker login -u ${{ secrets.HUB_USER }} -p ${{ secrets.HUB_TOKEN }}
           ${GITHUB_WORKSPACE}/ci/tools/manifest.sh nsd
-      - name: Install my post-manifest tools
+      ## Holy hell, I have to set up an entire python3 venv. WTF.
+      - name: Install python virtual environment
         run: |
+          pyvenv-3 --system-site-packages ${GITHUB_WORKSPACE}
+          . ${GITHUB_WORKSPACE}/bin/activate
+          pip install --upgrade pip
+          pip install requests
+      - name: Run manifest cleaning tool
+        run: |
+          . ${GITHUB_WORKSPACE}/bin/activate
           curl -q -o ${GITHUB_WORKSPACE}/ci/hooks/post_manifest.py https://raw.githubusercontent.com/rootwyrm/rootcore/master/ci/tools/docker_hub_tag_cleaner.py 
           chmod +x ${GITHUB_WORKSPACE}/ci/hooks/post_manifest.py
-          pip install requests
           ${GITHUB_WORKSPACE}/ci/hooks/post_manifest.py -u ${{ secrets.HUB_USER }} -p ${{ secrets.HUB_TOKEN }} -c nsd -t ${GITHUB_WORKSPACE}/nsd/tags
 
 # vim:ts=2:sw=2:et
