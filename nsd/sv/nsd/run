@@ -10,7 +10,7 @@ fi
 
 if [ ! -f $nsdconf ]; then
 	echo "[nsd] No configuration present!"
-	exit -1
+	exit 1
 else
 	echo "[nsd] Testing configuration..."
 	/usr/local/sbin/nsd-checkconf ${nsdconf}
