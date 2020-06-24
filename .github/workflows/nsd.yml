@@ -58,6 +58,7 @@ jobs:
         run: |
           curl -q -o ${GITHUB_WORKSPACE}/ci/hooks/post_manifest.py https://raw.githubusercontent.com/rootwyrm/rootcore/master/ci/tools/docker_hub_tag_cleaner.py 
           chmod +x ${GITHUB_WORKSPACE}/ci/hooks/post_manifest.py
+          pip install requests
           ${GITHUB_WORKSPACE}/ci/hooks/post_manifest.py -u ${{ secrets.HUB_USER }} -p ${{ secrets.HUB_TOKEN }} -c nsd -t ${GITHUB_WORKSPACE}/nsd/tags
 
 # vim:ts=2:sw=2:et
