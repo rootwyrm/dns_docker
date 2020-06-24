@@ -54,6 +54,7 @@ ONBUILD RUN touch /firstboot && \
     done && \
     echo "$(date '+%FT%T.%N%:z') [BUILD] phase complete..." 
 
-ENTRYPOINT [ "/sbin/runit-init" ]
+STOPSIGNAL SIGCONT 
+ENTRYPOINT [ "/sbin/runit" ]
 
 # vim:ts=4:sw=4:et

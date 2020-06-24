@@ -1,6 +1,14 @@
 #!/bin/sh
 ## firstboot
 
+## Make sure we can shut down cleanly.
+touch /etc/runit/stopit
+chmod u+x /etc/runit/stopit
+## Fix console if missing
+if [ ! -c /dev/console ]; then
+	mknod -m 622 /dev/console c 5 1
+fi
+
 if [ -f /firstboot ]; then
 	echo "[RootWyrm] Running firstboot procedures..."
 	## Actually execute the firstboot scripts
