@@ -57,7 +57,7 @@ def hub_tag_delete(args,token):
         print("Could not open %s" % args.tags)
     tagfile = open(args.tags)
     for tag in list(tagfile):
-        print("Deleting %s" % args.container, ":%s - " % tag, Sep=None, end='')
+        print("Deleting %s" % args.container, ":%s - " % tag, sep=None, end='')
         target = f"{url_base}/{tag}"
         tag_delete = requests.delete(target, data='', headers=headers)
         if tag_delete.status_code == 204:
