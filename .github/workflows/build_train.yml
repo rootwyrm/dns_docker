@@ -165,12 +165,12 @@ jobs:
           docker login -u ${{ secrets.HUB_USER }} -p ${{ secrets.HUB_TOKEN }}
           ${GITHUB_WORKSPACE}/ci/tools/manifest.sh nsd
           docker logout
-      - name: Run post-manifest hooks
+      - name: Run manifest cleaning tool
         run: |
-          ${GITHUB_WORKSPACE}/ci/hooks/post_manifest ${{ secrets.HUB_USER }} ${{ secrets.HUB_TOKEN }} nsd
+          ${GITHUB_WORKSPACE}/ci/tools/manifest_clean.py -u ${{ secrets.HUB_USER }} -p ${{ secrets.HUB_TOKEN }} -c nsd -t ${GITHUB_WORKSPACE}/nsd/tags
   unbound_package:
     needs: unbound
-    name: Package unbound
+    name: Package and ship unbound
     runs-on: ubuntu-20.04
     steps:
       - name: Check out from ${{ github.ref }}
@@ -180,12 +180,12 @@ jobs:
           docker login -u ${{ secrets.HUB_USER }} -p ${{ secrets.HUB_TOKEN }}
           ${GITHUB_WORKSPACE}/ci/tools/manifest.sh unbound
           docker logout
-      - name: Run post-manifest hooks
+      - name: Run manifest cleaning tool
         run: |
-          ${GITHUB_WORKSPACE}/ci/hooks/post_manifest ${{ secrets.HUB_USER }} ${{ secrets.HUB_TOKEN }} unbound
+          ${GITHUB_WORKSPACE}/ci/tools/manifest_clean.py -u ${{ secrets.HUB_USER }} -p ${{ secrets.HUB_TOKEN }} -c unbound -t ${GITHUB_WORKSPACE}/unbound/tags
   dnsdist_package:
     needs: dnsdist
-    name: Package dnsdist
+    name: Package and ship dnsdist
     runs-on: ubuntu-20.04
     steps:
       - name: Check out from ${{ github.ref }}
@@ -194,9 +194,8 @@ jobs:
         run: |
           docker login -u ${{ secrets.HUB_USER }} -p ${{ secrets.HUB_TOKEN }}
           ${GITHUB_WORKSPACE}/ci/tools/manifest.sh dnsdist
-          docker logout
-      - name: Run post-manifest hooks
+      - name: Run manifest cleaning tool
         run: |
-          ${GITHUB_WORKSPACE}/ci/hooks/post_manifest ${{ secrets.HUB_USER }} ${{ secrets.HUB_TOKEN }} dnsdist
+          ${GITHUB_WORKSPACE}/ci/tools/manifest_clean.py -u ${{ secrets.HUB_USER }} -p ${{ secrets.HUB_TOKEN }} -c dnsdist -t ${GITHUB_WORKSPACE}/dnsdist/tags
 
 # vim:ts=2:sw=2:et
