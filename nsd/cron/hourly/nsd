@@ -1,0 +1,4 @@
+#!/bin/sh
+## periodic/hourly/nsd
+## Write zonefiles out
+/usr/local/sbin/nsd-control write > /dev/null 2>&1

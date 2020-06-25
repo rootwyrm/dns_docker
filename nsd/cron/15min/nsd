@@ -1,0 +1,6 @@
+#!/bin/sh
+## periodic/15min/nsd
+## Write zonefiles out if we missed a previous write
+if [ ! -f /var/db/nsd/nsd.db ]; then
+	/usr/local/sbin/nsd-control write > /dev/null 2>&1
+fi

@@ -33,7 +33,8 @@ EXPOSE    53/udp
 
 ## Create common elements
 ADD     [ "application/", "/opt/rootwyrm" ]
-COPY    [ "conf/", "/usr/local/etc/nsd" ]
+ADD     [ "conf/", "/usr/local/etc/nsd" ]
+ADD     [ "cron/", "/etc/periodic/" ]
 
 VOLUME [ "/run" ]
 VOLUME [ "/var/db/nsd" ]
