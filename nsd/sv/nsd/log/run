@@ -1,6 +1,0 @@
-#!/bin/sh
-if [ ! -d /var/log/nsd ]; then
-	mkdir /var/log/nsd
-fi
-
-exec svlogd /var/log/nsd

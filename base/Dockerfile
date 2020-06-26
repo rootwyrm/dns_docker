@@ -26,35 +26,41 @@ LABEL   maintainer="Phillip 'RootWyrm' Jaenke <prj+docker@rootwyrm.com>" \
         org.opencontainers.image.source="%%GITHUB_REPOSITORY%%" \
         org.opencontainers.image.created="%%RW_BUILDDATE%%" 
        
+#COPY [ "service/", "/etc/service" ]
+#COPY [ "runit/", "/etc/runit" ]
 COPY [ "appbase/", "/opt/rootwyrm" ]
-COPY [ "service/", "/etc/service" ]
-COPY [ "runit/", "/etc/runit" ]
+COPY [ "rc.conf", "/etc/rc.conf" ]
 
 VOLUME  [ "/run" ]
 
 RUN mkdir -p /opt/rootwyrm && \
     mkdir -p /usr/local/src && \
+    mkdir -p /run/openrc && \
+    mkdir -p /run/lock && \
+    chown root:uucp /run/lock && \
     apk update && apk upgrade && \
-    apk add --no-cache runit file dcron apk-cron openssl bash; \
-    rm -rf /etc/init.d && \
+    apk add --no-cache openrc file dcron apk-cron openssl bash; \
     sed -i -e '/^tty*/d' /etc/inittab && \
     sed -i -e '/^# Set up*/d' /etc/inittab && \
     sed -i -e '/^::ctrlalt*/d' /etc/inittab && \
-    sed -i -e '/.*salute$/d' /etc/inittab 
+    sed -i -e '/.*salute$/d' /etc/inittab && \
+    /sbin/rc-update add dcron && \
+    rm -f /etc/init.d/hw* ; \
+    rm -f /etc/init.d/modules ; \
+    rm -f /etc/init.d/modules-load ; \
+    rm -f /etc/init.d/modloop ; \
+    sed -i 's/\tcgroup_add_service/\t#cgroup_add_service/g' /lib/rc/sh/openrc-run.sh && \
+    sed -i 's/VSERVER/DOCKER/Ig' /lib/rc/sh/init.sh
 
 ONBUILD ADD [ "application/", "/opt/rootwyrm" ]
 ONBUILD ADD [ "sv/", "/etc/sv" ]
 ONBUILD RUN touch /firstboot && \
-    for sv in `ls /etc/sv`; do \
-        ln -s /etc/sv/$sv /etc/service/ ; \
-    done && \
     echo "$(date '+%FT%T.%N%:z') [BUILD] phase beginning..." ; \
     for bld in `ls /opt/rootwyrm/build/ | sort`; do \
         /opt/rootwyrm/build/$bld ; \
     done && \
     echo "$(date '+%FT%T.%N%:z') [BUILD] phase complete..." 
 
-STOPSIGNAL SIGCONT 
-ENTRYPOINT [ "/sbin/runit" ]
+ENTRYPOINT [ "/sbin/init" ]
 
 # vim:ts=4:sw=4:et
