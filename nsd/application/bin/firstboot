@@ -11,24 +11,43 @@
 function ipaddress()
 {
 	export SYSTEM_LOCALIP4=$(hostname -i)
-	if [ ! -z $SYSTEM_LOCALIP4 ]; then
-		export NSD_LOCALIP4=$SYSTEM_LOCALIP4
-	else
-		printf 'FATAL: Could not determine system IP! Shutting down.\n'
-		/sbin/runit-init 0
+	if [ -z $SYSTEM_LOCALIP4 ]; then
+		printf 'FATAL: Could not determine system IP!\n'
+		exit 1
 	fi
 	
 	export SYSTEM_LOCALIP6=$(ifconfig eth0 | grep inet6 | grep -v Link | awk '{print $3}')
 	if [[ $SYSTEM_LOCALIP6 == '' ]]; then
 		unset SYSTEM_LOCALIP6
-	else
-		export NSD_LOCALIP6=$SYSTEM_LOCALIP6
 	fi
+}
+
+function message()
+{
+	printf '**********************************************************************\n'
+	printf 'System IPv4 Address: %s\n' "$SYSTEM_LOCALIP4"
+	if [ ! -z $SYSTEM_LOCALIP6 ]; then
+		printf 'System IPv6 Address: %s\n' "$SYSTEM_LOCALIP6"
+	fi
+	## Insert IP addresses
+	printf 'nsd binding to %s\n' "$SYSTEM_LOCALIP4"
+	## Insert IPv6 if present, delete if absent
+	if [ ! -z $NSD_LOCALIP6 ]; then
+		printf 'nsd binding to %s\n' "$NSD_LOCALIP6"
+	fi
+	if [ $CONTROL_SETUP = '1' ]; then
+		printf 'nsd control socket listening at /run/nsd.control.sock\n'
+	fi
+	printf 'Starting with %s servers\n' "$NSD_NCPU"
+	printf 'Using %s lax.xfr.dns.icann.org for root zones\n' "$LAX_XFR"
+	printf 'Using %s lax.xfr.dns.icann.org for root zones\n' "$LAX_XFR"
+	printf '**********************************************************************\n'
 }
 
 function config()
 {
 	local CONFIG="/usr/local/etc/nsd/nsd.conf"
+	local CFGDIR="/usr/local/etc/nsd"
 
 	## Run ncpu/2 servers up to a maximum 4 - %%NSD_NCPU%%
 	local cpucount=$(cat /proc/cpuinfo | grep ^processor | wc -l)
@@ -45,46 +64,44 @@ function config()
 	LAX_XFR=$(host -t A lax.xfr.dns.icann.org 9.9.9.9 | grep address | awk '{print $4}')
 	if [ -z $LAX_XFR ] || [ $LAX_XFR = "" ]; then
 		printf 'Could not resolve lax.xfr.dns.icann.org via PCH, aborting!\n'
-		touch /nsd.disable
 		exit 1
 	fi
 	IAD_XFR=$(host -t A iad.xfr.dns.icann.org 9.9.9.9 | grep address | awk '{print $4}')
 	if [ -z $IAD_XFR ] || [ $IAD_XFR = "" ]; then
 		printf 'Could not resolve iad.xfr.dns.icann.org via PCH, aborting!\n'
-		touch /nsd.disable
 		exit 1
 	fi
-	
+
 	## Fix permissions
-	/usr/local/sbin/nsd-control-setup
+	if [ ! -f $CFGDIR/nsd_control.key ] || [ ! -f $CFGDIR/nsd_control.pem ] || [ ! -f $CFGDIR/nsd_server.key ] || [ ! -f $CFGDIR/nsd_server.pem ]; then
+		/usr/local/sbin/nsd-control-setup
+		if [ $? -ne 0 ]; then
+			exit $?
+		else
+			export CONTROL_SETUP=1
+		fi
+	else
+		export CONTROL_SETUP=1
+	fi
 	chown -R nsd:nsd /var/db/nsd
 	chown -R nsd:nsd /usr/local/etc/nsd
 
-	printf '**********************************************************************\n'
-	printf 'System IPv4 Address: %s\n' "$SYSTEM_LOCALIP4"
-	if [ ! -z $SYSTEM_LOCALIP6 ]; then
-		printf 'System IPv6 Address: %s\n' "$SYSTEM_LOCALIP6"
-	fi
-	## Insert IP addresses
-	sed -i -e 's/%%NSD_LOCALIP4%%/'$NSD_LOCALIP4'/g' $CONFIG
-	printf 'nsd binding to %s\n' "$NSD_LOCALIP4"
-	## Insert IPv6 if present, delete if absent
+	## Bind to the IPv4 address
+	sed -i -e 's/%%NSD_LOCALIP4%%/'$SYSTEM_LOCALIP4'/g' $CONFIG
+	## Bind to IPv6 if present, disable if not
 	if [ ! -z $NSD_LOCALIP6 ]; then
-		sed -i -e 's/%%NSD_LOCALIP6%%/'$NSD_LOCALIP6'/g' $CONFIG
-		printf 'nsd binding to %s\n' "$NSD_LOCALIP6"
+		sed -i -e 's/%%NSD_LOCALIP6%%/'$SYSTEM_IP6'/g' $CONFIG
 	else
 		sed -i -e '/.*%%NSD_LOCALIP6%%.*/d' $CONFIG
 	fi
+
+	# Set number of servers to start
 	sed -i -e 's/%%NSD_NCPU%%/'$NSD_NCPU'/g' $CONFIG
-	printf 'Starting with %s servers\n' "$NSD_NCPU"
+	# Set root-servers.net transfers	
 	sed -i -e 's/%%LAX_XFR%%/'$LAX_XFR'/g' $CONFIG
-	printf 'Using %s lax.xfr.dns.icann.org for root zones\n' "$LAX_XFR"
 	sed -i -e 's/%%IAD_XFR%%/'$IAD_XFR'/g' $CONFIG
-	printf 'Using %s iad.xfr.dns.icann.org for root zones\n' "$IAD_XFR"
-	printf '\n'
-	printf 'nsd firstboot completed.\n'
-	printf '**********************************************************************\n'
 }
 
 ipaddress
 config
+message

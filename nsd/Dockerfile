@@ -35,12 +35,15 @@ EXPOSE    53/udp
 ADD     [ "application/", "/opt/rootwyrm" ]
 ADD     [ "conf/", "/usr/local/etc/nsd" ]
 ADD     [ "cron/", "/etc/periodic/" ]
+ADD     [ "init.d/", "/etc/init.d/" ]
 
 VOLUME [ "/run" ]
 VOLUME [ "/var/db/nsd" ]
 VOLUME [ "/usr/local/etc/nsd/conf.d" ]
 VOLUME [ "/usr/local/etc/nsd/zones" ]
 
-CMD [ "/sbin/runsvdir", "-P", "/etc/service" ]
+RUN /sbin/rc-update add nsd default
+
+CMD [ "/sbin/init" ]
 
 # vim:sw=4:ts=4:et

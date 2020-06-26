@@ -25,6 +25,8 @@ export vbpkg_content="gcc g++ make libevent-dev openssl-dev protobuf-c-dev fstrm
 export vrpkg="${BUILDNAME}_run"
 export vrpkg_content="curl libevent openssl protobuf-c fstrm bind-tools"
 
+## busybox doesn't support nanoseconds
+export DATEFMT="+%FT%T%z"
 export curl_cmd="/usr/bin/curl --tlsv1.2 -L --silent"
 
 install_runtime()
@@ -32,7 +34,7 @@ install_runtime()
 	######################################################################
 	## Install runtime packages first.
 	######################################################################
-	echo "$(date '+%b %d %H:%M:%S') [${BUILDNAME}] Installing runtime dependencies as $vrpkg"
+	echo "$(date $DATEFMT) [${BUILDNAME}] Installing runtime dependencies as $vrpkg"
 	/sbin/apk --no-cache add --virtual $vrpkg $vrpkg_content > /dev/null 2>&1
 	CHECK_ERROR $? $vrpkg
 }
@@ -42,8 +44,8 @@ install_buildpkg()
 	######################################################################
 	## Install our build packages.
 	######################################################################
-	echo "$(date '+%b %d %H:%M:%S') [${BUILDNAME}] Entering build phase."
-	echo "$(date '+%b %d %H:%M:%S') [${BUILDNAME}] Installing build dependencies as $vbpkg"
+	echo "$(date $DATEFMT) [${BUILDNAME}] Entering build phase."
+	echo "$(date $DATEFMT) [${BUILDNAME}] Installing build dependencies as $vbpkg"
 	/sbin/apk --no-cache add --virtual $vbpkg $vbpkg_content > /dev/null 2>&1 
 	CHECK_ERROR $? $vbpkg
 }
@@ -57,7 +59,7 @@ user()
 
 build()
 {
-	echo "$(date '+%b %d %H:%M:%S') [${BUILDNAME}] Retrieving ${BUILDNAME} ${DISTVER}"
+	echo "$(date $DATEFMT) [${BUILDNAME}] Retrieving ${BUILDNAME} ${DISTVER}"
 	if [ ! -d /usr/local/src ]; then
 		mkdir /usr/local/src
 	fi
@@ -68,7 +70,7 @@ build()
 	rm ${DISTFILE}
 	cd ${BUILDNAME}-${DISTVER}
 
-	echo "$(date '+%b %d %H:%M:%S') [${BUILDNAME}] Configuring..."
+	echo "$(date $DATEFMT) [${BUILDNAME}] Configuring..."
 	## NOTE: Must be extremely explicit with paths for nsd
 	./configure \
 		--with-configdir=/usr/local/etc/nsd \
@@ -78,17 +80,17 @@ build()
 		--enable-ratelimit-default-is-off --enable-dnstap \
 		--enable-tcp-fastopen
 	CHECK_ERROR $? "${BUILDNAME}_configure"
-	echo "$(date '+%b %d %H:%M:%S') [${BUILDNAME}] configure complete."
+	echo "$(date $DATEFMT) [${BUILDNAME}] configure complete."
 
-	echo "$(date '+%b %d %H:%M:%S') [${BUILDNAME}] Building..."
+	echo "$(date $DATEFMT) [${BUILDNAME}] Building..."
 	make 
 	CHECK_ERROR $? "${BUILDNAME}_build"
-	echo "$(date '+%b %d %H:%M:%S') [${BUILDNAME}] Build complete."
+	echo "$(date $DATEFMT) [${BUILDNAME}] Build complete."
 
-	echo "$(date '+%b %d %H:%M:%S') [${BUILDNAME}] Doing install..."
+	echo "$(date $DATEFMT) [${BUILDNAME}] Doing install..."
 	make install
 	CHECK_ERROR $? "${BUILDNAME}_install"
-	echo "$(date '+%b %d %H:%M:%S') [${BUILDNAME}] install complete"
+	echo "$(date $DATEFMT) [${BUILDNAME}] install complete"
 }
 
 clean()
@@ -96,7 +98,7 @@ clean()
 	######################################################################
 	## Clean up after ourselves.
 	######################################################################
-	echo "$(date '+%b %d %H:%M:%S') [${BUILDNAME}] Cleaning up build."
+	echo "$(date $DATEFMT) [${BUILDNAME}] Cleaning up build."
 	make clean
 	cd /root
 	rm -rf /usr/local/src/${BUILDNAME}-${DISTVER}
@@ -111,5 +113,5 @@ user
 build
 clean
 
-echo "$(date '+%b %d %H:%M:%S') [${BUILDNAME}] Build and install of ${DISTVER} complete."
+echo "$(date $DATEFMT) [${BUILDNAME}] Build and install of ${DISTVER} complete."
 exit 0 
