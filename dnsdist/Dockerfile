@@ -36,7 +36,6 @@ EXPOSE	443/tcp
 EXPOSE	8053/tcp
 
 ADD [ "conf/", "/usr/local/etc/dnsdist" ]
-ADD [ "cron/", "/etc/periodic" ]
 
 VOLUME [ "/usr/local/etc/dnsdist/conf.d", "/usr/local/etc/dnsdist/lua", "/usr/local/etc/dnsdist/maps" ]
 
