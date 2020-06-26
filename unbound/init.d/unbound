@@ -1,0 +1,39 @@
+#!/sbin/openrc-run
+supervisor=supervise-daemon
+
+extra_commands="checkconfig configtest"
+extra_started_commands="reload"
+
+name="unbound daemon"
+description="unbound is a high-performance recursing domain name server"
+
+: ${cfgfile:=${UNBOUND_CONFFILE:-/usr/local/etc/unbound/$RC_SVCNAME.conf}}
+
+command="/usr/local/sbin/unbound"
+command_args=""
+command_args="$command_args"
+
+required_files="$cfgfile"
+
+depend() {
+	need net
+	use logger
+	provide dns
+	after entropy
+}
+
+checkconfig() {
+	ebegin "Checking $cfgfile"
+	/usr/local/sbin/unbound-checkconf -f $cfgfile > /dev/null
+	eend $?
+}
+
+start_pre() {
+	/opt/rootwyrm/bin/firstboot
+	if [ $? -ne 0 ]; then
+		exit $?
+	else
+		rm -f /firstboot
+	fi
+	checkconfig
+}

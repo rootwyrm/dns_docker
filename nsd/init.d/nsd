@@ -15,7 +15,7 @@ description_reopen="Reopen NSD log file (for logrotate)"
 : ${cfgfile:=${NSD_CONFIG:-"/usr/local/etc/nsd/nsd.conf"}}  # NSD_CONFIG is for backward compatibility
 
 command="/usr/local/sbin/nsd"
-command_args="-c $cfgfile -d -L /dev/stdout -u nsd ${command_args:-}"
+command_args="-c $cfgfile -l /var/log/nsd.log -u nsd ${command_args:-}"
 command_background="yes"
 pidfile="/run/$RC_SVCNAME.pid"
 start_stop_daemon_args="--wait 50"
@@ -25,14 +25,6 @@ required_files="$cfgfile"
 depend() {
 	need net dcron
 	use logger
-}
-
-start_pre() {
-	/opt/rootwyrm/bin/firstboot
-	if [ $? -ne 0 ]; then
-		exit $RC
-	fi
-    checkconfig
 }
 
 checkconfig() {
@@ -50,6 +42,30 @@ reload() {
 reopen() {
 	ebegin "Reopening $name log file"
 	/usr/local/sbin/nsd-control log_reopen
+	eend $?
+}
+
+start_pre() {
+	/opt/rootwyrm/bin/firstboot
+	if [ $? -ne 0 ]; then
+		exit $RC
+	fi
+    checkconfig
+}
+
+start()
+{
+	ebegin "Starting NSD"
+	$command $command_args
+	eend $?
+}
+	
+stop() {
+	ebegin "Writing out NSD zones" 
+	/usr/local/sbin/nsd-control write > /dev/null
+	eend $?
+	ebegin "Stopping NSD"
+	/usr/local/sbin/nsd-control stop > /dev/null
 	eend $?
 }
 

@@ -32,17 +32,10 @@ EXPOSE    53/tcp
 EXPOSE    53/udp
 
 ## Create common elements
-ADD     [ "application/", "/opt/rootwyrm" ]
 ADD     [ "conf/", "/usr/local/etc/nsd" ]
 ADD     [ "cron/", "/etc/periodic/" ]
-ADD     [ "init.d/", "/etc/init.d/" ]
 
-VOLUME [ "/run" ]
-VOLUME [ "/var/db/nsd" ]
-VOLUME [ "/usr/local/etc/nsd/conf.d" ]
-VOLUME [ "/usr/local/etc/nsd/zones" ]
-
-RUN /sbin/rc-update add nsd default
+VOLUME [ "/var/db/nsd", "/usr/local/etc/nsd/conf.d", "/usr/local/etc/nsd/zones" ]
 
 CMD [ "/sbin/init" ]
 

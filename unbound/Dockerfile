@@ -37,9 +37,8 @@ EXPOSE  853/tcp
 ADD [ "conf/", "/usr/local/etc/unbound" ]
 ADD [ "application/", "/opt/rootwyrm" ]
 
-VOLUME [ "/run" ]
 VOLUME [ "/usr/local/etc/unbound/conf.d" ]
 
-CMD [ "/sbin/runsvdir", "-P", "/etc/service" ]
+CMD [ "/sbin/init" ]
 
 # vim:ts=4:sw=4:et

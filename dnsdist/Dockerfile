@@ -36,13 +36,10 @@ EXPOSE	443/tcp
 EXPOSE	8053/tcp
 
 ADD [ "conf/", "/usr/local/etc/dnsdist" ]
-ADD [ "application", "/opt/rootwyrm" ]
+ADD [ "cron/", "/etc/periodic" ]
 
-VOLUME [ "/run" ]
-VOLUME [ "/usr/local/etc/dnsdist/conf.d" ]
-VOLUME [ "/usr/local/etc/dnsdist/lua" ]
-VOLUME [ "/usr/local/etc/dnsdist/maps" ]
+VOLUME [ "/usr/local/etc/dnsdist/conf.d", "/usr/local/etc/dnsdist/lua", "/usr/local/etc/dnsdist/maps" ]
 
-CMD [ "/sbin/runsvdir", "-P", "/etc/service" ]
+CMD [ "/sbin/init" ]
 
 # vim:ts=4:sw=4:et

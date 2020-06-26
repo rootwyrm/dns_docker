@@ -25,6 +25,8 @@ export vbpkg_content="git gcc g++ make autoconf automake openssl-dev luajit-dev 
 export vrpkg="dnsdist_run"
 export vrpkg_content="curl gettext openssl luajit libedit libsodium boost h2o lmdb libprotobuf libprotoc protoc re2 fstrm" 
 
+## busybox doesn't support nanoseconds
+export DATEFMT="+%FT%T%z"
 export curl_cmd="/usr/bin/curl --tlsv1.2 --cert-status -L --silent"
 	
 ######################################################################
@@ -32,7 +34,7 @@ export curl_cmd="/usr/bin/curl --tlsv1.2 --cert-status -L --silent"
 ######################################################################
 install_runtime()
 {
-	echo "$(date '+%b %d %H:%M:%S') [${BUILDNAME}] Installing runtime dependencies as $vrpkg"
+	echo "$(date $DATEFMT) [${BUILDNAME}] Installing runtime dependencies as $vrpkg"
 	/sbin/apk --no-cache add --virtual $vrpkg $vrpkg_content > /dev/null 2>&1
 	CHECK_ERROR $? $vrpkg
 }
@@ -42,8 +44,8 @@ install_runtime()
 ######################################################################
 install_buildpkg()
 {
-	echo "$(date '+%b %d %H:%M:%S') [${BUILDNAME}] Entering build phase."
-	echo "$(date '+%b %d %H:%M:%S') [${BUILDNAME}] Installing build dependencies as $vbpkg"
+	echo "$(date $DATEFMT) [${BUILDNAME}] Entering build phase."
+	echo "$(date $DATEFMT) [${BUILDNAME}] Installing build dependencies as $vbpkg"
 	/sbin/apk --no-cache add --virtual $vbpkg $vbpkg_content > /dev/null 2>&1 
 	CHECK_ERROR $? $vbpkg
 }
@@ -62,7 +64,7 @@ user()
 ######################################################################
 build()
 {
-	echo "$(date '+%b %d %H:%M:%S') [${BUILDNAME}] Retrieving ${DISTVER}"
+	echo "$(date $DATEFMT) [${BUILDNAME}] Retrieving ${DISTVER}"
 	if [ ! -d /usr/local/src ]; then
 		mkdir /usr/local/src
 	fi
@@ -75,24 +77,24 @@ build()
 	## XXX: Work around a bug.
 	mkdir ibdir
 
-	echo "$(date '+%b %d %H:%M:%S') [${BUILDNAME}] Configuring..."
+	echo "$(date $DATEFMT) [${BUILDNAME}] Configuring..."
 	## Be extremely explicit.
 	./configure --prefix=/usr/local \
 		--with-lua --with-re2 --with-ebpf \
 		--enable-dnstap --enable-dnscrypt --enable-dns-over-tls \
 		--enable-dns-over-https --with-re2
 	CHECK_ERROR $? "dnsdist_configure"
-	echo "$(date '+%b %d %H:%M:%S') [${BUILDNAME}] configure complete."
+	echo "$(date $DATEFMT) [${BUILDNAME}] configure complete."
 
-	echo "$(date '+%b %d %H:%M:%S') [${BUILDNAME}] Building..."
+	echo "$(date $DATEFMT) [${BUILDNAME}] Building..."
 	make 
 	CHECK_ERROR $? "dnsdist_build"
-	echo "$(date '+%b %d %H:%M:%S') [${BUILDNAME}] Build complete."
+	echo "$(date $DATEFMT) [${BUILDNAME}] Build complete."
 
-	echo "$(date '+%b %d %H:%M:%S') [${BUILDNAME}] Doing make install..."
+	echo "$(date $DATEFMT) [${BUILDNAME}] Doing make install..."
 	make install
 	CHECK_ERROR $? "dnsdist_install"
-	echo "$(date '+%b %d %H:%M:%S') [${BUILDNAME}] make install complete"
+	echo "$(date $DATEFMT) [${BUILDNAME}] make install complete"
 }
 
 ######################################################################
@@ -100,7 +102,7 @@ build()
 ######################################################################
 clean()
 {
-	echo "$(date '+%b %d %H:%M:%S') [${BUILDNAME}] Cleaning up build."
+	echo "$(date $DATEFMT) [${BUILDNAME}] Cleaning up build."
 	make clean
 	cd /root
 	rm -rf /usr/local/src/dnsdist-${DISTVER}
@@ -115,5 +117,5 @@ user
 build
 clean
 
-echo "$(date '+%b %d %H:%M:%S') [${BUILDNAME}] Build and install of ${DISTVER} complete."
+echo "$(date $DATEFMT) [${BUILDNAME}] Build and install of ${DISTVER} complete."
 exit 0 

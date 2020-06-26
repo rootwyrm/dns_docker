@@ -26,8 +26,6 @@ LABEL   maintainer="Phillip 'RootWyrm' Jaenke <prj+docker@rootwyrm.com>" \
         org.opencontainers.image.source="%%GITHUB_REPOSITORY%%" \
         org.opencontainers.image.created="%%RW_BUILDDATE%%" 
        
-#COPY [ "service/", "/etc/service" ]
-#COPY [ "runit/", "/etc/runit" ]
 COPY [ "appbase/", "/opt/rootwyrm" ]
 COPY [ "rc.conf", "/etc/rc.conf" ]
 
@@ -45,6 +43,7 @@ RUN mkdir -p /opt/rootwyrm && \
     sed -i -e '/^::ctrlalt*/d' /etc/inittab && \
     sed -i -e '/.*salute$/d' /etc/inittab && \
     /sbin/rc-update add dcron && \
+    ln -s /run /var/run && \
     rm -f /etc/init.d/hw* ; \
     rm -f /etc/init.d/modules ; \
     rm -f /etc/init.d/modules-load ; \
@@ -53,13 +52,14 @@ RUN mkdir -p /opt/rootwyrm && \
     sed -i 's/VSERVER/DOCKER/Ig' /lib/rc/sh/init.sh
 
 ONBUILD ADD [ "application/", "/opt/rootwyrm" ]
-ONBUILD ADD [ "sv/", "/etc/sv" ]
+ONBUILD ADD [ "init.d/", "/etc/init.d" ]
 ONBUILD RUN touch /firstboot && \
-    echo "$(date '+%FT%T.%N%:z') [BUILD] phase beginning..." ; \
+    echo "$(date '+%FT%T%z') [BUILD] phase beginning..." ; \
     for bld in `ls /opt/rootwyrm/build/ | sort`; do \
         /opt/rootwyrm/build/$bld ; \
     done && \
-    echo "$(date '+%FT%T.%N%:z') [BUILD] phase complete..." 
+    echo "$(date '+%FT%T%z') [BUILD] phase complete..." ; \
+    /sbin/rc-update add $(cat /opt/rootwyrm/id.service) default
 
 ENTRYPOINT [ "/sbin/init" ]
 

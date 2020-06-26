@@ -28,6 +28,11 @@ function ipaddress()
 
 function config()
 {
+	if [ -f /firstboot ]; then
+		printf '[dnsdist] Performing initial firstboot tasks.\n'
+		printf '[dnsdist] This may take some time.\n'
+		printf '\n'
+	fi
 	local CONFIG="/usr/local/etc/dnsdist/dnsdist.conf"
 	## Create API key in persistent storage
 	APIKEY="/usr/local/etc/dnsdist/conf.d/api.key"
@@ -41,7 +46,7 @@ function config()
 		DNSDIST_APIKEY=$(cat $APIKEY)
 	fi
 
-	## Always generate a new random password unless doing factory reset 
+	## Generate a new random password when necessary
 	PASSWD="/usr/local/etc/dnsdist/passwd"
 	if [ ! -f $PASSWD ]; then
 		## Use blocking randomness
@@ -53,31 +58,38 @@ function config()
 		DNSDIST_PASSWD=$(cat $PASSWD)
 	fi
 
-	printf '**********************************************************************\n'
-	printf 'System IPv4 Address: %s\n' "$SYSTEM_LOCALIP4"
-	if [ ! -z $SYSTEM_LOCALIP6 ]; then
-		printf 'System IPv6 Address: %s\n' "$SYSTEM_LOCALIP6"
-	fi
 	## Insert IP addresses
 	sed -i -e 's/%%DNSDIST_LOCALIP4%%/'$DNSDIST_LOCALIP4'/g' $CONFIG
-	printf 'dnsdist binding to %s\n' "$DNSDIST_LOCALIP4"
 	## Insert IPv6 if present, delete if absent
 	if [ ! -z $DNSDIST_LOCALIP6 ]; then
 		sed -i -e 's/%%DNSDIST_LOCALIP6%%/'$DNSDIST_LOCALIP6'/g' $CONFIG
-		printf 'dnsdist binding to %s\n' "$DNSDIST_LOCALIP6"
 	else
 		sed -i -e '/.*%%DNSDIST_LOCALIP6%%.*/d' $CONFIG
 	fi
 	## API key
 	sed -i -e 's/%%DNSDIST_APIKEY%%/'$DNSDIST_APIKEY'/g' $CONFIG
-	printf 'dnsdist API Key: %s\n' "$DNSDIST_APIKEY"
 	## Password
 	sed -i -e 's/%%DNSDIST_PASSWD%%/'$DNSDIST_PASSWD'/g' $CONFIG
-	printf 'dnsdist Web Password: admin:%s\n' "$DNSDIST_PASSWD"
-	printf '**********************************************************************\n'
-	printf '[dnsdist] firstboot tasks complete.\n'
 }
 
-printf '[dnsdist] Performing firstboot tasks...\n'
+function message()
+{
+	printf '**********************************************************************\n'
+	printf 'System IPv4 Address %s\n' "$SYSTEM_LOCALIP4"
+	if [ ! -z $SYSTEM_LOCALIP6 ]; then
+		printf 'System IPv6 Address: %s\n' "$SYSTEM_LOCALIP6"
+	fi
+	printf '\n'
+	printf 'dnsdist binding to %s\n' "$SYSTEM_LOCALIP4"
+	if [ ! -z $SYSTEM_LOCALIP6 ]; then
+		printf 'dnsdist binding to %s\n' "$SYSTEM_LOCALIP6"
+	fi
+	printf '\n'
+	printf 'dnsdist API Key: %s\n' "$DNSDIST_APIKEY"
+	printf 'dnsdist Web Password: admin:%s\n' "$DNSDIST_PASSWD"
+	printf '**********************************************************************\n'
+}
+
 ipaddress
 config
+message

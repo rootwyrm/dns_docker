@@ -1,0 +1,131 @@
+#!/usr/bin/env bash
+################################################################################
+# Copyright (C) 2020-* Phillip R. Jaenke <prj+docker@rootwyrm.com>
+# All rights reserved
+#
+# CC-BY-NC-3.0
+# See /LICENSE for details
+################################################################################
+
+
+function ipaddress()
+{
+	export SYSTEM_LOCALIP4=$(hostname -i)
+	if [ -z $SYSTEM_LOCALIP4 ]; then
+		printf 'FATAL: Could not determine system IP! Shutting down.\n'
+		exit 1
+	fi
+	
+	export SYSTEM_LOCALIP6=$(ifconfig eth0 | grep inet6 | grep -v Link | awk '{print $3}')
+	if [[ $SYSTEM_LOCALIP6 == '' ]]; then
+		unset SYSTEM_LOCALIP6
+	fi
+}
+
+# Generate TLS session keys	every start.
+function session_regenerate()
+{
+	printf '[unbound] Regenerating TLS Session Ticket Keys... '
+	dd if=/dev/random bs=1 count=80 of=/usr/local/etc/unbound/tls_secret0.key > /dev/null 2>&1
+	KEYR0=$?
+	dd if=/dev/random bs=1 count=80 of=/usr/local/etc/unbound/tls_secret1.key > /dev/null 2>&1
+	KEYR1=$?
+	dd if=/dev/random bs=1 count=80 of=/usr/local/etc/unbound/tls_secret2.key > /dev/null 2>&1
+	KEYR2=$?
+	if [ $KEYR0 != 0 ] || [ $KEYR1 != 0 ] || [ $KEYR2 != 0 ]; then
+		printf 'FAILED!\n'
+	else
+		printf '[ok]\n'
+	fi
+}
+
+function config()
+{
+	local CONFIG="/usr/local/etc/unbound/unbound.conf"
+
+	## Run ncpu servers up to a maximum 8 - %%UNBOUND_NCPU%%
+	local cpucount=$(cat /proc/cpuinfo | grep ^processor | wc -l)
+	if [[ $cpucount -gt 8 ]]; then
+		UNBOUND_NCPU=8
+	## Run a minimum of 2 threads
+	elif [[ $cpucount -le 2 ]]; then
+		UNBOUND_NCPU=2
+	else
+		UNBOUND_NCPU=$cpucount
+	fi
+
+	## Perform TLS Session key regeneration early on	
+	session_regenerate
+
+	## Symlink system certificates
+	if [ ! -s /usr/local/etc/unbound/ca-certificates.crt ]; then
+		ln -s /etc/ssl/certs/ca-certificates.crt /usr/local/etc/unbound/ca-certificates.crt
+	fi
+	
+	printf '[unbound] Updating root anchors...'
+	if [ ! -f /usr/local/etc/unbound/root.key ]; then
+		/usr/local/sbin/unbound-anchor
+		## Returns 1 if /usr/local/etc/unbound/root.key doesn't exist
+		if [ $? -eq 0 ] || [ $? -eq 1 ]; then
+			printf '[ok]\n'
+		else
+			printf '[ERROR %s]\n' "$?"
+		fi
+	fi
+
+	## Generate keys and fix permissions
+	if [ ! -f /usr/local/etc/unbond/unbound_server.key ]; then
+		printf '[unbound] Setting up remote control keys... '
+		/usr/local/sbin/unbound-control-setup > /dev/null 2>&1
+		if [ $? -eq 0 ]; then
+			printf '[ok]\n'
+			export REMOTE_CONTROL=1
+		else
+			printf '[ERROR %s]\n' "$?"
+		fi
+	else
+		export REMOTE_CONTROL=1
+	fi
+
+	if [ -f /firstboot ]; then
+		## Insert IP addresses
+		sed -i -e 's/%%UNBOUND_LOCALIP4%%/'$SYSTEM_LOCALIP4'/g' $CONFIG
+		## Insert IPv6 if present, delete if absent
+		if [ ! -z $SYSTEM_LOCALIP6 ]; then
+			sed -i -e 's/%%UNBOUND_LOCALIP6%%/'$SYSTEM_LOCALIP6'/g' $CONFIG
+		else
+			sed -i -e '/.*%%UNBOUND_LOCALIP6%%.*/d' $CONFIG
+		fi
+		sed -i -e 's/%%UNBOUND_NCPU%%/'$UNBOUND_NCPU'/g' $CONFIG
+	fi
+	
+	## Fix permissions 
+	chown -R unbound:unbound /usr/local/etc/unbound
+
+	## Prevent rerun
+	rm -f /firstboot
+}
+
+function message()
+{
+	printf '**********************************************************************\n'
+	printf 'System IPv4 Address: %s\n' "$SYSTEM_LOCALIP4"
+	if [ ! -z $SYSTEM_LOCALIP6 ]; then
+		printf 'System IPv6 Address: %s\n' "$SYSTEM_LOCALIP6"
+	fi
+	printf '\n'
+	printf 'unbound binding to %s\n' "$SYSTEM_LOCALIP4"
+	if [ ! -z $SYSTEM_LOCALIP6 ]; then
+		printf 'unbound binding to %s\n' "$SYSTEM_LOCALIP6"
+	fi
+	printf 'unbound starting with %s threads\n' "$UNBOUND_NCPU"
+	if [ ! -z $REMOTE_CONTROL ]; then
+		printf 'Remote Control is enabled on localhost:8953\n'
+	fi
+	printf '\n'
+	printf '**********************************************************************\n'
+}
+
+ipaddress
+config
+message

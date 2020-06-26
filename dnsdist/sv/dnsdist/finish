@@ -1,9 +1,0 @@
-#!/bin/sh
-## dnsdist
-
-echo "Stopping dnsdist..."
-echo " "
-
-for x in `ps auxww | grep dnsdist | grep -v grep | awk '{print $1}'`; do
-	kill -9 $x
-done

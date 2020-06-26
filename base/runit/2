@@ -1,7 +1,0 @@
-#!/bin/sh
-
-PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin
-
-echo "Starting dns_docker..."
-exec env - PATH=$PATH \
-	runsvdir -P /etc/service
