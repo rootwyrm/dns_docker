@@ -22,9 +22,9 @@ services:
       - /run
       - /tmp
     volumes:
-      - "/opt/rootwyrm/dnsdist:/usr/local/etc/dnsdist/conf.d"
-      - "/opt/rootwyrm/dnsdist/lua:/usr/local/etc/dnsdist/lua"
-      - "/opt/rootwyrm/dnsdist/maps:/usr/local/etc/dnsdist/maps"
+      - "/opt/rootwyrm/etc/dnsdist:/usr/local/etc/dnsdist/conf.d"
+      - "/opt/rootwyrm/etc/dnsdist/lua:/usr/local/etc/dnsdist/lua"
+      - "/opt/rootwyrm/etc/dnsdist/maps:/usr/local/etc/dnsdist/maps"
     cap_add:
       - NET_ADMIN
       - NET_BIND_SERVICE
