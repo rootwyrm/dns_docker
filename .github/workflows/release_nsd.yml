@@ -1,0 +1,83 @@
+## nsd
+name: Release Build - nsd
+on:
+  push:
+    branches:
+      - master
+      - release/*
+    tags:
+      - v1*
+    paths:
+      - 'nsd/**'
+  pull_request:
+    branches:
+      - master
+      - release/*
+    tags:
+      - v1*
+    paths:
+      - 'nsd/**'
+  repository_dispatch:
+    types: [ nsd ]
+
+## Rebuild
+jobs:
+  nsd:
+    strategy:
+      matrix:
+        platform: [ amd64, 386, arm64, arm/v7 ]
+    name: Build nsd/${{ github.ref }}-${{ matrix.platform }}
+    runs-on: ubuntu-20.04
+    env:
+      CONTAINER: nsd
+      BINFMT: a7996909642ee92942dcd6cff44b9b95f08dad64
+    steps:
+    - name: Check out from ${{ github.ref }} 
+      id: checkout
+      uses: actions/checkout@v2
+    - name: Run pre-build hooks
+      id: hooks
+      run: |
+        $GITHUB_WORKSPACE/ci/hooks/pre_build
+    - name: Set up build environment
+      id: buildenv
+      run: |
+        docker run --rm --privileged docker/binfmt:$BINFMT
+        docker buildx create --name rootwyrm --use
+    - name: Build for ${{ matrix.platform }}
+      run: |
+        PLATFORM_TAG=$(echo ${{ matrix.platform }} | sed -e 's,/,,g')
+        VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+        [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
+        [ "$VERSION" == "master" ] && VERSION=latest
+        docker login -u ${{ secrets.HUB_USER }} -p ${{ secrets.HUB_TOKEN }}
+        docker buildx build --platform linux/${{ matrix.platform }} \
+        --tag rootwyrm/$CONTAINER:$VERSION-$PLATFORM_TAG \
+        --pull --push $CONTAINER
+  nsd_package:
+    needs: nsd
+    name: Package and ship nsd
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Check out from ${{ github.ref }}
+        uses: actions/checkout@v2
+      - name: Install manifest-tool
+        run: |
+          ${GITHUB_WORKSPACE}/ci/tools/install.manifest-tool.sh
+      ## Doesn't print correctly due to python3 flux. 
+      - name: Assemble and push manifest
+        run: |
+          PLATFORM_TAG=$(echo ${{ matrix.platform }} | sed -e 's,/,,g')
+          VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+          [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
+          [ "$VERSION" == "master" ] && VERSION=latest
+          docker login -u ${{ secrets.HUB_USER }} -p ${{ secrets.HUB_TOKEN }}
+          ${GITHUB_WORKSPACE}/ci/manifest-tool push from-args \
+          --platforms linux/amd64,linux/386,linux/arm64,linux/arm/v7 \
+          --template rootwyrm/nsd-ARCHVARIANT:${{ github.ref }} \
+        --target rootwyrm/nsd:${{ github.ref }}
+#      - name: Run manifest cleaning tool
+#        run: |
+#          ${GITHUB_WORKSPACE}/ci/tools/manifest_clean.py -u ${{ secrets.HUB_USER }} -p ${{ secrets.HUB_TOKEN }} -c nsd -t ${GITHUB_WORKSPACE}/nsd/tags
+
+# vim:ts=2:sw=2:et

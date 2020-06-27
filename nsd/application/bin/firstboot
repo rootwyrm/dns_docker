@@ -7,20 +7,7 @@
 # See /LICENSE for details
 ################################################################################
 
-
-function ipaddress()
-{
-	export SYSTEM_LOCALIP4=$(hostname -i)
-	if [ -z $SYSTEM_LOCALIP4 ]; then
-		printf 'FATAL: Could not determine system IP!\n'
-		exit 1
-	fi
-	
-	export SYSTEM_LOCALIP6=$(ifconfig eth0 | grep inet6 | grep -v Link | awk '{print $3}')
-	if [[ $SYSTEM_LOCALIP6 == '' ]]; then
-		unset SYSTEM_LOCALIP6
-	fi
-}
+. /opt/rootwyrm/lib/deploy.lib.sh
 
 function message()
 {
@@ -39,8 +26,16 @@ function message()
 		printf 'nsd control socket listening at /run/nsd.control.sock\n'
 	fi
 	printf 'Starting with %s servers\n' "$NSD_NCPU"
-	printf 'Using %s lax.xfr.dns.icann.org for root zones\n' "$LAX_XFR"
-	printf 'Using %s lax.xfr.dns.icann.org for root zones\n' "$LAX_XFR"
+	if [ ! -z $LAX_XFR ]; then
+		printf 'Using %s lax.xfr.dns.icann.org for root zones\n' "$LAX_XFR"
+	else
+		printf 'lax.xfr.dns.icann.org configured for root zones\n'
+	fi
+	if [ ! -z $IAD_XFR ]; then
+		printf 'Using %s lax.xfr.dns.icann.org for root zones\n' "$LAX_XFR"
+	else
+		printf 'iad.xfr.dns.icann.org configured for root zones\n'
+	fi
 	printf '**********************************************************************\n'
 }
 
@@ -50,26 +45,47 @@ function config()
 	local CFGDIR="/usr/local/etc/nsd"
 
 	## Run ncpu servers up to a maximum 16 - %%NSD_NCPU%%
-	local cpucount=$(cat /proc/cpuinfo | grep ^processor | wc -l)
-	if [[ $cpucount -gt 16 ]]; then
-		NSD_NCPU=16
-	elif [[ $cpucount -le 2 ]]; then
-		NSD_NCPU=2
+	grep '%%NSD_NCPU%%' $CONFIG > /dev/null
+	if [ $? -eq 1 ]; then
+		NSD_NCPU=$(cat $CONFIG | grep server-count | awk '{print $2}')
 	else
-		NSD_NCPU=$(($cpucount))
+		local cpucount=$(cat /proc/cpuinfo | grep ^processor | wc -l)
+		if [[ $cpucount -gt 16 ]]; then
+			NSD_NCPU=16
+		elif [[ $cpucount -le 2 ]]; then
+			NSD_NCPU=2
+		else
+			NSD_NCPU=$(($cpucount))
+		fi
+		# Set number of servers to start
+		sed -i -e 's/%%NSD_NCPU%%/'$NSD_NCPU'/g' $CONFIG
 	fi
 
-	## Don't trust the local resolver for these. Ever.
-	## This doesn't abuse PCH, because these are one-time lookups.
-	LAX_XFR=$(host -t A lax.xfr.dns.icann.org 9.9.9.9 | grep address | awk '{print $4}')
-	if [ -z $LAX_XFR ] || [ $LAX_XFR = "" ]; then
-		printf 'Could not resolve lax.xfr.dns.icann.org via PCH, aborting!\n'
-		exit 1
+	########################################
+	## lax.xfr.dns.icann.org
+	grep '%%LAX_XFR%%' $CONFIG > /dev/null
+	if [ $? -eq 0 ]; then
+		## Don't trust the local resolver for these. Ever.
+		## This doesn't abuse PCH, because these are one-time lookups.
+		LAX_XFR=$(host -t A lax.xfr.dns.icann.org 9.9.9.9 | grep address | awk '{print $4}')
+		if [ -z $LAX_XFR ] || [ $LAX_XFR = "" ]; then
+			printf 'Could not resolve lax.xfr.dns.icann.org via PCH, aborting!\n'
+			exit 1
+		fi
+		# Set root-servers.net transfers	
+		sed -i -e 's/%%LAX_XFR%%/'$LAX_XFR'/g' $CONFIG
 	fi
-	IAD_XFR=$(host -t A iad.xfr.dns.icann.org 9.9.9.9 | grep address | awk '{print $4}')
-	if [ -z $IAD_XFR ] || [ $IAD_XFR = "" ]; then
-		printf 'Could not resolve iad.xfr.dns.icann.org via PCH, aborting!\n'
-		exit 1
+	########################################
+	## iad.xfr.dns.icann.org
+	grep '%%IAD_XFR%%' $CONFIG > /dev/null
+	if [ $? -eq 0 ]; then
+		IAD_XFR=$(host -t A iad.xfr.dns.icann.org 9.9.9.9 | grep address | awk '{print $4}')
+		if [ -z $IAD_XFR ] || [ $IAD_XFR = "" ]; then
+			printf 'Could not resolve iad.xfr.dns.icann.org via PCH, aborting!\n'
+			exit 1
+		fi
+		# Set root-servers.net transfers	
+		sed -i -e 's/%%IAD_XFR%%/'$IAD_XFR'/g' $CONFIG
 	fi
 
 	## Fix permissions
@@ -97,17 +113,11 @@ function config()
 		sed -i -e '/.*%%NSD_LOCALIP6%%.*/d' $CONFIG
 	fi
 
-	# Set number of servers to start
-	sed -i -e 's/%%NSD_NCPU%%/'$NSD_NCPU'/g' $CONFIG
-	# Set root-servers.net transfers	
-	sed -i -e 's/%%LAX_XFR%%/'$LAX_XFR'/g' $CONFIG
-	sed -i -e 's/%%IAD_XFR%%/'$IAD_XFR'/g' $CONFIG
-	
-	## Fix permissions	
+	## Fix permissions on every start
 	chown -R nsd:nsd /var/db/nsd
 	chown -R nsd:nsd /usr/local/etc/nsd
 }
 
-ipaddress
+IPADDRESS
 config
 message
