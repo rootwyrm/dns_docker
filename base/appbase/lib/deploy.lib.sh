@@ -8,7 +8,8 @@
 export chkfile="/firstboot"
 export svcdir="/etc/service"
 
-CHECK_ERROR()
+## Generic CHECK_ERROR function
+function CHECK_ERROR()
 {
 	if [ $1 -ne 0 ]; then
 		RC=$1
@@ -19,6 +20,32 @@ CHECK_ERROR()
 			echo "[FATAL] Error occurred in $2 : $1"
 			exit $RC
 		fi
+	fi
+}
+
+## Ingest the environment
+function ingest_environment()
+{
+	if [ -s /.dockerenv ]; then
+		. /.dockerenv
+	fi
+	if [ -s /.dockerinit ]; then
+		. /.dockerinit
+	fi
+}
+
+## Get system IP address function
+function IPADDRESS()
+{
+	export SYSTEM_LOCALIP4=$(hostname -i)
+	if [ ! -z $SYSTEM_LOCALIP4 ]; then
+		printf 'FATAL: Could not determine system IP! Shutting down.\n'
+		exit 1
+	fi
+	
+	export SYSTEM_LOCALIP6=$(ifconfig eth0 | grep inet6 | grep -v Link | awk '{print $3}')
+	if [[ $SYSTEM_LOCALIP6 == '' ]]; then
+		unset SYSTEM_LOCALIP6
 	fi
 }
 
@@ -34,16 +61,6 @@ test_deploy()
 		elif [ -f "$chkfile".conf ]; then
 			. "$chkfile".conf
 		fi
-	fi
-}
-
-ingest_environment()
-{
-	if [ -s /.dockerenv ]; then
-		. /.dockerenv
-	fi
-	if [ -s /.dockerinit ]; then
-		. /.dockerinit
 	fi
 }
 
@@ -63,6 +80,25 @@ deploy_complete()
 ######################################################################
 ## MOTD and Version Information
 ######################################################################
+function system_version()
+{
+	if [ -f /opt/rootwyrm/release ]; then
+		export SYSTEM_RELEASE=$(cat /opt/rootwyrm/release)
+	else
+		export SYSTEM_RELEASE="unknown"
+	fi
+}
+
+function software_version()
+{
+	if [ -f /opt/rootwyrm/id.service ]; then
+		verfile=/opt/rootwyrm/$(cat /opt/rootwyrm/id.service).version
+	fi
+	if [ -f $verfile ]; then
+		export SWVERSION=$(cat $verfile)
+	fi
+}
+
 generate_motd()
 {
 	baserel="R0V0U0.0000"
@@ -136,24 +172,4 @@ deploy_application_git()
 
 ## NYI: update_application_git
 
-######################################################################
-## runit functions
-######################################################################
-runit_linksv()
-{
-	if [ -z $1 ] && [ -z $app_svname ]; then
-		echo "[FATAL] runit_linksv() called with no arguments."
-	elif [ -d /etc/sv/$app_svname ]; then
-		ln -s /etc/sv/$app_svname /etc/service
-		if [ $? -ne 0 ]; then
-			echo "[FATAL] Failed to install $app_svname in runit."
-			exit 1
-		fi
-	elif [ -d /etc/sv/$1 ]; then
-		ln -s /etc/sv/$1 /etc/service
-		if [ $? -ne 0 ]; then
-			echo "[FATAL] Failed to install $1 in runit."
-			exit 1
-		fi
-	fi
-}
+# vim:ft=sh:ts=4:sw=4
