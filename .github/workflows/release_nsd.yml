@@ -18,7 +18,7 @@ on:
     paths:
       - 'nsd/**'
   repository_dispatch:
-    types: [ nsd ]
+    types: [ test_nsd ]
 
 ## Rebuild
 jobs:
@@ -75,7 +75,7 @@ jobs:
           ${GITHUB_WORKSPACE}/ci/manifest-tool push from-args \
           --platforms linux/amd64,linux/386,linux/arm64,linux/arm/v7 \
           --template rootwyrm/nsd-ARCHVARIANT:${{ github.ref }} \
-        --target rootwyrm/nsd:${{ github.ref }}
+          --target rootwyrm/nsd:${{ github.ref }}
 #      - name: Run manifest cleaning tool
 #        run: |
 #          ${GITHUB_WORKSPACE}/ci/tools/manifest_clean.py -u ${{ secrets.HUB_USER }} -p ${{ secrets.HUB_TOKEN }} -c nsd -t ${GITHUB_WORKSPACE}/nsd/tags
