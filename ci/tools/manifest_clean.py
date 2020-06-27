@@ -59,7 +59,7 @@ def hub_tag_delete(args,token):
     for tag in list(tagfile):
         print("Deleting %s" % args.container, ":%s - " % tag, sep=None, end='')
         target = f"{url_base}/{tag}"
-        tag_delete = requests.delete(target, data='', headers=headers)
+        tag_delete = requests.delete(target.strip('\n'), data='', headers=headers)
         if tag_delete.status_code == 204:
             print("deleted.")
         elif tag_delete.status_code == 202:

@@ -49,14 +49,14 @@ function config()
 	local CONFIG="/usr/local/etc/nsd/nsd.conf"
 	local CFGDIR="/usr/local/etc/nsd"
 
-	## Run ncpu/2 servers up to a maximum 4 - %%NSD_NCPU%%
+	## Run ncpu servers up to a maximum 16 - %%NSD_NCPU%%
 	local cpucount=$(cat /proc/cpuinfo | grep ^processor | wc -l)
-	if [[ $cpucount -gt 4 ]]; then
-		NSD_NCPU=4
+	if [[ $cpucount -gt 16 ]]; then
+		NSD_NCPU=16
 	elif [[ $cpucount -le 2 ]]; then
 		NSD_NCPU=2
 	else
-		NSD_NCPU=$(($cpucount/2))
+		NSD_NCPU=$(($cpucount))
 	fi
 
 	## Don't trust the local resolver for these. Ever.
@@ -74,17 +74,19 @@ function config()
 
 	## Fix permissions
 	if [ ! -f $CFGDIR/nsd_control.key ] || [ ! -f $CFGDIR/nsd_control.pem ] || [ ! -f $CFGDIR/nsd_server.key ] || [ ! -f $CFGDIR/nsd_server.pem ]; then
-		/usr/local/sbin/nsd-control-setup
+		printf '[nsd] Setting up remote control keys...'
+		/usr/local/sbin/nsd-control-setup > /dev/null 2>&1
 		if [ $? -ne 0 ]; then
-			exit $?
+			RC=$?
+			printf '[ERROR] $RC'
+			exit $RC
 		else
+			printf ' [ok]\n'
 			export CONTROL_SETUP=1
 		fi
 	else
 		export CONTROL_SETUP=1
 	fi
-	chown -R nsd:nsd /var/db/nsd
-	chown -R nsd:nsd /usr/local/etc/nsd
 
 	## Bind to the IPv4 address
 	sed -i -e 's/%%NSD_LOCALIP4%%/'$SYSTEM_LOCALIP4'/g' $CONFIG
@@ -100,6 +102,10 @@ function config()
 	# Set root-servers.net transfers	
 	sed -i -e 's/%%LAX_XFR%%/'$LAX_XFR'/g' $CONFIG
 	sed -i -e 's/%%IAD_XFR%%/'$IAD_XFR'/g' $CONFIG
+	
+	## Fix permissions	
+	chown -R nsd:nsd /var/db/nsd
+	chown -R nsd:nsd /usr/local/etc/nsd
 }
 
 ipaddress

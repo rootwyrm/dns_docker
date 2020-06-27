@@ -9,3 +9,7 @@ dnsdist has a very specific volume layout in order to support complex configurat
 * conf.d/ - base configuration overrides (e.g. listen, ACLs, web UI)
 * lua/ - any standalone Lua programs or snippets must go in this directory
 * maps/ - all response mappings (e.g. rate-limits, specific redirects, etc.)
+
+## Future Features
+1.6.0 will add support for DoH/DoT endpoints. 
+This did not make it into 1.5.0.
