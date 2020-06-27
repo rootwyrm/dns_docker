@@ -4,13 +4,13 @@ on:
   push:
     branches: [ master ]
     paths:
-      - 'base/*'
+      - 'base/**'
   pull_request:
     branches: [ master ]
     paths:
-      - 'base/*'
+      - 'base/**'
   repository_dispatch:
-    types: [ mdsdJlPE ]
+    types: [ base ]
 
 ## Rebuild
 jobs:
