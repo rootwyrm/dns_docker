@@ -74,7 +74,7 @@ jobs:
           docker login -u ${{ secrets.HUB_USER }} -p ${{ secrets.HUB_TOKEN }}
           ${GITHUB_WORKSPACE}/ci/manifest-tool push from-args \
           --platforms linux/amd64,linux/386,linux/arm64,linux/arm/v7 \
-          --template rootwyrm/nsd-ARCHVARIANT:$VERSION \
+          --template rootwyrm/nsd:$VERSION-ARCHVARIANT \
           --target rootwyrm/nsd:$VERSION
 #      - name: Run manifest cleaning tool
 #        run: |
