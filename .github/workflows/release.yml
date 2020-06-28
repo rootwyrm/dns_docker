@@ -1,16 +1,21 @@
-## Full crossbuild
+################################################################################
+## Full release build.
+## Do these as pure crossbuilds to minimize the headaches, and due to 
+## the builds occurring less frequently.
+################################################################################
+
 name: Build - All
 on:
   push:
     branches:
-      - release
+      - release/*
     tags:
-      - v1.0.0
+      - v1*
   pull_request:
     branches:
-      - release
+      - release/*
     tags:
-      - v1.0.0
+      - v1*
   pull_request_review:
     types: [ submitted, edited ]
   repository_dispatch:
@@ -42,25 +47,26 @@ jobs:
       id: buildenv
       run: |
         docker run --rm --privileged docker/binfmt:$BINFMT
-        docker buildx create --name rootwyrm --use
+        docker buildx create --name dns_docker --use
     - name: Build for platforms
       run: |
+        PLATFORM_TAG=$(echo ${{ matrix.platform }} | sed -e 's,/,,g')
+        VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+        [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
+        [ "$VERSION" == "master" ] && VERSION=latest
         docker login -u ${{ secrets.HUB_USER }} -p ${{ secrets.HUB_TOKEN }}
         docker buildx build --platform $PLATFORM --pull --push \
-        --tag $RW_TAG:latest \
+        --tag $RW_TAG:$VERSION \
         $CONTAINER 
-
 ################################################################################
 # Consumers
 ################################################################################
   nsd:
     needs: base
-    strategy:
-      matrix:
-        platform: [ linux/amd64, linux/386, linux/arm64, linux/arm/v7 ]
     env: 
       CONTAINER: nsd
       BINFMT: a7996909642ee92942dcd6cff44b9b95f08dad64
+      PLATFORM: "linux/amd64,linux/386,linux/arm64,linux/arm/v7"
     name: nsd - ${{ matrix.platform }}
     runs-on: ubuntu-20.04
     steps:
@@ -75,19 +81,19 @@ jobs:
       id: buildenv
       run: |
         docker run --rm --privileged docker/binfmt:$BINFMT
-        docker buildx create --name rootwyrm --use
+        docker buildx create --name dns_docker --use
     - name: Build nsd - ${{ matrix.platform }}
       run: |
+        PLATFORM_TAG=$(echo ${{ matrix.platform }} | sed -e 's,/,,g')
+        VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+        [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
+        [ "$VERSION" == "master" ] && VERSION=latest
         docker login -u ${{ secrets.HUB_USER }} -p ${{ secrets.HUB_TOKEN }}
-        PLATFORM_TAG=$(echo ${{ matrix.platform }} | sed -e 's,linux/,,' | sed -e 's,/,,g')
-        docker buildx build --platform ${{ matrix.platform }} \
-        --tag rootwyrm/$CONTAINER:$PLATFORM_TAG \
-        --pull --push $CONTAINER
+        docker buildx build --platform $PLATFORM --pull --push \
+        --tag rootwyrm/$CONTAINER:$VERSION \
+        $CONTAINER
   unbound:
     needs: base
-    strategy:
-      matrix:
-        platform: [ linux/amd64, linux/386, linux/arm64, linux/arm/v7 ]
     env: 
       CONTAINER: unbound
       BINFMT: a7996909642ee92942dcd6cff44b9b95f08dad64
@@ -105,19 +111,19 @@ jobs:
       id: buildenv
       run: |
         docker run --rm --privileged docker/binfmt:$BINFMT
-        docker buildx create --name rootwyrm --use
+        docker buildx create --name dns_docker --use
     - name: Build unbound - ${{ matrix.platform }}
       run: |
+        PLATFORM_TAG=$(echo ${{ matrix.platform }} | sed -e 's,/,,g')
+        VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+        [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
+        [ "$VERSION" == "master" ] && VERSION=latest
         docker login -u ${{ secrets.HUB_USER }} -p ${{ secrets.HUB_TOKEN }}
-        PLATFORM_TAG=$(echo ${{ matrix.platform }} | sed -e 's,linux/,,' | sed -e 's,/,,g')
-        docker buildx build --platform ${{ matrix.platform }} \
-        --tag rootwyrm/$CONTAINER:$PLATFORM_TAG \
-        --pull --push $CONTAINER
+        docker buildx build --platform $PLATFORM --pull --push \
+        --tag rootwyrm/$CONTAINER:$VERSION \
+        $CONTAINER
   dnsdist:
     needs: base
-    strategy:
-      matrix:
-        platform: [ linux/amd64, linux/386, linux/arm64, linux/arm/v7 ]
     env: 
       CONTAINER: dnsdist
       BINFMT: a7996909642ee92942dcd6cff44b9b95f08dad64
@@ -135,67 +141,16 @@ jobs:
       id: buildenv
       run: |
         docker run --rm --privileged docker/binfmt:$BINFMT
-        docker buildx create --name rootwyrm --use
+        docker buildx create --name dns_docker --use
     - name: Build dnsdist - ${{ matrix.platform }}
       run: |
+        PLATFORM_TAG=$(echo ${{ matrix.platform }} | sed -e 's,/,,g')
+        VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+        [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
+        [ "$VERSION" == "master" ] && VERSION=latest
         docker login -u ${{ secrets.HUB_USER }} -p ${{ secrets.HUB_TOKEN }}
-        PLATFORM_TAG=$(echo ${{ matrix.platform }} | sed -e 's,linux/,,' | sed -e 's,/,,g')
-        docker buildx build --platform ${{ matrix.platform }} \
-        --tag rootwyrm/$CONTAINER:$PLATFORM_TAG \
-        --pull --push $CONTAINER
-
-################################################################################
-# Packagers
-################################################################################
-  nsd_package:
-    needs: nsd
-    name: Package nsd
-    runs-on: ubuntu-20.04
-    steps:
-      - name: Check out from ${{ github.ref }}
-        uses: actions/checkout@v2
-        with:
-          submodules: true
-      - name: Ship nsd manifest
-        run: |
-          docker login -u ${{ secrets.HUB_USER }} -p ${{ secrets.HUB_TOKEN }}
-          ${GITHUB_WORKSPACE}/ci/tools/manifest.sh nsd
-          docker logout
-      - name: Run manifest cleaning tool
-        run: |
-          ${GITHUB_WORKSPACE}/ci/tools/manifest_clean.py -u ${{ secrets.HUB_USER }} -p ${{ secrets.HUB_TOKEN }} -c nsd -t ${GITHUB_WORKSPACE}/nsd/tags
-  unbound_package:
-    needs: unbound
-    name: Package and ship unbound
-    runs-on: ubuntu-20.04
-    steps:
-      - name: Check out from ${{ github.ref }}
-        uses: actions/checkout@v2
-        with:
-          submodules: true
-      - name: Ship unbound manifest
-        run: |
-          docker login -u ${{ secrets.HUB_USER }} -p ${{ secrets.HUB_TOKEN }}
-          ${GITHUB_WORKSPACE}/ci/tools/manifest.sh unbound
-          docker logout
-      - name: Run manifest cleaning tool
-        run: |
-          ${GITHUB_WORKSPACE}/ci/tools/manifest_clean.py -u ${{ secrets.HUB_USER }} -p ${{ secrets.HUB_TOKEN }} -c unbound -t ${GITHUB_WORKSPACE}/unbound/tags
-  dnsdist_package:
-    needs: dnsdist
-    name: Package and ship dnsdist
-    runs-on: ubuntu-20.04
-    steps:
-      - name: Check out from ${{ github.ref }}
-        uses: actions/checkout@v2
-        with:
-          submodules: true
-      - name: Ship dnsdist manifest
-        run: |
-          docker login -u ${{ secrets.HUB_USER }} -p ${{ secrets.HUB_TOKEN }}
-          ${GITHUB_WORKSPACE}/ci/tools/manifest.sh dnsdist
-      - name: Run manifest cleaning tool
-        run: |
-          ${GITHUB_WORKSPACE}/ci/tools/manifest_clean.py -u ${{ secrets.HUB_USER }} -p ${{ secrets.HUB_TOKEN }} -c dnsdist -t ${GITHUB_WORKSPACE}/dnsdist/tags
+        docker buildx build --platform $PLATFORM --pull --push \
+        --tag rootwyrm/$CONTAINER:$VERSION \
+        $CONTAINER
 
 # vim:ts=2:sw=2:et
