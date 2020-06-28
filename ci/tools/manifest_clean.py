@@ -1,4 +1,4 @@
-#!/usr/bin/env python3.8
+#!/usr/bin/env python3
 
 import sys, os
 from argparse import ArgumentParser
@@ -6,7 +6,7 @@ import requests
 import json
 
 def hub_login(args):
-    print("Logging in to hub.docker.com...", end='')
+    print("Logging in to hub.docker.com... ", end='')
     headers = {
         'User-Agent': 'rootwyrm/rootcore/ci/tools/docker_hub',
         'Content-Type': 'application/json',
@@ -41,8 +41,6 @@ def hub_logout(token):
         sys.exit(2)    
 
 def hub_tag_delete(args,token):
-    print("hub_tag_delete")
-    print(args)
     ## Define our endpoint at the top.
     headers = {
         'User-Agent': 'rootwyrm/rootcore/ci/tools/docker_hub',
@@ -51,26 +49,44 @@ def hub_tag_delete(args,token):
     }
     ## respositories/$user/$container/tags/$tag
     url_base = f"https://hub.docker.com/v2/repositories/{args.username}/{args.container}/tags"
+    print("Operating on repository %s" % args.container)
+    ## Try it as a file first.
     try:
-        open(args.tags)
+        open(args.tags, "r")
+        tagfile = open(args.tags)
+        for tag in list(tagfile):
+            target = f"{url_base}/{tag}".strip('\n')
+            delete = requests.delete(target, data='', headers=headers)
+            result = delete.status_code
+            list = [container, ':', tags]
+            print("".join(list), "- ", end='')
+            hub_return_check(result)
+    ## Working with a bare tag argument.
+    except IOError:
+        target = f"{url_base}/{args.tags}".strip('\n')
+        delete = requests.delete(target, data='', headers=headers)
+        result = delete.status_code
+        container = args.container
+        tags = args.tags
+        list = [container, ':', tags]
+        print("".join(list), "- ", end='')
+        hub_return_check(result)
     except:
-        print("Could not open %s" % args.tags)
-    tagfile = open(args.tags)
-    for tag in list(tagfile):
-        print("Deleting %s" % args.container, ":%s - " % tag, sep=None, end='')
-        target = f"{url_base}/{tag}"
-        tag_delete = requests.delete(target.strip('\n'), data='', headers=headers)
-        if tag_delete.status_code == 204:
-            print("deleted.")
-        elif tag_delete.status_code == 202:
-            print("queued.")
-        elif tag_delete.status_code == 404:
-            print("not found.")
-        elif tag_delete.status_code == 401:
-            print("authorization token failure!")
-            sys.exit(10)
-        else:
-            print("error - %s" % tag_delete.status_code)
+        print("Encountered an unknown error.")
+        sys.exit(1)
+
+def hub_return_check(result):
+    if result == 204:
+        print("deleted.")
+    elif result == 202:
+        print("queued.")
+    elif result == 404:
+        print("not found.")
+    elif result == 401:
+        print("authorization token failure!")
+        sys.exit(10)
+    else:
+        print("error - %s" % result)
 
 def main():
     parser = ArgumentParser(description="Cleans up Docker Hub tags")

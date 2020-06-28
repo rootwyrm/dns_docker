@@ -1,0 +1,201 @@
+## Full crossbuild
+name: Build - All
+on:
+  push:
+    branches:
+      - release
+    tags:
+      - v1.0.0
+  pull_request:
+    branches:
+      - release
+    tags:
+      - v1.0.0
+  pull_request_review:
+    types: [ submitted, edited ]
+  repository_dispatch:
+    types: [ release ]
+
+jobs:
+################################################################################
+# Base Container
+################################################################################
+  base:
+    name: Release ${{ github.ref }}
+    runs-on: ubuntu-20.04
+    env:
+      BINFMT: a7996909642ee92942dcd6cff44b9b95f08dad64
+      CONTAINER: base
+      PLATFORM: "linux/amd64,linux/386,linux/arm64,linux/arm/v7"
+      RW_TAG: rootwyrm/dns_base
+    steps:
+    - name: Check out from ${{ github.ref }}
+      id: checkout
+      uses: actions/checkout@v2
+      with:
+        submodules: true
+    - name: Run pre-build hooks
+      id: hooks
+      run: |
+        $GITHUB_WORKSPACE/ci/hooks/pre_build
+    - name: Set up build environment
+      id: buildenv
+      run: |
+        docker run --rm --privileged docker/binfmt:$BINFMT
+        docker buildx create --name rootwyrm --use
+    - name: Build for platforms
+      run: |
+        docker login -u ${{ secrets.HUB_USER }} -p ${{ secrets.HUB_TOKEN }}
+        docker buildx build --platform $PLATFORM --pull --push \
+        --tag $RW_TAG:latest \
+        $CONTAINER 
+
+################################################################################
+# Consumers
+################################################################################
+  nsd:
+    needs: base
+    strategy:
+      matrix:
+        platform: [ linux/amd64, linux/386, linux/arm64, linux/arm/v7 ]
+    env: 
+      CONTAINER: nsd
+      BINFMT: a7996909642ee92942dcd6cff44b9b95f08dad64
+    name: nsd - ${{ matrix.platform }}
+    runs-on: ubuntu-20.04
+    steps:
+    - name: Check out from ${{ github.ref }}
+      uses: actions/checkout@v2
+      with:
+        submodules: true
+    - name: Run pre-build hooks
+      run: |
+        $GITHUB_WORKSPACE/ci/hooks/pre_build
+    - name: Set up build environment
+      id: buildenv
+      run: |
+        docker run --rm --privileged docker/binfmt:$BINFMT
+        docker buildx create --name rootwyrm --use
+    - name: Build nsd - ${{ matrix.platform }}
+      run: |
+        docker login -u ${{ secrets.HUB_USER }} -p ${{ secrets.HUB_TOKEN }}
+        PLATFORM_TAG=$(echo ${{ matrix.platform }} | sed -e 's,linux/,,' | sed -e 's,/,,g')
+        docker buildx build --platform ${{ matrix.platform }} \
+        --tag rootwyrm/$CONTAINER:$PLATFORM_TAG \
+        --pull --push $CONTAINER
+  unbound:
+    needs: base
+    strategy:
+      matrix:
+        platform: [ linux/amd64, linux/386, linux/arm64, linux/arm/v7 ]
+    env: 
+      CONTAINER: unbound
+      BINFMT: a7996909642ee92942dcd6cff44b9b95f08dad64
+    name: unbound - ${{ matrix.platform }}
+    runs-on: ubuntu-20.04
+    steps:
+    - name: Check out from ${{ github.ref }}
+      uses: actions/checkout@v2
+      with:
+        submodules: true
+    - name: Run pre-build hooks
+      run: |
+        $GITHUB_WORKSPACE/ci/hooks/pre_build
+    - name: Set up build environment
+      id: buildenv
+      run: |
+        docker run --rm --privileged docker/binfmt:$BINFMT
+        docker buildx create --name rootwyrm --use
+    - name: Build unbound - ${{ matrix.platform }}
+      run: |
+        docker login -u ${{ secrets.HUB_USER }} -p ${{ secrets.HUB_TOKEN }}
+        PLATFORM_TAG=$(echo ${{ matrix.platform }} | sed -e 's,linux/,,' | sed -e 's,/,,g')
+        docker buildx build --platform ${{ matrix.platform }} \
+        --tag rootwyrm/$CONTAINER:$PLATFORM_TAG \
+        --pull --push $CONTAINER
+  dnsdist:
+    needs: base
+    strategy:
+      matrix:
+        platform: [ linux/amd64, linux/386, linux/arm64, linux/arm/v7 ]
+    env: 
+      CONTAINER: dnsdist
+      BINFMT: a7996909642ee92942dcd6cff44b9b95f08dad64
+    name: dnsdist - ${{ matrix.platform }}
+    runs-on: ubuntu-20.04
+    steps:
+    - name: Check out from ${{ github.ref }}
+      uses: actions/checkout@v2
+      with:
+        submodules: true
+    - name: Run pre-build hooks
+      run: |
+        $GITHUB_WORKSPACE/ci/hooks/pre_build
+    - name: Set up build environment
+      id: buildenv
+      run: |
+        docker run --rm --privileged docker/binfmt:$BINFMT
+        docker buildx create --name rootwyrm --use
+    - name: Build dnsdist - ${{ matrix.platform }}
+      run: |
+        docker login -u ${{ secrets.HUB_USER }} -p ${{ secrets.HUB_TOKEN }}
+        PLATFORM_TAG=$(echo ${{ matrix.platform }} | sed -e 's,linux/,,' | sed -e 's,/,,g')
+        docker buildx build --platform ${{ matrix.platform }} \
+        --tag rootwyrm/$CONTAINER:$PLATFORM_TAG \
+        --pull --push $CONTAINER
+
+################################################################################
+# Packagers
+################################################################################
+  nsd_package:
+    needs: nsd
+    name: Package nsd
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Check out from ${{ github.ref }}
+        uses: actions/checkout@v2
+        with:
+          submodules: true
+      - name: Ship nsd manifest
+        run: |
+          docker login -u ${{ secrets.HUB_USER }} -p ${{ secrets.HUB_TOKEN }}
+          ${GITHUB_WORKSPACE}/ci/tools/manifest.sh nsd
+          docker logout
+      - name: Run manifest cleaning tool
+        run: |
+          ${GITHUB_WORKSPACE}/ci/tools/manifest_clean.py -u ${{ secrets.HUB_USER }} -p ${{ secrets.HUB_TOKEN }} -c nsd -t ${GITHUB_WORKSPACE}/nsd/tags
+  unbound_package:
+    needs: unbound
+    name: Package and ship unbound
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Check out from ${{ github.ref }}
+        uses: actions/checkout@v2
+        with:
+          submodules: true
+      - name: Ship unbound manifest
+        run: |
+          docker login -u ${{ secrets.HUB_USER }} -p ${{ secrets.HUB_TOKEN }}
+          ${GITHUB_WORKSPACE}/ci/tools/manifest.sh unbound
+          docker logout
+      - name: Run manifest cleaning tool
+        run: |
+          ${GITHUB_WORKSPACE}/ci/tools/manifest_clean.py -u ${{ secrets.HUB_USER }} -p ${{ secrets.HUB_TOKEN }} -c unbound -t ${GITHUB_WORKSPACE}/unbound/tags
+  dnsdist_package:
+    needs: dnsdist
+    name: Package and ship dnsdist
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Check out from ${{ github.ref }}
+        uses: actions/checkout@v2
+        with:
+          submodules: true
+      - name: Ship dnsdist manifest
+        run: |
+          docker login -u ${{ secrets.HUB_USER }} -p ${{ secrets.HUB_TOKEN }}
+          ${GITHUB_WORKSPACE}/ci/tools/manifest.sh dnsdist
+      - name: Run manifest cleaning tool
+        run: |
+          ${GITHUB_WORKSPACE}/ci/tools/manifest_clean.py -u ${{ secrets.HUB_USER }} -p ${{ secrets.HUB_TOKEN }} -c dnsdist -t ${GITHUB_WORKSPACE}/dnsdist/tags
+
+# vim:ts=2:sw=2:et

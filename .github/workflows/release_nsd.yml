@@ -76,8 +76,16 @@ jobs:
           --platforms linux/amd64,linux/386,linux/arm64,linux/arm/v7 \
           --template rootwyrm/nsd:$VERSION-ARCHVARIANT \
           --target rootwyrm/nsd:$VERSION
-#      - name: Run manifest cleaning tool
-#        run: |
-#          ${GITHUB_WORKSPACE}/ci/tools/manifest_clean.py -u ${{ secrets.HUB_USER }} -p ${{ secrets.HUB_TOKEN }} -c nsd -t ${GITHUB_WORKSPACE}/nsd/tags
+      - name: Run manifest cleaning tool
+        strategy:
+          matrix:
+            platform: [ amd64, 386, arm64, armv77 ]
+          run: |
+            PLATFORM_TAG=$(echo ${{ matrix.platform }} | sed -e 's,/,,g')
+            VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+            [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
+            [ "$VERSION" == "master" ] && VERSION=latest
+            docker login -u ${{ secrets.HUB_USER }} -p ${{ secrets.HUB_TOKEN }}
+            ${GITHUB_WORKSPACE}/ci/tools/manifest_clean.py -u ${{ secrets.HUB_USER }} -p ${{ secrets.HUB_TOKEN }} -c nsd -t $VERSION-$PLATFORM_TAG
 
 # vim:ts=2:sw=2:et
