@@ -80,12 +80,12 @@ jobs:
         strategy:
           matrix:
             platform: [ amd64, 386, arm64, armv77 ]
-          run: |
-            PLATFORM_TAG=$(echo ${{ matrix.platform }} | sed -e 's,/,,g')
-            VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
-            [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
-            [ "$VERSION" == "master" ] && VERSION=latest
-            docker login -u ${{ secrets.HUB_USER }} -p ${{ secrets.HUB_TOKEN }}
-            ${GITHUB_WORKSPACE}/ci/tools/manifest_clean.py -u ${{ secrets.HUB_USER }} -p ${{ secrets.HUB_TOKEN }} -c nsd -t $VERSION-$PLATFORM_TAG
+        run: |
+          PLATFORM_TAG=$(echo ${{ matrix.platform }} | sed -e 's,/,,g')
+          VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+          [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
+          [ "$VERSION" == "master" ] && VERSION=latest
+          docker login -u ${{ secrets.HUB_USER }} -p ${{ secrets.HUB_TOKEN }}
+          ${GITHUB_WORKSPACE}/ci/tools/manifest_clean.py -u ${{ secrets.HUB_USER }} -p ${{ secrets.HUB_TOKEN }} -c nsd -t $VERSION-$PLATFORM_TAG
 
 # vim:ts=2:sw=2:et
