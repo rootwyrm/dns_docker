@@ -1,4 +1,5 @@
-FROM	docker.io/rootwyrm/dns_base:latest
+ARG     RELEASE=latest
+FROM	docker.io/rootwyrm/dns_base:${RELEASE}
 
 ## Set up our labels
 LABEL	maintainer="Phillip 'RootWyrm' Jaenke <prj+docker@rootwyrm.com>" \

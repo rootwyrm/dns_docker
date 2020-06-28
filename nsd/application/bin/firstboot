@@ -118,6 +118,7 @@ function config()
 	chown -R nsd:nsd /usr/local/etc/nsd
 }
 
+ingest_environment
 IPADDRESS
 config
 message

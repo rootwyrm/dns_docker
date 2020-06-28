@@ -10,12 +10,12 @@ on:
     branches:
       - release/*
     tags:
-      - v1*
+      - *
   pull_request:
     branches:
       - release/*
     tags:
-      - v1*
+      - *
   pull_request_review:
     types: [ submitted, edited ]
   repository_dispatch:
@@ -56,7 +56,7 @@ jobs:
         [ "$VERSION" == "master" ] && VERSION=latest
         docker login -u ${{ secrets.HUB_USER }} -p ${{ secrets.HUB_TOKEN }}
         docker buildx build --platform $PLATFORM --pull --push \
-        --tag $RW_TAG:$VERSION \
+        --build-arg RELEASE=${VERSION} --tag $RW_TAG:${VERSION} \
         $CONTAINER 
 ################################################################################
 # Consumers
@@ -67,7 +67,7 @@ jobs:
       CONTAINER: nsd
       BINFMT: a7996909642ee92942dcd6cff44b9b95f08dad64
       PLATFORM: "linux/amd64,linux/386,linux/arm64,linux/arm/v7"
-    name: nsd - ${{ matrix.platform }}
+    name: Release - nsd ${{ github.ref }}
     runs-on: ubuntu-20.04
     steps:
     - name: Check out from ${{ github.ref }}
@@ -82,22 +82,23 @@ jobs:
       run: |
         docker run --rm --privileged docker/binfmt:$BINFMT
         docker buildx create --name dns_docker --use
-    - name: Build nsd - ${{ matrix.platform }}
+    - name: Build nsd ${{ github.ref }}
       run: |
-        PLATFORM_TAG=$(echo ${{ matrix.platform }} | sed -e 's,/,,g')
         VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
         [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
         [ "$VERSION" == "master" ] && VERSION=latest
         docker login -u ${{ secrets.HUB_USER }} -p ${{ secrets.HUB_TOKEN }}
         docker buildx build --platform $PLATFORM --pull --push \
-        --tag rootwyrm/$CONTAINER:$VERSION \
+        --build-arg RELEASE=${VERSION} --tag rootwyrm/$CONTAINER:$VERSION \
         $CONTAINER
+        docker logout
   unbound:
     needs: base
     env: 
       CONTAINER: unbound
       BINFMT: a7996909642ee92942dcd6cff44b9b95f08dad64
-    name: unbound - ${{ matrix.platform }}
+      PLATFORM: "linux/amd64,linux/386,linux/arm64,linux/arm/v7"
+    name: Release - unbound ${{ github.ref }}
     runs-on: ubuntu-20.04
     steps:
     - name: Check out from ${{ github.ref }}
@@ -112,22 +113,23 @@ jobs:
       run: |
         docker run --rm --privileged docker/binfmt:$BINFMT
         docker buildx create --name dns_docker --use
-    - name: Build unbound - ${{ matrix.platform }}
+    - name: Build unbound ${{ github.ref }}
       run: |
-        PLATFORM_TAG=$(echo ${{ matrix.platform }} | sed -e 's,/,,g')
         VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
         [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
         [ "$VERSION" == "master" ] && VERSION=latest
         docker login -u ${{ secrets.HUB_USER }} -p ${{ secrets.HUB_TOKEN }}
         docker buildx build --platform $PLATFORM --pull --push \
-        --tag rootwyrm/$CONTAINER:$VERSION \
+        --build-arg RELEASE=${VERSION} --tag rootwyrm/$CONTAINER:$VERSION \
         $CONTAINER
+        docker logout
   dnsdist:
     needs: base
     env: 
       CONTAINER: dnsdist
       BINFMT: a7996909642ee92942dcd6cff44b9b95f08dad64
-    name: dnsdist - ${{ matrix.platform }}
+      PLATFORM: "linux/amd64,linux/386,linux/arm64,linux/arm/v7"
+    name: Release - dnsdist ${{ github.ref }}
     runs-on: ubuntu-20.04
     steps:
     - name: Check out from ${{ github.ref }}
@@ -142,15 +144,15 @@ jobs:
       run: |
         docker run --rm --privileged docker/binfmt:$BINFMT
         docker buildx create --name dns_docker --use
-    - name: Build dnsdist - ${{ matrix.platform }}
+    - name: Build dnsdist ${{ github.ref }}
       run: |
-        PLATFORM_TAG=$(echo ${{ matrix.platform }} | sed -e 's,/,,g')
         VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
         [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
         [ "$VERSION" == "master" ] && VERSION=latest
         docker login -u ${{ secrets.HUB_USER }} -p ${{ secrets.HUB_TOKEN }}
         docker buildx build --platform $PLATFORM --pull --push \
-        --tag rootwyrm/$CONTAINER:$VERSION \
+        --build-arg RELEASE=${VERSION} --tag rootwyrm/$CONTAINER:$VERSION \
         $CONTAINER
+        docker logout
 
 # vim:ts=2:sw=2:et

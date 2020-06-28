@@ -7,20 +7,7 @@
 # See /LICENSE for details
 ################################################################################
 
-
-function ipaddress()
-{
-	export SYSTEM_LOCALIP4=$(hostname -i)
-	if [ -z $SYSTEM_LOCALIP4 ]; then
-		printf 'FATAL: Could not determine system IP! Shutting down.\n'
-		exit 1
-	fi
-	
-	export SYSTEM_LOCALIP6=$(ifconfig eth0 | grep inet6 | grep -v Link | awk '{print $3}')
-	if [[ $SYSTEM_LOCALIP6 == '' ]]; then
-		unset SYSTEM_LOCALIP6
-	fi
-}
+. /opt/rootwyrm/lib/deploy.lib.sh
 
 # Generate TLS session keys	every start.
 function session_regenerate()
@@ -42,11 +29,23 @@ function session_regenerate()
 function config()
 {
 	local CONFIG="/usr/local/etc/unbound/unbound.conf"
+	## Prevent rerun
+	if [ -f /firstboot ]; then
+		printf '[unbound] Performing first boot operations.\n'
+	fi
 
-	## Run ncpu servers up to a maximum 8 - %%UNBOUND_NCPU%%
+	## Perform TLS Session key regeneration early on, and always.
+	session_regenerate
+
+	## Symlink system certificates, always check this.
+	if [ ! -s /usr/local/etc/unbound/ca-certificates.crt ]; then
+		ln -s /etc/ssl/certs/ca-certificates.crt /usr/local/etc/unbound/ca-certificates.crt
+	fi
+
+	## Run ncpu servers up to a maximum 16 - %%UNBOUND_NCPU%%
 	local cpucount=$(cat /proc/cpuinfo | grep ^processor | wc -l)
-	if [[ $cpucount -gt 8 ]]; then
-		UNBOUND_NCPU=8
+	if [[ $cpucount -gt 16 ]]; then
+		UNBOUND_NCPU=16
 	## Run a minimum of 2 threads
 	elif [[ $cpucount -le 2 ]]; then
 		UNBOUND_NCPU=2
@@ -54,19 +53,20 @@ function config()
 		UNBOUND_NCPU=$cpucount
 	fi
 
-	## Perform TLS Session key regeneration early on	
-	session_regenerate
-
-	## Symlink system certificates
-	if [ ! -s /usr/local/etc/unbound/ca-certificates.crt ]; then
-		ln -s /etc/ssl/certs/ca-certificates.crt /usr/local/etc/unbound/ca-certificates.crt
-	fi
-	
-	printf '[unbound] Updating root anchors...'
-	if [ ! -f /usr/local/etc/unbound/root.key ]; then
+	## Update the root anchors
+	if [ -f /firstboot ]; then
+		printf '[unbound] Retrieving root anchors... '
 		/usr/local/sbin/unbound-anchor
-		## Returns 1 if /usr/local/etc/unbound/root.key doesn't exist
+		## Returns 1 if the file doesn't exist on first boot
 		if [ $? -eq 0 ] || [ $? -eq 1 ]; then
+			printf '[ok]\n'
+		else
+			printf '[ERROR %s]\n' "$?"
+		fi
+	else
+		printf '[unbound] Updating root anchors... '
+		/usr/local/sbin/unbound-anchor
+		if [ $? -eq 0 ]; then 
 			printf '[ok]\n'
 		else
 			printf '[ERROR %s]\n' "$?"
@@ -99,11 +99,14 @@ function config()
 		sed -i -e 's/%%UNBOUND_NCPU%%/'$UNBOUND_NCPU'/g' $CONFIG
 	fi
 	
-	## Fix permissions 
+	## Prevent triggering firstboot again	
+	if [ -f /firstboot ]; then	
+		rm -f /firstboot
+	fi
+	
+	## Fix permissions every time
 	chown -R unbound:unbound /usr/local/etc/unbound
 
-	## Prevent rerun
-	rm -f /firstboot
 }
 
 function message()
@@ -122,10 +125,15 @@ function message()
 	if [ ! -z $REMOTE_CONTROL ]; then
 		printf 'Remote Control is enabled on localhost:8953\n'
 	fi
+	if [ -f /usr/local/etc/unbound/root.key ]; then
+		printf 'DNSSEC Root Anchors are installed\n'
+		printf 'DNSSEC Enabled\n'
+	fi
 	printf '\n'
 	printf '**********************************************************************\n'
 }
 
-ipaddress
+ingest_environment
+IPADDRESS
 config
 message

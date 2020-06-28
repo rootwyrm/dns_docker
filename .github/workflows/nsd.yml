@@ -1,30 +1,38 @@
 ## nsd
-name: Build - nsd
+name: CI - nsd
 on:
   push:
-    branches: [ master ]
+    branches:
+      - master
+      - release/*
+    tags:
+      - v1*
     paths:
       - 'nsd/**'
   pull_request:
-    branches: [ master ]
+    branches:
+      - master
+      - release/*
+    tags:
+      - v1*
     paths:
       - 'nsd/**'
   repository_dispatch:
-    types: [ nsd ]
+    types: [ test_nsd ]
 
 ## Rebuild
 jobs:
   nsd:
     strategy:
       matrix:
-        platform: [ linux/amd64, linux/386, linux/arm64, linux/arm/v7 ]
-    name: nsd - ${{ matrix.platform }}
+        platform: [ amd64, 386, arm64, arm/v7 ]
+    name: Build ${{ github.ref }} nsd/${{ matrix.platform }}
     runs-on: ubuntu-20.04
     env:
       CONTAINER: nsd
       BINFMT: a7996909642ee92942dcd6cff44b9b95f08dad64
     steps:
-    - name: Check out from ${{ github.ref }} triggered by ${{ github.actor }}
+    - name: Check out from ${{ github.ref }} 
       id: checkout
       uses: actions/checkout@v2
     - name: Run pre-build hooks
@@ -38,26 +46,42 @@ jobs:
         docker buildx create --name rootwyrm --use
     - name: Build for ${{ matrix.platform }}
       run: |
-        PLATFORM_TAG=$(echo ${{ matrix.platform }} | sed -e 's,linux/,,' | sed -e 's,/,,g')
+        PLATFORM_TAG=$(echo ${{ matrix.platform }} | sed -e 's,/,,g')
+        VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+        [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
+        [ "$VERSION" == "master" ] && VERSION=latest
         docker login -u ${{ secrets.HUB_USER }} -p ${{ secrets.HUB_TOKEN }}
-        docker buildx build --platform ${{ matrix.platform }} \
-        --tag rootwyrm/$CONTAINER:$PLATFORM_TAG \
+        docker buildx build --platform linux/${{ matrix.platform }} \
+        --tag rootwyrm/$CONTAINER:$VERSION-$PLATFORM_TAG \
         --pull --push $CONTAINER
   nsd_package:
     needs: nsd
-    name: Package and ship nsd
+    name: Package nsd ${{ github.ref }}
     runs-on: ubuntu-20.04
     steps:
       - name: Check out from ${{ github.ref }}
         uses: actions/checkout@v2
-      - name: Ship nsd manifest
+      - name: Install manifest-tool
         run: |
-          docker login -u ${{ secrets.HUB_USER }} -p ${{ secrets.HUB_TOKEN }}
-          ${GITHUB_WORKSPACE}/ci/tools/manifest.sh nsd
-      ## Can't do a Python3 venv, not installed.
+          ${GITHUB_WORKSPACE}/ci/tools/install.manifest-tool.sh
       ## Doesn't print correctly due to python3 flux. 
+      - name: Assemble and push manifest ${{ github.ref }}
+        run: |
+          VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+          [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
+          [ "$VERSION" == "master" ] && VERSION=latest
+          docker login -u ${{ secrets.HUB_USER }} -p ${{ secrets.HUB_TOKEN }}
+          ${GITHUB_WORKSPACE}/ci/manifest-tool push from-args \
+          --platforms linux/amd64,linux/386,linux/arm64,linux/arm/v7 \
+          --template rootwyrm/nsd:$VERSION-ARCHVARIANT \
+          --target rootwyrm/nsd:$VERSION
       - name: Run manifest cleaning tool
         run: |
-          ${GITHUB_WORKSPACE}/ci/tools/manifest_clean.py -u ${{ secrets.HUB_USER }} -p ${{ secrets.HUB_TOKEN }} -c nsd -t ${GITHUB_WORKSPACE}/nsd/tags
+          VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+          [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
+          [ "$VERSION" == "master" ] && VERSION=latest
+          for p in amd64 386 arm64 armv7; do
+          ${GITHUB_WORKSPACE}/ci/tools/manifest_clean.py -u ${{ secrets.HUB_USER }} -p ${{ secrets.HUB_TOKEN }} -c nsd -t $VERSION-$p
+          done
 
 # vim:ts=2:sw=2:et
