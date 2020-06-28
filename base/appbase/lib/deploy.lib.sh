@@ -38,7 +38,7 @@ function ingest_environment()
 function IPADDRESS()
 {
 	export SYSTEM_LOCALIP4=$(hostname -i)
-	if [ ! -z $SYSTEM_LOCALIP4 ]; then
+	if [ -z $SYSTEM_LOCALIP4 ]; then
 		printf 'FATAL: Could not determine system IP! Shutting down.\n'
 		exit 1
 	fi
