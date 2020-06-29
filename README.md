@@ -9,10 +9,10 @@ Built for amd64, i686, arm64, and arm/v7 architectures.
 # CI Status
 | Component   | Status               |
 |-------------|----------------------|
-| Build Train | ![Build - All](https://github.com/rootwyrm/dns_docker/workflows/Build%20-%20All/badge.svg) ![GitHub issues](https://img.shields.io/github/issues/rootwyrm/dns_docker) ![GitHub pull requests](https://img.shields.io/github/issues-pr/rootwyrm/dns_docker) |
-| dnsdist     | ![Build - dnsdist](https://github.com/rootwyrm/dns_docker/workflows/Build%20-%20dnsdist/badge.svg) ![Docker Image Size (latest semver)](https://img.shields.io/docker/image-size/rootwyrm/dnsdist) |
-| unbound     | ![Build - unbound](https://github.com/rootwyrm/dns_docker/workflows/Build%20-%20unbound/badge.svg) ![Docker Image Size (latest semver)](https://img.shields.io/docker/image-size/rootwyrm/unbound) |
-| nsd         | ![Build - nsd](https://github.com/rootwyrm/dns_docker/workflows/Build%20-%20nsd/badge.svg) ![Docker Image Size (latest semver)](https://img.shields.io/docker/image-size/rootwyrm/nsd) |
+| Build Train | ![CI - World](https://github.com/rootwyrm/dns_docker/workflows/CI%20-%20World/badge.svg) ![GitHub issues](https://img.shields.io/github/issues/rootwyrm/dns_docker) ![GitHub pull requests](https://img.shields.io/github/issues-pr/rootwyrm/dns_docker) ![GitHub milestones](https://img.shields.io/github/milestones/open/rootwyrm/dns_docker) |
+| dnsdist     | ![CICD - dnsdist](https://github.com/rootwyrm/dns_docker/workflows/CICD%20-%20dnsdist/badge.svg) ![Docker Image Size (latest semver)](https://img.shields.io/docker/image-size/rootwyrm/dnsdist) |
+| unbound     | ![CICD - unbound](https://github.com/rootwyrm/dns_docker/workflows/CICD%20-%20unbound/badge.svg) ![Docker Image Size (latest semver)](https://img.shields.io/docker/image-size/rootwyrm/unbound) |
+| nsd         | ![CICD - nsd](https://github.com/rootwyrm/dns_docker/workflows/CICD%20-%20nsd/badge.svg) ![Docker Image Size (latest semver)](https://img.shields.io/docker/image-size/rootwyrm/nsd) |
 |  |  |
 
 # Installation
