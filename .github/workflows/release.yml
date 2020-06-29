@@ -10,12 +10,12 @@ on:
     branches:
       - release/*
     tags:
-      - *
+      - v*
   pull_request:
     branches:
       - release/*
     tags:
-      - *
+      - v*
   pull_request_review:
     types: [ submitted, edited ]
   repository_dispatch:

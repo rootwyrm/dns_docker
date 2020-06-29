@@ -1,5 +1,5 @@
-## nsd
-name: CICD - nsd
+## unbound
+name: CICD - unbound
 on:
   push:
     branches:
@@ -8,7 +8,7 @@ on:
     tags:
       - v1*
     paths:
-      - 'nsd/**'
+      - 'unbound/**'
   pull_request:
     branches:
       - master
@@ -16,20 +16,20 @@ on:
     tags:
       - v1*
     paths:
-      - 'nsd/**'
+      - 'unbound/**'
   repository_dispatch:
-    types: [ test_nsd ]
+    types: [ test_unbound ]
 
 ## Rebuild
 jobs:
-  nsd:
+  unbound:
     strategy:
       matrix:
         platform: [ amd64, 386, arm64, arm/v7 ]
-    name: Build ${{ github.ref }} nsd/${{ matrix.platform }}
+    name: Build ${{ github.ref }} unbound/${{ matrix.platform }}
     runs-on: ubuntu-20.04
     env:
-      CONTAINER: nsd
+      CONTAINER: unbound
       BINFMT: a7996909642ee92942dcd6cff44b9b95f08dad64
     steps:
     - name: Check out from ${{ github.ref }} 
@@ -54,9 +54,9 @@ jobs:
         docker buildx build --platform linux/${{ matrix.platform }} \
         --tag rootwyrm/$CONTAINER:$VERSION-$PLATFORM_TAG \
         --pull --push $CONTAINER
-  nsd_package:
-    needs: nsd
-    name: Package nsd ${{ github.ref }}
+  unbound_package:
+    needs: unbound
+    name: Package unbound ${{ github.ref }}
     runs-on: ubuntu-20.04
     steps:
       - name: Check out from ${{ github.ref }}
@@ -73,15 +73,15 @@ jobs:
           docker login -u ${{ secrets.HUB_USER }} -p ${{ secrets.HUB_TOKEN }}
           ${GITHUB_WORKSPACE}/ci/manifest-tool push from-args \
           --platforms linux/amd64,linux/386,linux/arm64,linux/arm/v7 \
-          --template rootwyrm/nsd:$VERSION-ARCHVARIANT \
-          --target rootwyrm/nsd:$VERSION
+          --template rootwyrm/unbound:$VERSION-ARCHVARIANT \
+          --target rootwyrm/unbound:$VERSION
       - name: Run manifest cleaning tool
         run: |
           VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
           [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
           [ "$VERSION" == "master" ] && VERSION=latest
           for p in amd64 386 arm64 armv7; do
-          ${GITHUB_WORKSPACE}/ci/tools/manifest_clean.py -u ${{ secrets.HUB_USER }} -p ${{ secrets.HUB_TOKEN }} -c nsd -t $VERSION-$p
+          ${GITHUB_WORKSPACE}/ci/tools/manifest_clean.py -u ${{ secrets.HUB_USER }} -p ${{ secrets.HUB_TOKEN }} -c unbound -t $VERSION-$p
           done
 
 # vim:ts=2:sw=2:et
