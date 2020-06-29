@@ -31,6 +31,8 @@ LABEL   maintainer="Phillip 'RootWyrm' Jaenke <prj+docker@rootwyrm.com>" \
 
 EXPOSE    53/tcp
 EXPOSE    53/udp
+EXPOSE    10530/tcp
+EXPOSE    10530/udp
 
 ## Create common elements
 ADD     [ "conf/", "/usr/local/etc/nsd" ]

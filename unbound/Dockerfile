@@ -29,10 +29,12 @@ LABEL	maintainer="Phillip 'RootWyrm' Jaenke <prj+docker@rootwyrm.com>" \
         org.opencontainers.image.source="%%GITHUB_REPOSITORY%%" \
         org.opencontainers.image.created="%%RW_BUILDDATE%%" 
 
-EXPOSE	53/tcp
 EXPOSE	53/udp
+EXPOSE	53/tcp
 EXPOSE  853/udp
 EXPOSE  853/tcp
+EXPOSE	10531/udp
+EXPOSE	10531/tcp
 
 ## Create common elements
 ADD [ "conf/", "/usr/local/etc/unbound" ]
