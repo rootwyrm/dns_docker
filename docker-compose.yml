@@ -55,6 +55,7 @@ services:
       - /tmp
     volumes:
       - "/opt/rootwyrm/etc/nsd:/usr/local/etc/nsd/conf.d"
+      - "/opt/rootwyrm/var/db/nsd:/var/db/nsd"
     cap_add:
       - NET_ADMIN
       - NET_BIND_SERVICE
@@ -88,7 +89,6 @@ services:
 
 networks:
   dns:
-    #enable_ipv6: true
     ipam:
       config:
         - subnet: "172.16.53.0/24"
