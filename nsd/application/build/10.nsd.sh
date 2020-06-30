@@ -11,11 +11,13 @@
 ######################################################################
 
 . /opt/rootwyrm/lib/deploy.lib.sh
+ingest_environment
+software_version
 
 #export IFS=$'\n'
 export BUILDNAME="nsd"
 export DISTSITE="https://www.nlnetlabs.nl/downloads/nsd/"
-export DISTVER="4.3.1"
+export DISTVER="${SWVERSION:-4.3.1}"
 # https://www.nlnetlabs.nl/downloads/nsd/nsd-4.3.1.tar.gz
 
 ## Build
@@ -72,7 +74,8 @@ build()
 
 	echo "$(date $DATEFMT) [${BUILDNAME}] Configuring..."
 	## NOTE: Must be extremely explicit with paths for nsd
-	./configure \
+	## testing
+	./configure 
 		--with-configdir=/usr/local/etc/nsd \
 		--with-pidfile=/run/nsd.pid \
 		--with-xfrdir=/var/db/nsd \

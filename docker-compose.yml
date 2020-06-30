@@ -1,15 +1,14 @@
 ## docker-compose.yml
   
-## XXX: version 3.x does not support IPv6
-version: "2.4"
+version: "3.7"    # CAUTION: do not use 3.8, breaks on Alpine
 services:
   dnsdist:
     ## Never deploy more than 1 dnsdist instance per host.
     container_name: dnsdist
     networks:
       dns:
-        ipv4_address: 172.16.53.10
-    image: docker.io/rootwyrm/dnsdist:latest
+        ipv4_address: ${ADDR_DNSDIST:-172.16.53.10}
+    image: docker.io/rootwyrm/dnsdist:${RELEASE:-latest}
     sysctls:
       - net.core.somaxconn=10240
       - net.ipv4.tcp_rmem=10240 87380 12582912
@@ -18,6 +17,11 @@ services:
       - net.ipv4.tcp_tw_reuse=1
       - net.ipv4.tcp_fastopen=3
     restart: on-failure
+    ports:
+      - "53:53"
+      - "443:443"
+      - "853:853"
+      - "8053:8053"
     tmpfs:
       - /run
       - /tmp
@@ -43,6 +47,9 @@ services:
       - net.ipv4.tcp_tw_reuse=1
       - net.ipv4.tcp_fastopen=3
     restart: on-failure
+    ports:
+      - "53"
+      - "10530:10530"
     tmpfs:
       - /run
       - /tmp
@@ -66,6 +73,10 @@ services:
       - net.ipv4.tcp_tw_reuse=1
       - net.ipv4.tcp_fastopen=3
     restart: on-failure
+    ports:
+      - "53"
+      - "853"
+      - "10531:10531"
     tmpfs:
       - /run
       - /tmp
