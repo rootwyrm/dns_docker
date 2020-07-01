@@ -29,7 +29,7 @@ LABEL   maintainer="Phillip 'RootWyrm' Jaenke <prj+docker@rootwyrm.com>" \
 COPY [ "appbase/", "/opt/rootwyrm" ]
 COPY [ "rc.conf", "/etc/rc.conf" ]
 
-VOLUME  [ "/run" ]
+VOLUME  [ "/run:/opt/rootwyrm/var/run" ]
 
 RUN mkdir -p /opt/rootwyrm && \
     mkdir -p /usr/local/src && \
