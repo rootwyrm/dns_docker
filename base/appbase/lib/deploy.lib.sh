@@ -37,14 +37,14 @@ function ingest_environment()
 ## Get system IP address function
 function IPADDRESS()
 {
-	export SYSTEM_LOCALIP4=$(hostname -i)
+	export SYSTEM_LOCALIP4=$(ip addr list eth0 | grep 'inet ' | awk '{print $2}' | cut -d / -f 1)
 	if [ -z $SYSTEM_LOCALIP4 ]; then
 		printf 'FATAL: Could not determine system IP! Shutting down.\n'
 		exit 1
 	fi
 	
-	export SYSTEM_LOCALIP6=$(ifconfig eth0 | grep inet6 | grep -v Link | awk '{print $3}')
-	if [[ $SYSTEM_LOCALIP6 == '' ]]; then
+	export SYSTEM_LOCALIP6=$(ip addr list eth0 | grep 'inet6 ' | grep global | awk '{print $2}' | cut -d / -f 1)
+	if [ -z $SYSTEM_LOCALIP6 ] || [ $SYSTEM_LOCALIP6 == '' ]; then
 		unset SYSTEM_LOCALIP6
 	fi
 }
