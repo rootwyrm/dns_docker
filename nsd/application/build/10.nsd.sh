@@ -75,7 +75,7 @@ build()
 	echo "$(date $DATEFMT) [${BUILDNAME}] Configuring..."
 	## NOTE: Must be extremely explicit with paths for nsd
 	## testing
-	./configure 
+	./configure \
 		--with-configdir=/usr/local/etc/nsd \
 		--with-pidfile=/run/nsd.pid \
 		--with-xfrdir=/var/db/nsd \
