@@ -53,6 +53,7 @@ RUN mkdir -p /opt/rootwyrm && \
 
 ONBUILD ADD [ "application/", "/opt/rootwyrm" ]
 ONBUILD ADD [ "init.d/", "/etc/init.d" ]
+ONBUILD ADD [ "conf/", "/opt/rootwyrm/conf" ]
 ONBUILD RUN touch /firstboot && \
     echo "$(date '+%FT%T%z') [BUILD] phase beginning..." ; \
     for bld in `ls /opt/rootwyrm/build/ | sort`; do \

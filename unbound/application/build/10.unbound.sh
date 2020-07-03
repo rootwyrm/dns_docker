@@ -70,8 +70,10 @@ build()
 	cd ${BUILDNAME}-${DISTVER}
 
 	echo "$(date $DATEFMT) [${BUILDNAME}] Configuring..."
-	## XXX: Need to test for tcp_fast_open
-	./configure --prefix=/usr/local \
+	## CAUTION: Have to look for libevent in /usr or it doesn't get
+	## found.
+	./configure \
+		--prefix=/usr/local \
 		--with-libevent=/usr \
 		--enable-pie --enable-relro-now --enable-subnet \
 		--enable-tfo-client --enable-tfo-server \
