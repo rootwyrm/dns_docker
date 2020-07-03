@@ -36,10 +36,6 @@ EXPOSE	80/tcp
 EXPOSE	443/tcp
 EXPOSE	8053/tcp
 
-ADD [ "conf/", "/usr/local/etc/dnsdist" ]
-
-VOLUME [ "/usr/local/etc/dnsdist/conf.d", "/usr/local/etc/dnsdist/lua", "/usr/local/etc/dnsdist/maps" ]
-
-CMD [ "/sbin/init" ]
+VOLUME [ "/usr/local/etc/conf.d", "/usr/local/etc/lua", "/usr/local/etc/maps" ]
 
 # vim:ts=4:sw=4:et

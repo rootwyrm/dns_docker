@@ -1,27 +1,35 @@
 --------------------------------------------------------------------------------
+-- Part of dns_docker by Phillip "RootWyrm" Jaenke
+-- https://github.com/rootwyrm/dns_docker
+-- 
 -- dnsdist.conf
 --------------------------------------------------------------------------------
 
--- Randomly generated API key
-setKey("%%DNSDIST_APIKEY%%")
+------------------------------------------------------------
+-- Control Socket configuration
+------------------------------------------------------------
+%%DNSDIST_CONTROLKEY%%
+controlSocket('127.0.0.1:5199')
+setConsoleACL('127.0.0.0/8')
 
 ------------------------------------------------------------
 -- Listener configuration
 ------------------------------------------------------------
-setLocal('127.0.0.1')
-setLocal('%%DNSDIST_LOCALIP4%%'/32)
-setLocal('%%DNSDIST_LOCALIP6%%'/32)
+setLocal('127.0.0.1', { reusePort=true, tcpFastOpenQueueSize=64})
+--addLocal('%%DNSDIST_LOCALIP4%%', { reusePort=true, tcpFastOpenQueueSize=32})
+%%DNSDIST_LISTENER%%
 
 ------------------------------------------------------------
 -- Web server configuration
 ------------------------------------------------------------
-webserver("%%DNSDIST_LOCALIP4%%:8053", "%%DNSDIST_PASSWD%%")
-webserver("%%DNSDIST_LOCALIP6%%:8053", "%%DNSDIST_PASSWD%%")
+webserver("%%DNSDIST_LOCALIP4%%:8053", "%%DNSDIST_PASSWD%%", "%%DNSDIST_APIKEY%%", {}, "127.0.0.0/8, 172.16.0.0/12")
+webserver("%%DNSDIST_LOCALIP6%%:8053", "%%DNSDIST_PASSWD%%", "%%DNSDIST_APIKEY%%", {}, "127.0.0.0/8, 172.16.0.0/12")
 
 ------------------------------------------------------------
 -- Set default ACL
 ------------------------------------------------------------
 setACL('127.0.0.0/8')
+addACL('172.16.0.0/12')
 
 ------------------------------------------------------------
 -- XXX: DOH configuration goes here
@@ -29,14 +37,23 @@ setACL('127.0.0.0/8')
 
 ------------------------------------------------------------
 -- Server pools
--- You should add your authoritative and recursive servers to the
---     respective pools here named 'authoritative' and 'recursor.'
 ------------------------------------------------------------
 -- XXX: DO NOT ALTER OR ADD TO THE "localroot" POOL!
-newServer( {address="172.16.53.11:53", pool="localroot", name="localroot", tcpFastOpen=true, qps=100000} )
--- Configurable pools
-newServer( {address="172.16.53.11:53", pool="authoritative", name="nsd.docker", tcpFastOpen=true, qps=50} )
-newServer( {address="172.16.53.12:53", pool="recursor", name="unbound.docker", tcpFastOpen=true, qps=50} )
+newServer( {address="172.16.53.11:10530", pool="localroot", name="localroot", tcpFastOpen=true, qps=100000} )
+-- Some reasonable public engagement servers as an example
+-- DO NOT CHANGE THE HEALTH CHECK SETTINGS!
+
+-- newServer( { address="9.9.9.9:53", pool="quad9",  name="dns9.quad9.net", qps=10, checkFunction=quad9_HealthCheck, checkInterval=120} )
+-- newServer( { address="149.112.112.112:53", pool="quad9",  name="rrdns.pch.net", qps=10, checkFunction=quad9_HealthCheck, checkInterval=120} )
+
+--function quad9_HealthCheck(qname, qtype, qclass, dh)
+--	dh:setCD(true)
+--	local randomName = { 'powerdns.com.', 'www.google.com.', 'www.bing.com.', 'facebook.com.', 'amazon.com.' }
+--	for k in pairs(randomName) do
+--		table.insert(names,k)
+--	end
+--	return newDNSName([math.random(#names)]), DNSQType.A, qclass
+--end
 
 ------------------------------------------------------------
 -- Fixed mapping
@@ -67,9 +84,21 @@ addAction("238.in-addr.arpa",   PoolAction("localroot"))
 addAction("239.in-addr.arpa",   PoolAction("localroot"))
 
 ------------------------------------------------------------
+-- Base cache settings; must set cache
+------------------------------------------------------------
+cache_localroot     = newPacketCache(512)
+cache_authoritative = newPacketCache(4096, {numberOfShards=4})
+cache_recursor      = newPacketCache(8192, {numberOfShards=8})
+getPool("localroot"):setCache(cache_localroot)
+getPool("authoritative"):setCache(cache_authoritative)
+getPool("recursor"):setCache(cache_recursor)
+
+------------------------------------------------------------
 -- Include actions; order matters
 -- Subdirectories 
 ------------------------------------------------------------
-includeDirectory('/usr/local/etc/dnsdist/conf.d')
-includeDirectory('/usr/local/etc/dnsdist/lua')
-includeDirectory('/usr/local/etc/dnsdist/maps')
+includeDirectory('/usr/local/etc/conf.d')
+includeDirectory('/usr/local/etc/lua')
+includeDirectory('/usr/local/etc/maps')
+
+-- vim:ft=lua

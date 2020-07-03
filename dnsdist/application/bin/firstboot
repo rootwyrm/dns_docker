@@ -11,12 +11,40 @@
 
 function config()
 {
+	local CONFIGDIR="/usr/local/etc/"
+	local CONFIGSRC="/opt/rootwyrm/conf/dnsdist.conf.orig"
+	local CONFIG="/usr/local/etc/dnsdist.conf"
+	
 	if [ -f /firstboot ]; then
 		printf '[dnsdist] Performing initial firstboot tasks.\n'
 		printf '[dnsdist] This may take some time!\n'
 		printf '\n'
+		export FIRSTBOOT=1
 	fi
-	local CONFIG="/usr/local/etc/dnsdist/dnsdist.conf"
+	if [ ! -f ${CONFIG} ]; then 
+		cp ${CONFIGSRC} ${CONFIG}
+		if [ $? -ne 0 ]; then
+			RC=$?
+			echo "Could not install configuration - ERROR $RC"
+			exit $RC
+		fi
+	elif [ -f /factory.reset ]; then
+		printf '[dnsdist] Factory reset requested!\n'
+		printf '[dnsdist] Passwords and keys will NOT be changed.\n'
+		printf '[dnsdist] Configuration will be backed up.\n'
+		printf '\n'
+		cp ${CONFIG} ${CONFIG}.bak
+		cp ${CONFIGSRC} ${CONFIG}
+		export FIRSTBOOT=1
+	fi
+
+	## Create our control key
+	if [ ! -z $FIRSTBOOT ]; then
+		CONTROLKEY=$(echo 'makeKey()' | dnsdist -l 127.0.0.1:53531 | grep ^setKey)
+		sed -i -e 's/%%DNSDIST_CONTROLKEY%%/'$CONTROLKEY'/g' $CONFIG
+		echo $CONTROLKEY > $CONFIGDIR/control.conf
+	fi
+
 	## Create API key in persistent storage
 	APIKEY="/usr/local/etc/dnsdist/conf.d/api.key"
 	if [ ! -f $APIKEY ]; then
@@ -30,18 +58,42 @@ function config()
 	fi
 
 	## Generate a new random password when necessary
-	PASSWD="/usr/local/etc/dnsdist/passwd"
-	if [ ! -f $PASSWD ]; then
+	PASSWD="/usr/local/etc/dnsdist.passwd"
+	if [ ! -f $PASSWD ] && [ -z $DNSDIST_PASSWD ]; then
 		## Use blocking randomness
 		cat /dev/random | tr -dc 'a-zA-Z0-9' | fold -w 16 | head -n 1 > $PASSWD
 		chmod 0700 $PASSWD
 		chown 0:0 $PASSWD
 		DNSDIST_PASSWD=$(cat $PASSWD)
+	elif [ ! -z $DNSDIST_PASSWD ]; then
+		echo "${DNSDIST_PASSWD}" > $PASSWD
+		DNSDIST_PASSWD=$(cat $PASSWD)
 	else
 		DNSDIST_PASSWD=$(cat $PASSWD)
 	fi
-	
-	## TODO: need to create listeners * NCPU
+
+	## XXX: need to tune tcp fastopen automagically
+	## TODO: maybe disable tcpfastopen?? identifiable thing.
+	## Create listeners based on CPU count
+	DNSDIST_THREAD=$(cat /proc/cpuinfo | grep processor | wc -l)
+	set -a ADDLOCAL
+	## Limits
+	if [ $DNSDIST_THREAD -gt 16 ]; then
+		DNSDIST_THREAD=16
+	elif [ $DNSDIST_THREAD -lt 4 ]; then
+		## Needed to avoid a known contention issue
+		DNSDIST_THREAD=4
+	fi
+	dnsdist_listener=1
+	while [ $dnsdist_listener -le ${DNSDIST_THREAD} ]; do
+		local LUAFUNCTION="addLocal("
+		local LUAOPTIONS="{ reusePort=true, tcpFastOpenQueueSize=64}"
+		ADDLOCAL+="${LUAFUNCTION}'0.0.0.0', ${LUAOPTIONS})\n"
+		dnsdist_listener=$(( $dnsdist_listener + 1 ))
+	done
+	sed -i -e 's,%%DNSDIST_LISTENER%%,'${ADDLOCAL[@]}',' ${CONFIG}
+	## XXX: need the tls listeners in here, same way
+
 	## Insert IP addresses
 	sed -i -e 's/%%DNSDIST_LOCALIP4%%/'$SYSTEM_LOCALIP4'/g' $CONFIG
 	## Insert IPv6 if present, delete if absent
@@ -61,7 +113,10 @@ function config()
 	fi
 
 	## Fix permissions always
-	chown -R dnsdist:dnsdist /usr/local/etc/dnsdist
+	chown -R dnsdist:dnsdist /usr/local/etc/dnsdist.conf
+	for x in conf.d lua maps; do
+		chown -R dnsdist:dnsdist /usr/local/etc/$x
+	done
 	chown 0:0 $APIKEY
 	chown 0:0 $PASSWD
 }
@@ -85,5 +140,6 @@ function message()
 }
 
 IPADDRESS
+ingest_environment
 config
 message
