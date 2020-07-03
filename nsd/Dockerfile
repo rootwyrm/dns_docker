@@ -40,6 +40,4 @@ ADD     [ "cron/", "/etc/periodic/" ]
 
 VOLUME [ "/var/db/nsd", "/usr/local/etc/nsd/conf.d", "/usr/local/etc/nsd/zones" ]
 
-CMD [ "/sbin/init" ]
-
 # vim:sw=4:ts=4:et

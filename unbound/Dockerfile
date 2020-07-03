@@ -37,11 +37,9 @@ EXPOSE	10531/udp
 EXPOSE	10531/tcp
 
 ## Create common elements
-ADD [ "conf/", "/usr/local/etc/unbound" ]
-ADD [ "application/", "/opt/rootwyrm" ]
+#XXX duplicate ADD [ "conf/", "/opt/rootwyrm/conf" ]
+#XXX duplicate ADD [ "application/", "/opt/rootwyrm" ]
 
-VOLUME [ "/usr/local/etc/unbound/conf.d" ]
-
-CMD [ "/sbin/init" ]
+VOLUME [ "/usr/local/etc/unbound/conf.d", "/usr/local/etc/unbound/zones" ]
 
 # vim:ts=4:sw=4:et

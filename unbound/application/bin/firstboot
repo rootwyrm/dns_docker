@@ -28,11 +28,24 @@ function session_regenerate()
 
 function config()
 {
-	local CONFIG="/usr/local/etc/unbound/unbound.conf"
+	export CONFIG="/usr/local/etc/unbound/unbound.conf"
+	export CONFIGDIR="/usr/local/etc/unbound"
+
 	## Prevent rerun
 	if [ -f /firstboot ]; then
 		printf '[unbound] Performing first boot operations.\n'
+		cp /opt/rootwyrm/conf/unbound.conf.orig ${CONFIG}
+		export FIRSTBOOT=1
+	elif [ -f /factory.reset ]; then
+		printf '[unbound] Factory reset requested!\n'
+		printf '[unbound] This may take some time.\n'
+		mv ${CONFIG} ${CONFIG}.bak
+		cp /opt/rootwyrm/conf/unbound.conf.orig ${CONFIG}
+		export FIRSTBOOT=1
 	fi
+
+	## Clear a line
+	printf '\n'
 
 	## Perform TLS Session key regeneration early on, and always.
 	session_regenerate
@@ -54,8 +67,9 @@ function config()
 	fi
 
 	## Update the root anchors
-	if [ -f /firstboot ]; then
-		printf '[unbound] Retrieving root anchors... '
+	if [ ! -z $FIRSTBOOT ]; then
+		rm -f ${CONFIGDIR}/root.key
+		printf '[unbound] Performing initial retrieval of root anchors... '
 		/usr/local/sbin/unbound-anchor
 		## Returns 1 if the file doesn't exist on first boot
 		if [ $? -eq 0 ] || [ $? -eq 1 ]; then
@@ -74,7 +88,7 @@ function config()
 	fi
 
 	## Generate keys and fix permissions
-	if [ ! -f /usr/local/etc/unbond/unbound_server.key ]; then
+	if [ ! -f /usr/local/etc/unbound/unbound_server.key ]; then
 		printf '[unbound] Setting up remote control keys... '
 		/usr/local/sbin/unbound-control-setup > /dev/null 2>&1
 		if [ $? -eq 0 ]; then
@@ -87,7 +101,7 @@ function config()
 		export REMOTE_CONTROL=1
 	fi
 
-	if [ -f /firstboot ]; then
+	if [ ! -z $FIRSTBOOT ]; then
 		## Insert IP addresses
 		sed -i -e 's/%%UNBOUND_LOCALIP4%%/'$SYSTEM_LOCALIP4'/g' $CONFIG
 		## Insert IPv6 if present, delete if absent
@@ -136,4 +150,4 @@ function message()
 ingest_environment
 IPADDRESS
 config
-message
+message > /message

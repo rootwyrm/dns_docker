@@ -25,9 +25,6 @@ LABEL   maintainer="Phillip 'RootWyrm' Jaenke <prj+docker@rootwyrm.com>" \
         org.opencontainers.image.revision="%%GITHUB_SHA%%" \
         org.opencontainers.image.source="%%GITHUB_REPOSITORY%%" \
         org.opencontainers.image.created="%%RW_BUILDDATE%%" 
-       
-COPY [ "appbase/", "/opt/rootwyrm" ]
-COPY [ "rc.conf", "/etc/rc.conf" ]
 
 VOLUME  [ "/run:/opt/rootwyrm/var/run" ]
 
@@ -50,6 +47,10 @@ RUN mkdir -p /opt/rootwyrm && \
     rm -f /etc/init.d/modloop ; \
     sed -i 's/\tcgroup_add_service/\t#cgroup_add_service/g' /lib/rc/sh/openrc-run.sh && \
     sed -i 's/VSERVER/DOCKER/Ig' /lib/rc/sh/init.sh
+
+COPY [ "rc.conf", "/etc/rc.conf" ]
+COPY [ "appbase/", "/opt/rootwyrm" ]
+ADD  [ "init.d/", "/etc/init.d" ]
 
 ONBUILD ADD [ "application/", "/opt/rootwyrm" ]
 ONBUILD ADD [ "init.d/", "/etc/init.d" ]

@@ -7,6 +7,7 @@ extra_started_commands="reload"
 name="unbound daemon"
 description="unbound is a high-performance recursing domain name server"
 
+pidfile="/usr/local/etc/unbound/unbound.pid"
 : ${cfgfile:=${UNBOUND_CONFFILE:-/usr/local/etc/unbound/$RC_SVCNAME.conf}}
 
 command="/usr/local/sbin/unbound"
@@ -16,7 +17,7 @@ command_args="$command_args"
 required_files="$cfgfile"
 
 depend() {
-	need net
+	need net rootwyrm
 	use logger
 	provide dns
 	after entropy
@@ -29,11 +30,9 @@ checkconfig() {
 }
 
 start_pre() {
-	/opt/rootwyrm/bin/firstboot
-	if [ $? -ne 0 ]; then
-		exit $?
-	else
-		rm -f /firstboot
-	fi
 	checkconfig
+	/opt/rootwyrm/bin/identify.sh
+	if [ -f /message ]; then
+		cat /message
+	fi
 }

@@ -7,20 +7,20 @@
 ## See /LICENSE for details
 ################################################################################
 
-if [ ! -f /opt/rootwyrm/id.service ]; then
-	module=$(cat /opt/rootwyrm/id.service)
+if [ -f /opt/rootwyrm/id.service ]; then
+	export module=$(cat /opt/rootwyrm/id.service)
 else
-	module="UNKNOWN"
+	export module="UNKNOWN"
 fi
-if [ ! -f /opt/rootwyrm/id.release ]; then
-	release=$(cat /opt/rootwyrm/id.release)
+if [ -f /opt/rootwyrm/id.release ]; then
+	export release=$(cat /opt/rootwyrm/id.release)
 else
-	release="HEAD"
+	export release="HEAD"
 fi
-if [ ! -f /opt/rootwyrm/id.release ]; then
-	module_version=$(cat /opt/rootwyrm/${module}.version)
+if [ -f /opt/rootwyrm/${module}.version ]; then
+	export module_version=$(cat /opt/rootwyrm/${module}.version)
 else
-	module_version="UNKNOWN"
+	export module_version="UNKNOWN"
 fi
 
 print_message()

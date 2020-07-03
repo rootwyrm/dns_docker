@@ -2,15 +2,19 @@
 ################################################################################
 ## init.d/nsd
 ################################################################################
-name="NSD"
+supervisor=supervise-daemon
 
 extra_commands="checkconfig"
 extra_started_commands="reload reopen"
+
+name="NSD"
 
 description="An authoritative-only, high performance, open source name server"
 description_checkconfig="Checks NSD configuration file for errors"
 description_reload="Reloads NSD config file and modified zone files from disk"
 description_reopen="Reopen NSD log file (for logrotate)"
+
+: ${cfgfile:=${NSD_CONFIG:-"/usr/local/etc/nsd/nsd.conf"}}
 
 command="/usr/local/sbin/nsd"
 command_args="-c $cfgfile -l /var/log/nsd.log -u nsd ${command_args:-}"
@@ -21,7 +25,7 @@ start_stop_daemon_args="--wait 50"
 required_files="$cfgfile"
 
 depend() {
-	need net dcron firstboot
+	need net dcron rootwyrm
 	use logger
 }
 
@@ -44,13 +48,11 @@ reopen() {
 }
 
 start_pre() {
-	if [ -f /opt/rootwyrm/bin/firstboot ]; then
-		/opt/rootwyrm/bin/firstboot
-		if [ $? -ne 0 ]; then
-			exit $RC
-		fi
-	: ${cfgfile:=${NSD_CONFIG:-"/firstboot"}}
     checkconfig
+	/opt/rootwyrm/bin/identify.sh
+	if [ -f /message ]; then
+		cat /message
+	fi
 }
 
 start()

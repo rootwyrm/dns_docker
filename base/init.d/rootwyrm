@@ -1,0 +1,42 @@
+#!/sbin/openrc-run
+
+name="$SVCNAME"
+command="/opt/rootwyrm/bin/firstboot"
+description="RootWyrm Firstboot Routines"
+
+depend() {
+	need net
+	provide rootwyrm
+	use logger
+}
+
+check_first() {
+	ebegin "Checking for /firstboot..."
+	test -f /firstboot
+	eend $?
+}
+
+check_reset() {
+	ebegin "Checking for /factory.reset..."
+	test -f /factory.reset
+	eend $?
+}
+
+checkfile() {
+	check_first
+	check_reset
+}
+
+start_pre() {
+	#/opt/rootwyrm/bin/identify.sh
+	checkfile
+	echo "Performing Firstboot..."
+	/opt/rootwyrm/bin/firstboot
+}
+
+stop() {
+	rm -f /firstboot
+	rm -f /factory.reset
+}
+
+# ft=sh

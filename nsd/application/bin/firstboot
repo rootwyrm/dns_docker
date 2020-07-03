@@ -9,36 +9,6 @@
 
 . /opt/rootwyrm/lib/deploy.lib.sh
 
-function message()
-{
-	printf '**********************************************************************\n'
-	printf 'System IPv4 Address: %s\n' "$SYSTEM_LOCALIP4"
-	if [ ! -z $SYSTEM_LOCALIP6 ]; then
-		printf 'System IPv6 Address: %s\n' "$SYSTEM_LOCALIP6"
-	fi
-	## Insert IP addresses
-	printf 'nsd binding to %s\n' "$SYSTEM_LOCALIP4"
-	## Insert IPv6 if present, delete if absent
-	if [ ! -z $NSD_LOCALIP6 ]; then
-		printf 'nsd binding to %s\n' "$NSD_LOCALIP6"
-	fi
-	if [ $CONTROL_SETUP = '1' ]; then
-		printf 'nsd control socket listening at /run/nsd.control.sock\n'
-	fi
-	printf 'Starting with %s servers\n' "$NSD_NCPU"
-	if [ ! -z $LAX_XFR ]; then
-		printf 'Using %s lax.xfr.dns.icann.org for root zones\n' "$LAX_XFR"
-	else
-		printf 'lax.xfr.dns.icann.org configured for root zones\n'
-	fi
-	if [ ! -z $IAD_XFR ]; then
-		printf 'Using %s lax.xfr.dns.icann.org for root zones\n' "$LAX_XFR"
-	else
-		printf 'iad.xfr.dns.icann.org configured for root zones\n'
-	fi
-	printf '**********************************************************************\n'
-}
-
 function config()
 {
 	local CONFIG="/usr/local/etc/nsd/nsd.conf"
@@ -118,7 +88,37 @@ function config()
 	chown -R nsd:nsd /usr/local/etc/nsd
 }
 
+function message()
+{
+	printf '**********************************************************************\n'
+	printf 'System IPv4 Address: %s\n' "$SYSTEM_LOCALIP4"
+	if [ ! -z $SYSTEM_LOCALIP6 ]; then
+		printf 'System IPv6 Address: %s\n' "$SYSTEM_LOCALIP6"
+	fi
+	## Insert IP addresses
+	printf 'nsd binding to %s\n' "$SYSTEM_LOCALIP4"
+	## Insert IPv6 if present, delete if absent
+	if [ ! -z $NSD_LOCALIP6 ]; then
+		printf 'nsd binding to %s\n' "$NSD_LOCALIP6"
+	fi
+	if [ $CONTROL_SETUP = '1' ]; then
+		printf 'nsd control socket listening at /run/nsd.control.sock\n'
+	fi
+	printf 'Starting with %s servers\n' "$NSD_NCPU"
+	if [ ! -z $LAX_XFR ]; then
+		printf 'Using %s lax.xfr.dns.icann.org for root zones\n' "$LAX_XFR"
+	else
+		printf 'lax.xfr.dns.icann.org configured for root zones\n'
+	fi
+	if [ ! -z $IAD_XFR ]; then
+		printf 'Using %s lax.xfr.dns.icann.org for root zones\n' "$LAX_XFR"
+	else
+		printf 'iad.xfr.dns.icann.org configured for root zones\n'
+	fi
+	printf '**********************************************************************\n'
+}
+
 ingest_environment
 IPADDRESS
 config
-message
+message > /message
