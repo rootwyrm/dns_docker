@@ -26,7 +26,7 @@ jobs:
     name: Build ${{ github.ref }} base
     runs-on: ubuntu-20.04
     env:
-      CONTAINER: dns_base
+      CONTAINER: base
       BINFMT: a7996909642ee92942dcd6cff44b9b95f08dad64
       PLATFORM: "linux/amd64,linux/386,linux/arm64,linux/arm/v7"
     steps:
@@ -49,7 +49,7 @@ jobs:
         [ "$VERSION" == "master" ] && VERSION=latest
         docker login -u ${{ secrets.HUB_USER }} -p ${{ secrets.HUB_TOKEN }}
         docker buildx build --platform $PLATFORM \
-        --tag rootwyrm/$CONTAINER:$VERSION \
-        --pull --push base
+        --tag rootwyrm/dns_$CONTAINER:$VERSION \
+        --pull --push $CONTAINER
 
 # vim:ts=2:sw=2:et
