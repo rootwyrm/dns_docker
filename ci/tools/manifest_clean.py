@@ -72,7 +72,7 @@ def hub_tag_delete(args,token):
         print("".join(list), "- ", end='')
         ## Need some debug.
         print(delete.text)
-        print(delete.body)
+        #print(delete.body)
         ## End Debug
         hub_return_check(result)
     except:
