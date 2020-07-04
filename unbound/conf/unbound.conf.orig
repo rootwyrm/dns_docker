@@ -94,3 +94,97 @@ remote-control:
 	server-cert-file: "/usr/local/etc/unbound/unbound_server.pem"
 	control-key-file: "/usr/local/etc/unbound/unbound_control.key"
 	control-cert-file: "/usr/local/etc/unbound/unbound_control.pem"
+
+forward-zone:
+    name: in-addr.arpa.
+    forward-addr: 172.16.53.11
+    forward-first: yes
+forward-zone:
+    name: arpa.
+    forward-addr: 172.16.53.11
+    forward-first: yes
+forward-zone:
+    name: root-servers.net.
+    forward-addr: 172.16.53.11
+    forward-first: yes
+forward-zone:
+    name: ipv4only.arpa.
+    forward-addr: 172.16.53.11
+    forward-first: yes
+forward-zone:
+    name: ip6.arpa.
+    forward-addr: 172.16.53.11
+    forward-first: yes
+forward-zone:
+    name: ip6-servers.arpa.
+    forward-addr: 172.16.53.11
+    forward-first: yes
+forward-zone:
+    name: mcast.net.
+    forward-addr: 172.16.53.11
+    forward-first: yes
+forward-zone:
+    name: 224.in-addr.arpa.
+    forward-addr: 172.16.53.11
+    forward-first: yes
+forward-zone:
+    name: 225.in-addr.arpa.
+    forward-addr: 172.16.53.11
+    forward-first: yes
+forward-zone:
+    name: 226.in-addr.arpa.
+    forward-addr: 172.16.53.11
+    forward-first: yes
+forward-zone:
+    name: 227.in-addr.arpa.
+    forward-addr: 172.16.53.11
+    forward-first: yes
+forward-zone:
+    name: 228.in-addr.arpa.
+    forward-addr: 172.16.53.11
+    forward-first: yes
+forward-zone:
+    name: 229.in-addr.arpa.
+    forward-addr: 172.16.53.11
+    forward-first: yes
+forward-zone:
+    name: 230.in-addr.arpa.
+    forward-addr: 172.16.53.11
+    forward-first: yes
+forward-zone:
+    name: 231.in-addr.arpa.
+    forward-addr: 172.16.53.11
+    forward-first: yes
+forward-zone:
+    name: 232.in-addr.arpa.
+    forward-addr: 172.16.53.11
+    forward-first: yes
+forward-zone:
+    name: 233.in-addr.arpa.
+    forward-addr: 172.16.53.11
+    forward-first: yes
+forward-zone:
+    name: 234.in-addr.arpa.
+    forward-addr: 172.16.53.11
+    forward-first: yes
+forward-zone:
+    name: 235.in-addr.arpa.
+    forward-addr: 172.16.53.11
+    forward-first: yes
+forward-zone:
+    name: 236.in-addr.arpa.
+    forward-addr: 172.16.53.11
+    forward-first: yes
+forward-zone:
+    name: 237.in-addr.arpa.
+    forward-addr: 172.16.53.11
+    forward-first: yes
+forward-zone:
+    name: 238.in-addr.arpa.
+    forward-addr: 172.16.53.11
+    forward-first: yes
+forward-zone:
+    name: 239.in-addr.arpa.
+    forward-addr: 172.16.53.11
+    forward-first: yes
+
