@@ -17,7 +17,7 @@ setConsoleACL('127.0.0.0/8')
 ------------------------------------------------------------
 setLocal('127.0.0.1', { reusePort=true, tcpFastOpenQueueSize=64})
 --addLocal('%%DNSDIST_LOCALIP4%%', { reusePort=true, tcpFastOpenQueueSize=32})
-%%DNSDIST_LISTENER%%
+--Local Listeners
 
 ------------------------------------------------------------
 -- Web server configuration

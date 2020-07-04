@@ -82,6 +82,11 @@ def hub_return_check(result):
         print("queued.")
     elif result == 404:
         print("not found.")
+    elif result == 403:
+        print("returned unauthorized!")
+        ## Need some debug.
+        print(delete.text)
+        print(delete.body)
     elif result == 401:
         print("authorization token failure!")
         sys.exit(10)

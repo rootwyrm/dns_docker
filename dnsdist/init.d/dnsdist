@@ -3,20 +3,22 @@
 ## init.d/dnsdist
 ################################################################################
 name="dnsdist"
+supervisor="supervise-daemon"
 
 extra_commands="checkconfig"
 
 description="A high-performance, programmable, secure, load-balancing DNS proxy"
 
-#: ${cfgfile:=${DNSDIST_CONFIG:-"/usr/local/etc/dnsdist/dnsdist.conf"}}
+: ${cfgfile:=${DNSDIST_CONFIG:-"/usr/local/etc/dnsdist.conf"}}
 
 command="/usr/local/bin/dnsdist"
-command_args="-u dnsdist -g dnsdist -C $cfgfile --supervised"
+command_args="-u dnsdist -g dnsdist -C $cfgfile"
+command_args_foreground="--supervised"
 
 required_files="$cfgfile"
 
 depend() {
-	need net dcron
+	need net dcron rootwyrm
 	use logger
 	after firewall 
 	before opennhrp bgpd
@@ -30,11 +32,10 @@ checkconfig() {
 }
 
 start_pre() {
-	/opt/rootwyrm/bin/firstboot
-	if [ $? -ne 0 ]; then
-		exit $?
+	/opt/rootwyrm/bin/identify.sh
+	if [ -f /message ]; then
+		cat /message
 	fi
-	: ${cfgfile:=${DNSDIST_CONFIG:-"/usr/local/etc/dnsdist/dnsdist.conf"}}
 	checkconfig
 }
 

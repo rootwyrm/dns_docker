@@ -76,7 +76,6 @@ function config()
 	## TODO: maybe disable tcpfastopen?? identifiable thing.
 	## Create listeners based on CPU count
 	DNSDIST_THREAD=$(cat /proc/cpuinfo | grep processor | wc -l)
-	set -a ADDLOCAL
 	## Limits
 	if [ $DNSDIST_THREAD -gt 16 ]; then
 		DNSDIST_THREAD=16
@@ -86,13 +85,13 @@ function config()
 	fi
 	dnsdist_listener=1
 	while [ $dnsdist_listener -le ${DNSDIST_THREAD} ]; do
-		local LUAFUNCTION="addLocal("
-		local LUAOPTIONS="{ reusePort=true, tcpFastOpenQueueSize=64}"
-		ADDLOCAL+="${LUAFUNCTION}'0.0.0.0', ${LUAOPTIONS})\n"
+		LISTENER="addLocal('"${SYSTEM_LOCALIP4}"', { reusePort=True, tcpFastOpenQueueSize=64 })"
+		sed -i -E '/--Local Listeners/a '"$LISTENER"'' ${CONFIG}
 		dnsdist_listener=$(( $dnsdist_listener + 1 ))
 	done
-	sed -i -e 's,%%DNSDIST_LISTENER%%,'${ADDLOCAL[@]}',' ${CONFIG}
+	#sed -i -e 's,%%DNSDIST_LISTENER%%,'$(cat /tmp/listener)',' ${CONFIG}
 	## XXX: need the tls listeners in here, same way
+	## XXX: except there's the SNI trickery involved.
 
 	## Insert IP addresses
 	sed -i -e 's/%%DNSDIST_LOCALIP4%%/'$SYSTEM_LOCALIP4'/g' $CONFIG
@@ -123,20 +122,24 @@ function config()
 
 function message()
 {
-	printf '**********************************************************************\n'
-	printf 'System IPv4 Address %s\n' "$SYSTEM_LOCALIP4"
-	if [ ! -z $SYSTEM_LOCALIP6 ]; then
-		printf 'System IPv6 Address: %s\n' "$SYSTEM_LOCALIP6"
+	outfile="/message"
+	if [ -f $outfile ]; then
+		rm $outfile
 	fi
-	printf '\n'
-	printf 'dnsdist binding to %s\n' "$SYSTEM_LOCALIP4"
+	printf '**********************************************************************\n' >> $outfile
+	printf 'System IPv4 Address %s\n' "$SYSTEM_LOCALIP4" >> $outfile
 	if [ ! -z $SYSTEM_LOCALIP6 ]; then
-		printf 'dnsdist binding to %s\n' "$SYSTEM_LOCALIP6"
+		printf 'System IPv6 Address: %s\n' "$SYSTEM_LOCALIP6" >> $outfile
 	fi
-	printf '\n'
-	printf 'dnsdist API Key: %s\n' "$DNSDIST_APIKEY"
-	printf 'dnsdist Web Password: admin:%s\n' "$DNSDIST_PASSWD"
-	printf '**********************************************************************\n'
+	printf '\n' >> $outfile
+	printf 'dnsdist binding to %s\n' "$SYSTEM_LOCALIP4" >> $outfile
+	if [ ! -z $SYSTEM_LOCALIP6 ]; then
+		printf 'dnsdist binding to %s\n' "$SYSTEM_LOCALIP6" >> $outfile
+	fi
+	printf '\n' >> $outfile
+	printf 'dnsdist API Key: %s\n' "$DNSDIST_APIKEY" >> $outfile
+	printf 'dnsdist Web Password: admin:%s\n' "$DNSDIST_PASSWD" >> $outfile
+	printf '**********************************************************************\n' >> $outfile
 }
 
 IPADDRESS
