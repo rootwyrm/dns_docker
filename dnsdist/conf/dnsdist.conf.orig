@@ -16,7 +16,6 @@ setConsoleACL('127.0.0.0/8')
 -- Listener configuration
 ------------------------------------------------------------
 setLocal('127.0.0.1', { reusePort=true, tcpFastOpenQueueSize=64})
---addLocal('%%DNSDIST_LOCALIP4%%', { reusePort=true, tcpFastOpenQueueSize=32})
 --Local Listeners
 
 ------------------------------------------------------------
@@ -59,35 +58,37 @@ newServer( {address="172.16.53.11:10530", pool="localroot", name="localroot", tc
 -- Fixed mapping
 ------------------------------------------------------------
 -- Send our authoritative queries to local NSD
-addAction("root-servers.net",   PoolAction("localroot"))
-addAction("arpa",               PoolAction("localroot"))
-addAction("in-addr.arpa",       PoolAction("localroot"))
-addAction("ipv4only.arpa",      PoolAction("localroot"))
-addAction("ip6.arpa",           PoolAction("localroot"))
-addAction("ip6-servers.arpa",   PoolAction("localroot"))
-addAction("mcast.net",          PoolAction("localroot"))
-addAction("224.in-addr.arpa",   PoolAction("localroot"))
-addAction("225.in-addr.arpa",   PoolAction("localroot"))
-addAction("226.in-addr.arpa",   PoolAction("localroot"))
-addAction("227.in-addr.arpa",   PoolAction("localroot"))
-addAction("228.in-addr.arpa",   PoolAction("localroot"))
-addAction("229.in-addr.arpa",   PoolAction("localroot"))
-addAction("230.in-addr.arpa",   PoolAction("localroot"))
-addAction("231.in-addr.arpa",   PoolAction("localroot"))
-addAction("232.in-addr.arpa",   PoolAction("localroot"))
-addAction("233.in-addr.arpa",   PoolAction("localroot"))
-addAction("234.in-addr.arpa",   PoolAction("localroot"))
-addAction("235.in-addr.arpa",   PoolAction("localroot"))
-addAction("236.in-addr.arpa",   PoolAction("localroot"))
-addAction("237.in-addr.arpa",   PoolAction("localroot"))
-addAction("238.in-addr.arpa",   PoolAction("localroot"))
-addAction("239.in-addr.arpa",   PoolAction("localroot"))
+localroot = newSuffixMatchNode()
+localroot:add("root-servers.net")
+localroot:add("arpa")
+localroot:add("in-addr.arpa")
+localroot:add("ipv4only.arpa")
+localroot:add("ip6.arpa")
+localroot:add("ip6-servers.arpa")
+localroot:add("mcast.net")          
+localroot:add("224.in-addr.arpa")
+localroot:add("225.in-addr.arpa")
+localroot:add("226.in-addr.arpa")
+localroot:add("227.in-addr.arpa")
+localroot:add("228.in-addr.arpa")
+localroot:add("229.in-addr.arpa")
+localroot:add("230.in-addr.arpa")
+localroot:add("231.in-addr.arpa")
+localroot:add("232.in-addr.arpa")
+localroot:add("233.in-addr.arpa")
+localroot:add("234.in-addr.arpa")
+localroot:add("235.in-addr.arpa")
+localroot:add("236.in-addr.arpa")
+localroot:add("237.in-addr.arpa")
+localroot:add("238.in-addr.arpa")
+localroot:add("239.in-addr.arpa")
+addAction(SuffixMatchNodeRule(localroot, true), PoolAction("localroot"))
 
 ------------------------------------------------------------
 -- Base cache settings; must set cache
 ------------------------------------------------------------
 cache_localroot     = newPacketCache(512)
-cache_authoritative = newPacketCache(4096, {numberOfShards=4})
+cache_authoritative = newPacketCache(2048, {numberOfShards=4})
 cache_recursor      = newPacketCache(8192, {numberOfShards=8})
 getPool("localroot"):setCache(cache_localroot)
 getPool("authoritative"):setCache(cache_authoritative)
@@ -97,6 +98,7 @@ getPool("recursor"):setCache(cache_recursor)
 -- Include actions; order matters
 -- Subdirectories 
 ------------------------------------------------------------
+-- XXX: need to 'if exists include webserver.conf'
 includeDirectory('/usr/local/etc/conf.d')
 includeDirectory('/usr/local/etc/lua')
 includeDirectory('/usr/local/etc/maps')

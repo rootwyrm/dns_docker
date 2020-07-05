@@ -12,8 +12,9 @@ description="A high-performance, programmable, secure, load-balancing DNS proxy"
 : ${cfgfile:=${DNSDIST_CONFIG:-"/usr/local/etc/dnsdist.conf"}}
 
 command="/usr/local/bin/dnsdist"
-command_args="-u dnsdist -g dnsdist -C $cfgfile"
-command_args_foreground="--supervised"
+command_args="-u dnsdist -g dnsdist -C $cfgfile --supervised"
+## XXX: does not work right under openrc 0.42.1-r10
+#command_args_foreground="--supervised"
 
 required_files="$cfgfile"
 

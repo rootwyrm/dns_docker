@@ -40,13 +40,13 @@ function config()
 
 	## Create our control key
 	if [ ! -z $FIRSTBOOT ]; then
-		CONTROLKEY=$(echo 'makeKey()' | dnsdist -l 127.0.0.1:53531 | grep ^setKey)
+		CONTROLKEY=$(echo 'makeKey()' | dnsdist -l 127.0.0.1:53531 -C /dev/null | grep ^setKey)
 		sed -i -e 's/%%DNSDIST_CONTROLKEY%%/'$CONTROLKEY'/g' $CONFIG
 		echo $CONTROLKEY > $CONFIGDIR/control.conf
 	fi
 
 	## Create API key in persistent storage
-	APIKEY="/usr/local/etc/dnsdist/conf.d/api.key"
+	APIKEY="${CONFIGDIR}/conf.d/api.key"
 	if [ ! -f $APIKEY ]; then
 		## Use blocking randomness
 		cat /dev/random | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1 > $APIKEY
@@ -84,12 +84,13 @@ function config()
 		DNSDIST_THREAD=4
 	fi
 	dnsdist_listener=1
-	while [ $dnsdist_listener -le ${DNSDIST_THREAD} ]; do
-		LISTENER="addLocal('"${SYSTEM_LOCALIP4}"', { reusePort=True, tcpFastOpenQueueSize=64 })"
-		sed -i -E '/--Local Listeners/a '"$LISTENER"'' ${CONFIG}
-		dnsdist_listener=$(( $dnsdist_listener + 1 ))
-	done
-	#sed -i -e 's,%%DNSDIST_LISTENER%%,'$(cat /tmp/listener)',' ${CONFIG}
+	if [ ! -z $FIRSTBOOT ]; then
+		while [ $dnsdist_listener -le ${DNSDIST_THREAD} ]; do
+			LISTENER="addLocal('"${SYSTEM_LOCALIP4}"', { reusePort=true, tcpFastOpenQueueSize=64 })"
+			sed -i -E '/--Local Listeners/a '"$LISTENER"'' ${CONFIG}
+			dnsdist_listener=$(( $dnsdist_listener + 1 ))
+		done
+	fi
 	## XXX: need the tls listeners in here, same way
 	## XXX: except there's the SNI trickery involved.
 
@@ -107,13 +108,18 @@ function config()
 	sed -i -e 's/%%DNSDIST_PASSWD%%/'$DNSDIST_PASSWD'/g' $CONFIG
 
 	## Prevent re-run
-	if [ -f /firstboot ]; then
-		rm /firstboot
+	if [ ! -z $FIRSTBOOT ]; then
+		if [ -f /firstboot ]; then
+			rm /firstboot
+		fi
+		if [ -f /factory.reset ]; then
+			rm /factory.reset
+		fi
 	fi
 
 	## Fix permissions always
 	chown -R dnsdist:dnsdist /usr/local/etc/dnsdist.conf
-	for x in conf.d lua maps; do
+	for x in conf.d lua maps pki; do
 		chown -R dnsdist:dnsdist /usr/local/etc/$x
 	done
 	chown 0:0 $APIKEY

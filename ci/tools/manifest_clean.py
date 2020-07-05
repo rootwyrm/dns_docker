@@ -71,7 +71,7 @@ def hub_tag_delete(args,token):
         list = [container, ':', tags]
         print("".join(list), "- ", end='')
         ## Need some debug.
-        print(delete.text)
+        #print(delete.text)
         #print(delete.body)
         ## End Debug
         hub_return_check(result)
@@ -87,7 +87,7 @@ def hub_return_check(result):
     elif result == 404:
         print("not found.")
     elif result == 403:
-        print("returned unauthorized!")
+        print("unauthorized.")
     elif result == 401:
         print("authorization token failure!")
         sys.exit(10)

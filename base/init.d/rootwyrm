@@ -30,7 +30,6 @@ checkfile() {
 start_pre() {
 	#/opt/rootwyrm/bin/identify.sh
 	checkfile
-	echo "Performing Firstboot..."
 	/opt/rootwyrm/bin/firstboot
 }
 

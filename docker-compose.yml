@@ -5,33 +5,34 @@ services:
   dnsdist:
     ## Never deploy more than 1 dnsdist instance per host.
     container_name: dnsdist
-    networks:
-      dns:
-        ipv4_address: ${ADDR_DNSDIST:-172.16.53.10}
+    network_mode: "host"
     image: docker.io/rootwyrm/dnsdist:${RELEASE:-latest}
     sysctls:
       - net.core.somaxconn=10240
-      - net.ipv4.tcp_rmem=10240 87380 12582912
-      - net.ipv4.tcp_wmem=10240 87380 12582912
+      - net.ipv4.tcp_rmem=1024 87380 12582912
+      - net.ipv4.tcp_wmem=1024 87380 12582912
       - net.ipv4.tcp_fin_timeout=15
       - net.ipv4.tcp_tw_reuse=1
       - net.ipv4.tcp_fastopen=3
     restart: on-failure
     ports:
       - "53:53"
-      - "443:443"
-      - "853:853"
-      - "8053:8053"
+      - "443:443/tcp"
+      - "853:853/tcp"
+      - "8053:8053/tcp"
     tmpfs:
       - /run
       - /tmp
     volumes:
-      - "/opt/rootwyrm/etc/dnsdist:/usr/local/etc/dnsdist/conf.d"
+      - "/opt/rootwyrm/etc/dnsdist/conf.d:/usr/local/etc/dnsdist/conf.d"
       - "/opt/rootwyrm/etc/dnsdist/lua:/usr/local/etc/dnsdist/lua"
       - "/opt/rootwyrm/etc/dnsdist/maps:/usr/local/etc/dnsdist/maps"
+      - "/opt/rootwyrm/etc/dnsdist/pki:/usr/local/etc/dnsdist/pki"
     cap_add:
       - NET_ADMIN
       - NET_BIND_SERVICE
+      ## CAUTION: Used for perf
+      - CAP_SYS_ADMIN
   nsd:
     ## If you need more than one nsd, you did it wrong.
     container_name: nsd
@@ -41,8 +42,8 @@ services:
     image: docker.io/rootwyrm/nsd:latest
     sysctls:
       - net.core.somaxconn=10240
-      - net.ipv4.tcp_rmem=10240 87380 12582912
-      - net.ipv4.tcp_wmem=10240 87380 12582912
+      - net.ipv4.tcp_rmem=1024 87380 12582912
+      - net.ipv4.tcp_wmem=1024 87380 12582912
       - net.ipv4.tcp_fin_timeout=15
       - net.ipv4.tcp_tw_reuse=1
       - net.ipv4.tcp_fastopen=3
@@ -55,12 +56,14 @@ services:
       - /tmp
     volumes:
       - "/opt/rootwyrm/etc/nsd:/usr/local/etc/nsd/conf.d"
+      - "/opt/rootwyrm/etc/nsd/pki:/usr/local/etc/nsd/pki"
+      - "/opt/rootwyrm/etc/nsd/zones:/usr/local/etc/nsd/zones"
       - "/opt/rootwyrm/var/db/nsd:/var/db/nsd"
     cap_add:
       - NET_ADMIN
       - NET_BIND_SERVICE
   unbound:
-    ## If you need more than one unbound, you did it wrong.
+    ## If you need more than one unbound, you probably did it wrong.
     container_name: unbound
     networks:
       dns:
@@ -68,8 +71,8 @@ services:
     image: docker.io/rootwyrm/unbound:latest
     sysctls:
       - net.core.somaxconn=10240
-      - net.ipv4.tcp_rmem=10240 87380 12582912
-      - net.ipv4.tcp_wmem=10240 87380 12582912
+      - net.ipv4.tcp_rmem=1024 87380 12582912
+      - net.ipv4.tcp_wmem=1024 87380 12582912
       - net.ipv4.tcp_fin_timeout=15
       - net.ipv4.tcp_tw_reuse=1
       - net.ipv4.tcp_fastopen=3
@@ -83,6 +86,8 @@ services:
       - /tmp
     volumes:
       - "/opt/rootwyrm/etc/unbound:/usr/local/etc/unbound/conf.d"
+      - "/opt/rootwyrm/etc/unbound/rpz:/usr/local/etc/unbound/rpz"
+      - "/opt/rootwyrm/etc/unbound/pki:/usr/local/etc/unbound/pki"
     cap_add:
       - NET_ADMIN
       - NET_BIND_SERVICE
