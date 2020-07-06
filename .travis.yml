@@ -1,14 +1,17 @@
 ## Trying out Travis.
 os: linux
 dist: bionic
+language: python
+python:
+  - "3.8"
 services:
   - docker
+arch:
+  - amd64
+  - arm64
 
 jobs:
   - name: "Travis CI Container Test"
-    arch:
-      - amd64
-      - arm64
     before_install:
     ## Update docker to latest-latest 
       - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
