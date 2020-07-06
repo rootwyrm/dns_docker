@@ -1,9 +1,9 @@
 ## Trying out Travis.
 os: linux
 dist: bionic
-language: python
-python:
-  - "3.8"
+#language: python
+#python:
+#  - "3.8"
 services:
   - docker
 arch:
