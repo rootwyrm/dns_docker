@@ -1,26 +1,34 @@
 #!/sbin/openrc-run
-supervisor=supervise-daemon
+################################################################################
+# Copyright (C) 2020-* Phillip "RootWyrm" Jaenke
+# All rights reserved
+#
+# Licensed under CC-BY-NC-3.0
+# See /LICENSE for details
+################################################################################
+# init.d/dnsdist
+################################################################################
+name="unbound"
+description="unbound is a high-performance recursing domain name server"
 
+supervisor="supervise-daemon"
 extra_commands="checkconfig configtest"
 extra_started_commands="reload"
 
-name="unbound daemon"
-description="unbound is a high-performance recursing domain name server"
-
-pidfile="/usr/local/etc/unbound/unbound.pid"
 : ${cfgfile:=${UNBOUND_CONFFILE:-/usr/local/etc/unbound/$RC_SVCNAME.conf}}
 
 command="/usr/local/sbin/unbound"
-command_args=""
-command_args="$command_args"
+command_args="${UNBOUND_OPTS}"
+command_args_foreground="-p -d"
 
 required_files="$cfgfile"
 
 depend() {
-	need net rootwyrm
+	need net dcron rootwyrm
 	use logger
+	after entropy firewall
+	before opennhrp bgpd ospfd
 	provide dns
-	after entropy
 }
 
 checkconfig() {
@@ -30,9 +38,9 @@ checkconfig() {
 }
 
 start_pre() {
-	checkconfig
 	/opt/rootwyrm/bin/identify.sh
 	if [ -f /message ]; then
 		cat /message
 	fi
+	checkconfig
 }

@@ -1,15 +1,16 @@
 #!/bin/bash
+################################################################################
+# Copyright (C) 2015-* Phillip "RootWyrm" Jaenke
+# All rights reserved
+# 
+# Licensed under CC-BY-NC-3.0
+# See /LICENSE for details
+################################################################################
 ## application/build/10.nsd.sh
-
-# Copyright (C) 2015-* Phillip R. Jaenke <prj+docker@rootwyrm.com>
-#
-# NO COMMERCIAL REDISTRIBUTION IN ANY FORM IS PERMITTED WITHOUT
-# EXPRESS WRITTEN CONSENT
 
 ######################################################################
 ## Function Import and Setup
 ######################################################################
-
 . /opt/rootwyrm/lib/deploy.lib.sh
 ingest_environment
 software_version
@@ -52,13 +53,9 @@ install_buildpkg()
 	CHECK_ERROR $? $vbpkg
 }
 
-user()
-{
-	## Need to create our user
-	adduser -g "nsd user" -D -H -h /var/db/nsd -s /sbin/nologin -u 101 nsd
-	CHECK_ERROR $? ${BUILDNAME}_user
-}
-
+################################################################################
+# Actual build routine
+################################################################################
 build()
 {
 	echo "$(date $DATEFMT) [${BUILDNAME}] Retrieving ${BUILDNAME} ${DISTVER}"
@@ -110,9 +107,9 @@ clean()
 	CHECK_ERROR $? "${BUILDNAME}_clean_apk"
 }
 
+CREATE_USER_DNSDOCKER
 install_runtime
 install_buildpkg
-user
 build
 clean
 

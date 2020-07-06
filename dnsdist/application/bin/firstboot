@@ -118,9 +118,9 @@ function config()
 	fi
 
 	## Fix permissions always
-	chown -R dnsdist:dnsdist /usr/local/etc/dnsdist.conf
+	chown -R dnsdocker:dnsdocker /usr/local/etc/dnsdist.conf
 	for x in conf.d lua maps pki; do
-		chown -R dnsdist:dnsdist /usr/local/etc/$x
+		chown -R dnsdocker:dnsdocker /usr/local/etc/$x
 	done
 	chown 0:0 $APIKEY
 	chown 0:0 $PASSWD

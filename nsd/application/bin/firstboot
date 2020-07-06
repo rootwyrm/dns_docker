@@ -84,8 +84,8 @@ function config()
 	fi
 
 	## Fix permissions on every start
-	chown -R nsd:nsd /var/db/nsd
-	chown -R nsd:nsd /usr/local/etc/nsd
+	chown -R dnsdocker:dnsdocker /var/db/nsd
+	chown -R dnsdocker:dnsdocker /usr/local/etc/nsd
 }
 
 function message()

@@ -1,21 +1,24 @@
 #!/bin/bash
+################################################################################
+# Copyright (C) 2015-* Phillip "RootWyrm" Jaenke
+# All rights reserved
+# 
+# Licensed under CC-BY-NC-3.0
+# See /LICENSE for details
+################################################################################
 ## application/build/10.unbound.sh
-
-# Copyright (C) 2015-* Phillip R. Jaenke <prj+docker@rootwyrm.com>
-#
-# NO COMMERCIAL REDISTRIBUTION IN ANY FORM IS PERMITTED WITHOUT
-# EXPRESS WRITTEN CONSENT
 
 ######################################################################
 ## Function Import and Setup
 ######################################################################
-
 . /opt/rootwyrm/lib/deploy.lib.sh
+ingest_environment
+software_version
 
 #export IFS=$'\n'
 export BUILDNAME="unbound"
 export DISTSITE="https://www.nlnetlabs.nl/downloads/unbound/"
-export DISTVER="1.10.1"
+export DISTVER="${SWVERSION:-1.10.1}"
 
 ## Build
 export vbpkg="${BUILDNAME}_build"
@@ -47,13 +50,6 @@ install_buildpkg()
 	echo "$(date $DATEFMT) [${BUILDNAME}] Installing build dependencies as $vbpkg"
 	/sbin/apk --no-cache add --virtual $vbpkg $vbpkg_content > /dev/null 2>&1 
 	CHECK_ERROR $? $vbpkg
-}
-
-user()
-{
-	## Need to create our user
-	adduser -g "unbound user" -D -H -h /usr/local/etc/unbound -s /sbin/nologin -u 106 unbound
-	CHECK_ERROR $? ${BUILDNAME}_user
 }
 
 build()
@@ -107,9 +103,9 @@ clean()
 	CHECK_ERROR $? "${BUILDNAME}_clean_apk"
 }
 
+CREATE_USER_DNSDOCKER
 install_runtime
 install_buildpkg
-user
 build
 clean
 

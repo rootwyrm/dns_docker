@@ -15,9 +15,10 @@ description_reload="Reloads NSD config file and modified zone files from disk"
 description_reopen="Reopen NSD log file (for logrotate)"
 
 : ${cfgfile:=${NSD_CONFIG:-"/usr/local/etc/nsd/nsd.conf"}}
+: ${user:=${NSD_USER:-"dnsdocker"}}
 
 command="/usr/local/sbin/nsd"
-command_args="-c $cfgfile -l /var/log/nsd.log -u nsd ${command_args:-}"
+command_args="-c $cfgfile -l /var/log/nsd.log -u ${user} ${command_args:-}"
 command_background="yes"
 pidfile="/run/$RC_SVCNAME.pid"
 start_stop_daemon_args="--wait 50"

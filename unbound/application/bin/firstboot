@@ -119,7 +119,8 @@ function config()
 	fi
 	
 	## Fix permissions every time
-	chown -R unbound:unbound /usr/local/etc/unbound
+	printf '[unbound] Fixing permissions... \n'
+	chown -R dnsdocker:dnsdocker /usr/local/etc/unbound
 
 }
 

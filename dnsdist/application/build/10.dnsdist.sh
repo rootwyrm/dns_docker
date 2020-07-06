@@ -51,15 +51,6 @@ install_buildpkg()
 }
 
 ######################################################################
-## Create local non-root user
-######################################################################
-user()
-{
-	adduser -g "dnsdist user" -D -H -s /sbin/nologin -u 5300 dnsdist
-	CHECK_ERROR $? dnsdist_user
-}
-
-######################################################################
 ## Perform build
 ######################################################################
 build()
@@ -111,9 +102,9 @@ clean()
 	CHECK_ERROR $? "dnsdist_clean_apk"
 }
 
+CREATE_USER_DNSDOCKER
 install_runtime
 install_buildpkg
-user
 build
 clean
 

@@ -46,7 +46,11 @@ RUN mkdir -p /opt/rootwyrm && \
     rm -f /etc/init.d/modules-load ; \
     rm -f /etc/init.d/modloop ; \
     sed -i 's/\tcgroup_add_service/\t#cgroup_add_service/g' /lib/rc/sh/openrc-run.sh && \
-    sed -i 's/VSERVER/DOCKER/Ig' /lib/rc/sh/init.sh
+    sed -i 's/VSERVER/DOCKER/Ig' /lib/rc/sh/init.sh ; \
+    echo "dns_docker is Copyright (C) 2020-* Phillip Jaenke and its contributors" > /LICENSE
+    echo "https://github.com/rootwyrm/dns_docker/" >> /LICENSE
+    echo "" >> /LICENSE
+    echo "This work is licensed under the Creative Commons Attribution-NonCommercial 3.0 Unported License. To view a copy of this license, visit http://creativecommons.org/licenses/by-nc/3.0/ or send a letter to Creative Commons, PO Box 1866, Mountain View, CA 94042, USA." >> /LICENSE
 
 COPY [ "rc.conf", "/etc/rc.conf" ]
 COPY [ "appbase/", "/opt/rootwyrm" ]

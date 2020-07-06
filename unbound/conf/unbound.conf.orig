@@ -1,8 +1,7 @@
 ## unbound.conf
-include: "conf.d/*.conf"
 
 server:
-	username: "unbound"
+	username: "dnsdocker"
 	chroot: "/usr/local/etc/unbound"
 	directory: "/usr/local/etc/unbound"
 	module-config: "respip subnetcache validator iterator"
@@ -10,7 +9,6 @@ server:
 	verbosity: 1
 	do-daemonize: no
 	logfile: ""
-	pidfile: "/usr/local/etc/unbound/unbound.pid"
 	use-syslog: no
 	statistics-interval: 1800
 	shm-enable: no
@@ -18,12 +16,10 @@ server:
 
 	## Internal Port
 	interface: 0.0.0.0@53		# %%UNBOUND_LOCALIP4%%
-	interface: ::0@53			# %%UNBOUND_LOCALIP6%%
 	## Cluster Mode Port
 	interface: 0.0.0.0@10531	# %%UNBOUND_LOCALIP4%%
-	interface: ::0@10531		# %%UNBOUND_LOCALIP6%%
 	do-ip4: yes	
-	do-ip6: no					# %%UNBOUND_LOCALIP4%%
+	do-ip6: no
 
 	outgoing-range: 32000
 	so-reuseport: yes
@@ -50,14 +46,12 @@ server:
 	## CAUTION: these are required with caps-for-id enabled
 	caps-whitelist: "licdn.com"
 	caps-whitelist: "senderbase.org"
+	## https://github.com/NLnetLabs/unbound/issues/19
+	caps-whitelist: "letsencrypt.org"
 
-	## Martians
-	private-address: 10.0.0.0/8
-	private-address: 172.16.0.0/12
-	private-address: 192.168.0.0/16
-	private-address: 169.254.0.0/16
-	private-address: fd00::/8
-	private-address: fe80::/8
+	## Permit Martians (commonly used)
+	unblock-lan-zones: yes
+	## Reject all 4to6 as nobody should be using it anyways.
 	private-address: ::ffff:0:0/96
 
 	do-not-query-address: 127.0.0.1/8
@@ -187,4 +181,7 @@ forward-zone:
     name: 239.in-addr.arpa.
     forward-addr: 172.16.53.11
     forward-first: yes
-
+################################################################################
+## END OF INTERNAL CONFIGURATION; INCLUDES GO BELOW
+################################################################################
+include: "conf.d/*.conf"
