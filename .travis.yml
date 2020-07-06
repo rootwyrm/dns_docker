@@ -10,7 +10,7 @@ services:
 
 before_install:
   ## Update docker to latest-latest 
-  - curl -fsSL https://download/docker.com/linux/ubuntu/gpg | sudo apt-key add -
+  - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
   - sudo apt-add-repository "deb [arch=https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
   - sudo apt-get update
   - sudo apt-get -y -o Dpkg::Options="--force-confnew" install docker-ce
