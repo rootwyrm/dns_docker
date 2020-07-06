@@ -1,7 +1,7 @@
 ## Trying out Travis.
 os: linux
 dist: bionic
-#language: python
+language: minimal
 #python:
 #  - "3.8"
 services:
