@@ -1,0 +1,89 @@
+################################################################################
+# Copyright (C) 2020-* Phillip "RootWyrm" Jaenke
+# All rights reserved
+#
+# Licensed under CC-BY-NC-3.0
+# See /LICENSE for details
+#
+# WARNING!! THIS IS A DNS RECURSOR DATA SET!!
+# YOU HAVE NO RIGHTS TO THIS FILE FOR TESTING COMMERCIAL PRODUCTS!!
+################################################################################
+# Internet query list for recursor.
+# DO NOT SET ANY EXPECTED RESULTS. DNS results change! That's the whole
+# freaking point of DNS!
+# Also remember this is pass/fail based on "returns an answer."
+
+################################################################################
+## Generic popular and semi-random additions go in here.
+## More is better if the domain is going to be around a long time.
+################################################################################
+www.google.com,A
+www.google.com,AAAA
+google.com,MX
+www.bing.com,A
+www.bing.com,AAAA
+bing.com,MX
+dns.google,A
+dns.google,AAAA
+8.8.8.8,PTR
+8.8.4.4,PTR
+1.1.1.1,PTR
+one.one.one.one,A
+dns9.quad9.net,A
+dns9.quad9.net,AAAA
+9.9.9.9,PTR
+149.112.112.9,PTR
+2620:fe::9,PTR
+www.cnn.com,A
+www.cnn.com,AAAA
+fastly.net,A
+fastly.net,MX
+www.jalopnik.com,A
+www.spotify.com,A
+docker.io,A
+docker.io,MX
+hub.docker.com,CNAME
+en.wikipedia.org,CNAME
+facebook.com,A
+facebook.com,AAAA
+
+################################################################################
+## ccTLD check, alphabetical
+## Preference is to check the ccTLD Registrar/Administrator where possible,
+##   except when the registrar is under a different ccTLD.
+################################################################################
+www.nic.ac,A
+www.nic.ad,A
+www.aeda.ae,A
+www.nic.af,A
+www.nic.ag,A
+nic.com.ai,A
+akep.al,A
+akep.al,AAAA
+www.isoc.am,A
+www.dns.ao,A
+com.aq,A
+www.nic.ar,A
+www.nic.ar,AAAA
+www.nic.as,A
+www.nic.at,A
+# Australia need to check several due to auDA delegation policies
+www.auda.org.au,A
+www.auda.org.au,AAAA
+afilias.com.au,A
+afilias.com.au,AAAA
+act.gov.au,A
+www.ecu.edu.au,A
+www.setar.aw,A
+www.regeringen.ax,A
+www.nic.az,A
+
+www.cnnic.cn,A
+www.cnnic.cn,AAAA
+www.to,A
+
+################################################################################
+## IDN Checks, randomized. 
+## EVERYONE HATES IDNS. EVERYONE.
+################################################################################
+#.հայ
