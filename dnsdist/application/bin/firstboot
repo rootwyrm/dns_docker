@@ -94,7 +94,7 @@ function config()
 	## Create our control key
 	if [ ! -z $FIRSTBOOT ]; then
 		CONTROLKEY=$(echo 'makeKey()' | dnsdist -l 127.0.0.1:53531 -C /dev/null | grep ^setKey)
-		sed -i -e 's/%%DNSDIST_CONTROLKEY%%/'$CONTROLKEY'/g' $CONFIG
+		sed -i -e 's,%%DNSDIST_CONTROLKEY%%,'$CONTROLKEY',g' $CONFIG
 		echo $CONTROLKEY > $CONFIGDIR/control.conf
 	fi
 
