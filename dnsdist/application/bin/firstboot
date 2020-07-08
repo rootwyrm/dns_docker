@@ -9,11 +9,64 @@
 
 . /opt/rootwyrm/lib/deploy.lib.sh
 
+## Separate out
+function webserver()
+{
+	local WEBCONFSRC="/opt/rootwyrm/conf/webserver.conf.orig"
+	local WEBCONFDEST="/usr/local/etc/conf.d/webserver.conf"
+
+	## Calculate our subnet with best effort
+	DEVICE=$(ip route | grep ^default | awk '{print $(NF)}')
+	WEBACL=$(ip route | grep -v ^default | grep $DEVICE | awk '{print $1}')
+	if [ -f /firstboot ] || [ ! -f $WEBCONFDEST ]; then
+		printf '[dnsdist] Configuring webserver with default ACL %s\n' "${WEBACL}"
+		cp $WEBCONFSRC $WEBCONFDEST
+	else
+		## Assume nothing to do, this is user-accessible.
+		return 0
+	fi
+
+	## Actually start replacing strings.
+	sed -i -e 's/%%SYSTEM_LOCALIP4%%/'${WEBACL}'/' $WEBCONFDEST
+	sed -i -e 's/%%DEFAULT_ACL%%/'${WEBACL}'/' $WEBCONFDEST
+
+	## Create API key in persistent storage
+	APIKEY="${CONFIGDIR}/conf.d/api.key"
+	if [ ! -f $APIKEY ]; then
+		## Use blocking randomness
+		cat /dev/random | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1 > $APIKEY
+		chmod 0700 $APIKEY
+		chown 0:0 $APIKEY
+		DNSDIST_APIKEY=$(cat $APIKEY)
+	else
+		DNSDIST_APIKEY=$(cat $APIKEY)
+	fi
+	## Insert APIKEY
+	sed -i -e 's/%%DNSDIST_APIKEY%%/'$DNSDIST_APIKEY'/g' $WEBCONFDEST
+	
+	## Generate a new random password when necessary
+	PASSWD="/usr/local/etc/dnsdist.passwd"
+	if [ ! -f $PASSWD ] && [ -z $DNSDIST_PASSWD ]; then
+		## Use blocking randomness
+		cat /dev/random | tr -dc 'a-zA-Z0-9' | fold -w 16 | head -n 1 > $PASSWD
+		chmod 0700 $PASSWD
+		chown 0:0 $PASSWD
+		DNSDIST_PASSWD=$(cat $PASSWD)
+	elif [ ! -z $DNSDIST_PASSWD ]; then
+		echo "${DNSDIST_PASSWD}" > $PASSWD
+		DNSDIST_PASSWD=$(cat $PASSWD)
+	else
+		DNSDIST_PASSWD=$(cat $PASSWD)
+	fi
+	## Insert password
+	sed -i -e 's/%%DNSDIST_PASSWD%%/'$DNSDIST_PASSWD'/g' $WEBCONFDEST
+}
+
 function config()
 {
-	local CONFIGDIR="/usr/local/etc/"
-	local CONFIGSRC="/opt/rootwyrm/conf/dnsdist.conf.orig"
-	local CONFIG="/usr/local/etc/dnsdist.conf"
+	export CONFIGDIR="/usr/local/etc/"
+	export CONFIGSRC="/opt/rootwyrm/conf/dnsdist.conf.orig"
+	export CONFIG="/usr/local/etc/dnsdist.conf"
 	
 	if [ -f /firstboot ]; then
 		printf '[dnsdist] Performing initial firstboot tasks.\n'
@@ -43,33 +96,6 @@ function config()
 		CONTROLKEY=$(echo 'makeKey()' | dnsdist -l 127.0.0.1:53531 -C /dev/null | grep ^setKey)
 		sed -i -e 's/%%DNSDIST_CONTROLKEY%%/'$CONTROLKEY'/g' $CONFIG
 		echo $CONTROLKEY > $CONFIGDIR/control.conf
-	fi
-
-	## Create API key in persistent storage
-	APIKEY="${CONFIGDIR}/conf.d/api.key"
-	if [ ! -f $APIKEY ]; then
-		## Use blocking randomness
-		cat /dev/random | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1 > $APIKEY
-		chmod 0700 $APIKEY
-		chown 0:0 $APIKEY
-		DNSDIST_APIKEY=$(cat $APIKEY)
-	else
-		DNSDIST_APIKEY=$(cat $APIKEY)
-	fi
-
-	## Generate a new random password when necessary
-	PASSWD="/usr/local/etc/dnsdist.passwd"
-	if [ ! -f $PASSWD ] && [ -z $DNSDIST_PASSWD ]; then
-		## Use blocking randomness
-		cat /dev/random | tr -dc 'a-zA-Z0-9' | fold -w 16 | head -n 1 > $PASSWD
-		chmod 0700 $PASSWD
-		chown 0:0 $PASSWD
-		DNSDIST_PASSWD=$(cat $PASSWD)
-	elif [ ! -z $DNSDIST_PASSWD ]; then
-		echo "${DNSDIST_PASSWD}" > $PASSWD
-		DNSDIST_PASSWD=$(cat $PASSWD)
-	else
-		DNSDIST_PASSWD=$(cat $PASSWD)
 	fi
 
 	## XXX: need to tune tcp fastopen automagically
@@ -103,9 +129,12 @@ function config()
 		sed -i -e '/.*%%DNSDIST_LOCALIP6%%.*/d' $CONFIG
 	fi
 	## API key
-	sed -i -e 's/%%DNSDIST_APIKEY%%/'$DNSDIST_APIKEY'/g' $CONFIG
+	#sed -i -e 's/%%DNSDIST_APIKEY%%/'$DNSDIST_APIKEY'/g' $CONFIG
 	## Password
-	sed -i -e 's/%%DNSDIST_PASSWD%%/'$DNSDIST_PASSWD'/g' $CONFIG
+	#sed -i -e 's/%%DNSDIST_PASSWD%%/'$DNSDIST_PASSWD'/g' $CONFIG
+
+	## Call webserver function
+	webserver
 
 	## Prevent re-run
 	if [ ! -z $FIRSTBOOT ]; then
@@ -116,6 +145,18 @@ function config()
 			rm /factory.reset
 		fi
 	fi
+
+	## Needs duplicated for message	
+	if [ -z $PASSWD ]; then
+		PASSWD="/usr/local/etc/dnsdist.passwd"
+	fi
+	if [ ! -f $PASSWD ] && [ -z $DNSDIST_PASSWD ]; then
+		DNSDIST_PASSWD=$(cat $PASSWD)
+	fi
+	if [ -z $APIKEY ]; then
+		APIKEY="${CONFIGDIR}/conf.d/api.key"
+	fi
+	DNSDIST_APIKEY=$(cat $APIKEY)
 
 	## Fix permissions always
 	chown -R dnsdocker:dnsdocker /usr/local/etc/dnsdist.conf

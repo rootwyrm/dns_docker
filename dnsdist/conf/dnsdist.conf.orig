@@ -19,12 +19,6 @@ setLocal('127.0.0.1', { reusePort=true, tcpFastOpenQueueSize=64})
 --Local Listeners
 
 ------------------------------------------------------------
--- Web server configuration
-------------------------------------------------------------
-webserver("%%DNSDIST_LOCALIP4%%:8053", "%%DNSDIST_PASSWD%%", "%%DNSDIST_APIKEY%%", {}, "127.0.0.0/8, 172.16.0.0/12")
-webserver("%%DNSDIST_LOCALIP6%%:8053", "%%DNSDIST_PASSWD%%", "%%DNSDIST_APIKEY%%", {}, "127.0.0.0/8, 172.16.0.0/12")
-
-------------------------------------------------------------
 -- Set default ACL
 ------------------------------------------------------------
 setACL('127.0.0.0/8')
