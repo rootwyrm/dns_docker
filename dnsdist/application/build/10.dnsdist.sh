@@ -15,7 +15,7 @@
 export BUILDNAME="dnsdist"
 export DISTSITE="https://downloads.powerdns.com/releases"
 if [ -z ${DISTVER} ]; then
-	export DISTVER="1.5.0-rc3"
+	export DISTVER="1.5.0-rc4"
 fi
 
 ## Build

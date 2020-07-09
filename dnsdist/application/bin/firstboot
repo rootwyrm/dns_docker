@@ -9,7 +9,7 @@
 
 . /opt/rootwyrm/lib/deploy.lib.sh
 
-## Separate out
+## Separate out webserver config.
 function webserver()
 {
 	local WEBCONFSRC="/opt/rootwyrm/conf/webserver.conf.orig"
@@ -27,7 +27,7 @@ function webserver()
 	fi
 
 	## Actually start replacing strings.
-	sed -i -e 's/%%SYSTEM_LOCALIP4%%/'${WEBACL}'/' $WEBCONFDEST
+	sed -i -e 's/%%DNSDIST_LOCALIP4%%/'${SYSTEM_LOCALIP4}'/' $WEBCONFDEST
 	sed -i -e 's/%%DEFAULT_ACL%%/'${WEBACL}'/' $WEBCONFDEST
 
 	## Create API key in persistent storage
