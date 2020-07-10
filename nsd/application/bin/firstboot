@@ -7,7 +7,7 @@
 # See /LICENSE for details
 ################################################################################
 
-. /opt/rootwyrm/lib/deploy.lib.sh
+. /opt/rootwyrm/lib/system.lib.sh
 
 function config()
 {
@@ -104,10 +104,10 @@ function config()
 
 	## Bind to the IPv4 address
 	if [ ! -z $FIRSTBOOT ]; then
-		sed -i -e 's/%%NSD_LOCALIP4%%/'$SYSTEM_LOCALIP4'/g' $CONFIG
+		sed -i -e 's/%%NSD_LOCALIP4%%/'${DEFAULT_IP4}'/g' $CONFIG
 		## Bind to IPv6 if present, disable if not
-		if [ ! -z $NSD_LOCALIP6 ]; then
-			sed -i -e 's/%%NSD_LOCALIP6%%/'$SYSTEM_IP6'/g' $CONFIG
+		if [ ! -z ${DEFAULT_IP6} ]; then
+			sed -i -e 's/%%NSD_LOCALIP6%%/'${DEFAULT_IP6}'/g' $CONFIG
 		else
 			sed -i -e '/.*%%NSD_LOCALIP6%%.*/d' $CONFIG
 		fi
@@ -134,8 +134,8 @@ function message()
 	## Insert IP addresses
 	printf 'nsd binding to %s\n' "$SYSTEM_LOCALIP4"
 	## Insert IPv6 if present, delete if absent
-	if [ ! -z $NSD_LOCALIP6 ]; then
-		printf 'nsd binding to %s\n' "$NSD_LOCALIP6"
+	if [ ! -z ${DEFAULT_IP6} ]; then
+		printf 'nsd binding to %s\n' "${DEFAULT_IP6}"
 	fi
 	if [ $CONTROL_SETUP = '1' ]; then
 		printf 'nsd control socket listening at /run/nsd.control.sock\n'
@@ -155,6 +155,5 @@ function message()
 }
 
 ingest_environment
-IPADDRESS
 config
 message > /message

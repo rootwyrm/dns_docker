@@ -7,7 +7,7 @@
 # See /LICENSE for details
 ################################################################################
 
-. /opt/rootwyrm/lib/deploy.lib.sh
+. /opt/rootwyrm/lib/system.lib.sh
 
 ## Separate out webserver config.
 function webserver()
@@ -27,7 +27,7 @@ function webserver()
 	fi
 
 	## Actually start replacing strings.
-	sed -i -e 's/%%DNSDIST_LOCALIP4%%/'${SYSTEM_LOCALIP4}'/' $WEBCONFDEST
+	sed -i -e 's/%%DNSDIST_LOCALIP4%%/'${DEFAULT_IP4}'/' $WEBCONFDEST
 	sed -i -e 's/%%DEFAULT_ACL%%/'${WEBACL}'/' $WEBCONFDEST
 
 	## Create API key in persistent storage
@@ -112,7 +112,7 @@ function config()
 	dnsdist_listener=1
 	if [ ! -z $FIRSTBOOT ]; then
 		while [ $dnsdist_listener -le ${DNSDIST_THREAD} ]; do
-			LISTENER="addLocal('"${SYSTEM_LOCALIP4}"', { reusePort=true, tcpFastOpenQueueSize=64 })"
+			LISTENER="addLocal('"${DEFAULT_IP4}"', { reusePort=true, tcpFastOpenQueueSize=64 })"
 			sed -i -E '/--Local Listeners/a '"$LISTENER"'' ${CONFIG}
 			dnsdist_listener=$(( $dnsdist_listener + 1 ))
 		done
@@ -121,10 +121,10 @@ function config()
 	## XXX: except there's the SNI trickery involved.
 
 	## Insert IP addresses
-	sed -i -e 's/%%DNSDIST_LOCALIP4%%/'$SYSTEM_LOCALIP4'/g' $CONFIG
+	sed -i -e 's/%%DNSDIST_LOCALIP4%%/'${DEFAULT_IP4}'/g' $CONFIG
 	## Insert IPv6 if present, delete if absent
 	if [ ! -z $SYSTEM_LOCALIP6 ]; then
-		sed -i -e 's/%%DNSDIST_LOCALIP6%%/'$SYSTEM_LOCALIP6'/g' $CONFIG
+		sed -i -e 's/%%DNSDIST_LOCALIP6%%/'${DEFAULT_IP6}'/g' $CONFIG
 	else
 		sed -i -e '/.*%%DNSDIST_LOCALIP6%%.*/d' $CONFIG
 	fi
@@ -160,7 +160,7 @@ function config()
 
 	## Fix permissions always
 	chown -R dnsdocker:dnsdocker /usr/local/etc/dnsdist.conf
-	for x in conf.d lua maps pki; do
+	for x in conf.d lua maps; do
 		chown -R dnsdocker:dnsdocker /usr/local/etc/$x
 	done
 	chown 0:0 $APIKEY
@@ -174,14 +174,14 @@ function message()
 		rm $outfile
 	fi
 	printf '**********************************************************************\n' >> $outfile
-	printf 'System IPv4 Address %s\n' "$SYSTEM_LOCALIP4" >> $outfile
-	if [ ! -z $SYSTEM_LOCALIP6 ]; then
-		printf 'System IPv6 Address: %s\n' "$SYSTEM_LOCALIP6" >> $outfile
+	printf 'System IPv4 Address %s\n' "${DEFAULT_IP4}" >> $outfile
+	if [ ! -z ${DEFAULT_IP6} ]; then
+		printf 'System IPv6 Address: %s\n' "${DEFAULT_IP6}" >> $outfile
 	fi
 	printf '\n' >> $outfile
-	printf 'dnsdist binding to %s\n' "$SYSTEM_LOCALIP4" >> $outfile
-	if [ ! -z $SYSTEM_LOCALIP6 ]; then
-		printf 'dnsdist binding to %s\n' "$SYSTEM_LOCALIP6" >> $outfile
+	printf 'dnsdist binding to %s\n' "${DEFAULT_IP4}" >> $outfile
+	if [ ! -z ${DEFAULT_IP6} ]; then
+		printf 'dnsdist binding to %s\n' "${DEFAULT_IP6}" >> $outfile
 	fi
 	printf '\n' >> $outfile
 	printf 'dnsdist API Key: %s\n' "$DNSDIST_APIKEY" >> $outfile
@@ -189,7 +189,6 @@ function message()
 	printf '**********************************************************************\n' >> $outfile
 }
 
-IPADDRESS
 ingest_environment
 config
 message
