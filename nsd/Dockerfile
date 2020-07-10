@@ -31,11 +31,11 @@ LABEL   maintainer="Phillip 'RootWyrm' Jaenke <prj+docker@rootwyrm.com>" \
 
 EXPOSE    53/tcp
 EXPOSE    53/udp
+EXPOSE    853/tcp
 EXPOSE    10530/tcp
 EXPOSE    10530/udp
 
 ## Create common elements
-ADD     [ "conf/", "/usr/local/etc/nsd" ]
 ADD     [ "cron/", "/etc/periodic/" ]
 
 VOLUME [ "/var/db/nsd", "/usr/local/etc/nsd/conf.d", "/usr/local/etc/nsd/zones" ]

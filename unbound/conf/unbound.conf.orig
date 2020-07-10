@@ -90,27 +90,7 @@ remote-control:
 	control-cert-file: "/usr/local/etc/unbound/unbound_control.pem"
 
 forward-zone:
-    name: in-addr.arpa.
-    forward-addr: 172.16.53.11
-    forward-first: yes
-forward-zone:
-    name: arpa.
-    forward-addr: 172.16.53.11
-    forward-first: yes
-forward-zone:
     name: root-servers.net.
-    forward-addr: 172.16.53.11
-    forward-first: yes
-forward-zone:
-    name: ipv4only.arpa.
-    forward-addr: 172.16.53.11
-    forward-first: yes
-forward-zone:
-    name: ip6.arpa.
-    forward-addr: 172.16.53.11
-    forward-first: yes
-forward-zone:
-    name: ip6-servers.arpa.
     forward-addr: 172.16.53.11
     forward-first: yes
 forward-zone:

@@ -50,21 +50,6 @@ zone:
     name: "root-servers.net"
     include-pattern: "localroot"
 zone:
-    name: "arpa"
-    include-pattern: "localroot"
-zone:
-    name: "in-addr.arpa"
-    include-pattern: "localroot"
-zone:
-    name: "ipv4only.arpa"
-    include-pattern: "localroot"
-zone:
-    name: "ip6.arpa"
-    include-pattern: "localroot"
-zone:
-    name: "ip6-servers.arpa"
-    include-pattern: "localroot"
-zone:
     name: "mcast.net"
     include-pattern: "localroot"
 zone:

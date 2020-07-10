@@ -11,54 +11,82 @@
 
 function config()
 {
-	local CONFIG="/usr/local/etc/nsd/nsd.conf"
-	local CFGDIR="/usr/local/etc/nsd"
+	export CONFIGDIR="/usr/local/etc/nsd"
+	export CONFIGSRC="/opt/rootwyrm/conf/nsd.conf.orig"
+	export CONFIG="/usr/local/etc/nsd/nsd.conf"
+
+	if [ -f /firstboot ]; then
+		printf '[nsd] Performing initial firstboot tasks.\n'
+		printf '[nsd] This may take some time!\n'
+		printf '\n'
+		export FIRSTBOOT=1
+	fi
+	if [ ! -f ${CONFIG} ]; then
+		cp ${CONFIGSRC} ${CONFIG}
+		if [ $? -ne 0 ]; then
+			RC=$?
+			printf 'Could not install configuration - ERROR %s\n' "$RC"
+			exit $RC
+		fi
+	elif [ -f /factory.reset ]; then
+		printf '[nsd] Factory reset requested!\n'
+		printf '[nsd] Passwords and keys will NOT be changed.\n'
+		printf '[nsd] Configuration will be backed up.\n'
+		printf '\n'
+		cp ${CONFIG} ${CONFIG}.bak
+		cp ${CONFIGSRC} ${CONFIG}
+		export FIRSTBOOT=1
+	fi
 
 	## Run ncpu servers up to a maximum 16 - %%NSD_NCPU%%
-	grep '%%NSD_NCPU%%' $CONFIG > /dev/null
-	if [ $? -eq 1 ]; then
-		NSD_NCPU=$(cat $CONFIG | grep server-count | awk '{print $2}')
-	else
-		local cpucount=$(cat /proc/cpuinfo | grep ^processor | wc -l)
-		if [[ $cpucount -gt 16 ]]; then
-			NSD_NCPU=16
-		elif [[ $cpucount -le 2 ]]; then
-			NSD_NCPU=2
+	if [ ! -z $FIRSTBOOT ]; then
+		grep '%%NSD_NCPU%%' $CONFIG > /dev/null
+		if [ $? -eq 1 ]; then
+			NSD_NCPU=$(cat $CONFIG | grep server-count | awk '{print $2}')
 		else
-			NSD_NCPU=$(($cpucount))
+			local cpucount=$(cat /proc/cpuinfo | grep ^processor | wc -l)
+			if [[ $cpucount -gt 16 ]]; then
+				NSD_NCPU=16
+			elif [[ $cpucount -le 2 ]]; then
+				NSD_NCPU=2
+			else
+				NSD_NCPU=$(($cpucount))
+			fi
+			# Set number of servers to start
+			sed -i -e 's/%%NSD_NCPU%%/'$NSD_NCPU'/g' $CONFIG
 		fi
-		# Set number of servers to start
-		sed -i -e 's/%%NSD_NCPU%%/'$NSD_NCPU'/g' $CONFIG
 	fi
 
-	########################################
-	## lax.xfr.dns.icann.org
-	grep '%%LAX_XFR%%' $CONFIG > /dev/null
-	if [ $? -eq 0 ]; then
-		## Don't trust the local resolver for these. Ever.
-		## This doesn't abuse PCH, because these are one-time lookups.
-		LAX_XFR=$(host -t A lax.xfr.dns.icann.org 9.9.9.9 | grep address | awk '{print $4}')
-		if [ -z $LAX_XFR ] || [ $LAX_XFR = "" ]; then
-			printf 'Could not resolve lax.xfr.dns.icann.org via PCH, aborting!\n'
-			exit 1
+	if [ ! -z $FIRSTBOOT ]; then
+		########################################
+		## lax.xfr.dns.icann.org
+		grep '%%LAX_XFR%%' $CONFIG > /dev/null
+		if [ $? -eq 0 ]; then
+			## Don't trust the local resolver for these. Ever.
+			## This doesn't abuse PCH, because these are one-time lookups.
+			LAX_XFR=$(host -t A lax.xfr.dns.icann.org 9.9.9.9 | grep address | awk '{print $4}')
+			if [ -z $LAX_XFR ] || [ $LAX_XFR = "" ]; then
+				printf 'Could not resolve lax.xfr.dns.icann.org via PCH, aborting!\n'
+				exit 1
+			fi
+			# Set root-servers.net transfers	
+			sed -i -e 's/%%LAX_XFR%%/'$LAX_XFR'/g' $CONFIG
 		fi
-		# Set root-servers.net transfers	
-		sed -i -e 's/%%LAX_XFR%%/'$LAX_XFR'/g' $CONFIG
-	fi
-	########################################
-	## iad.xfr.dns.icann.org
-	grep '%%IAD_XFR%%' $CONFIG > /dev/null
-	if [ $? -eq 0 ]; then
-		IAD_XFR=$(host -t A iad.xfr.dns.icann.org 9.9.9.9 | grep address | awk '{print $4}')
-		if [ -z $IAD_XFR ] || [ $IAD_XFR = "" ]; then
-			printf 'Could not resolve iad.xfr.dns.icann.org via PCH, aborting!\n'
-			exit 1
+		########################################
+		## iad.xfr.dns.icann.org
+		grep '%%IAD_XFR%%' $CONFIG > /dev/null
+		if [ $? -eq 0 ]; then
+			IAD_XFR=$(host -t A iad.xfr.dns.icann.org 9.9.9.9 | grep address | awk '{print $4}')
+			if [ -z $IAD_XFR ] || [ $IAD_XFR = "" ]; then
+				printf 'Could not resolve iad.xfr.dns.icann.org via PCH, aborting!\n'
+				exit 1
+			fi
+			# Set root-servers.net transfers	
+			sed -i -e 's/%%IAD_XFR%%/'$IAD_XFR'/g' $CONFIG
 		fi
-		# Set root-servers.net transfers	
-		sed -i -e 's/%%IAD_XFR%%/'$IAD_XFR'/g' $CONFIG
 	fi
 
-	## Fix permissions
+	## Set up control keys on every run.
 	if [ ! -f $CFGDIR/nsd_control.key ] || [ ! -f $CFGDIR/nsd_control.pem ] || [ ! -f $CFGDIR/nsd_server.key ] || [ ! -f $CFGDIR/nsd_server.pem ]; then
 		printf '[nsd] Setting up remote control keys...'
 		/usr/local/sbin/nsd-control-setup > /dev/null 2>&1
@@ -75,17 +103,25 @@ function config()
 	fi
 
 	## Bind to the IPv4 address
-	sed -i -e 's/%%NSD_LOCALIP4%%/'$SYSTEM_LOCALIP4'/g' $CONFIG
-	## Bind to IPv6 if present, disable if not
-	if [ ! -z $NSD_LOCALIP6 ]; then
-		sed -i -e 's/%%NSD_LOCALIP6%%/'$SYSTEM_IP6'/g' $CONFIG
-	else
-		sed -i -e '/.*%%NSD_LOCALIP6%%.*/d' $CONFIG
+	if [ ! -z $FIRSTBOOT ]; then
+		sed -i -e 's/%%NSD_LOCALIP4%%/'$SYSTEM_LOCALIP4'/g' $CONFIG
+		## Bind to IPv6 if present, disable if not
+		if [ ! -z $NSD_LOCALIP6 ]; then
+			sed -i -e 's/%%NSD_LOCALIP6%%/'$SYSTEM_IP6'/g' $CONFIG
+		else
+			sed -i -e '/.*%%NSD_LOCALIP6%%.*/d' $CONFIG
+		fi
 	fi
 
 	## Fix permissions on every start
 	chown -R dnsdocker:dnsdocker /var/db/nsd
-	chown -R dnsdocker:dnsdocker /usr/local/etc/nsd
+	chown dnsdocker:dnsdocker /usr/local/etc/nsd
+	chown dnsdocker:dnsdocker /usr/local/etc/nsd/*key
+	chown dnsdocker:dnsdocker /usr/local/etc/nsd/*pem
+	chown dnsdocker:dnsdocker /usr/local/etc/nsd/*conf
+	chown -R dnsdocker:dnsdocker /usr/local/etc/nsd/localroot
+	chown -R dnsdocker:dnsdocker /usr/local/etc/nsd/zones
+	chown -R dnsdocker:dnsdocker /usr/local/etc/nsd/conf.d
 }
 
 function message()

@@ -54,11 +54,6 @@ newServer( {address="172.16.53.11:10530", pool="localroot", name="localroot", tc
 -- Send our authoritative queries to local NSD
 localroot = newSuffixMatchNode()
 localroot:add("root-servers.net")
-localroot:add("arpa")
-localroot:add("in-addr.arpa")
-localroot:add("ipv4only.arpa")
-localroot:add("ip6.arpa")
-localroot:add("ip6-servers.arpa")
 localroot:add("mcast.net")          
 localroot:add("224.in-addr.arpa")
 localroot:add("225.in-addr.arpa")
