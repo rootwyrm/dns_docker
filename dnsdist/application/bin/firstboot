@@ -28,7 +28,7 @@ function webserver()
 
 	## Actually start replacing strings.
 	sed -i -e 's/%%DNSDIST_LOCALIP4%%/'${DEFAULT_IP4}'/' $WEBCONFDEST
-	sed -i -e 's/%%DEFAULT_ACL%%/'${WEBACL}'/' $WEBCONFDEST
+	sed -i -e 's,%%DEFAULT_ACL%%,'${WEBACL}',' $WEBCONFDEST
 
 	## Create API key in persistent storage
 	APIKEY="${CONFIGDIR}/conf.d/api.key"
@@ -166,7 +166,9 @@ function config()
 		chown -R dnsdocker:dnsdocker /usr/local/etc/dnsdist/$x
 	done
 	chown 0:0 $APIKEY
+	chmod 0600 $APIKEY
 	chown 0:0 $PASSWD
+	chmod 0600 $PASSWD
 }
 
 function message()
