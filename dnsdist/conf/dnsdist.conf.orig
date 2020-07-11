@@ -88,8 +88,8 @@ getPool("recursor"):setCache(cache_recursor)
 -- Subdirectories 
 ------------------------------------------------------------
 -- XXX: need to 'if exists include webserver.conf'
-includeDirectory('/usr/local/etc/conf.d')
-includeDirectory('/usr/local/etc/lua')
-includeDirectory('/usr/local/etc/maps')
+includeDirectory('/usr/local/etc/dnsdist/conf.d')
+includeDirectory('/usr/local/etc/dnsdist/lua')
+includeDirectory('/usr/local/etc/dnsdist/maps')
 
 -- vim:ft=lua
