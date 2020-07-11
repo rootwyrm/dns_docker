@@ -71,7 +71,9 @@ build()
 	echo "$(date $DATEFMT) [${BUILDNAME}] Configuring..."
 	## Be extremely explicit.
 	./configure --prefix=/usr/local \
-		--with-lua --with-re2 --with-ebpf \
+		--sysconfdir=/usr/local/etc/dnsdist \
+		--with-re2 --with-ebpf \
+		--with-boost=/usr \
 		--enable-dnstap --enable-dnscrypt --enable-dns-over-tls \
 		--enable-dns-over-https --with-re2
 	CHECK_ERROR $? "dnsdist_configure"

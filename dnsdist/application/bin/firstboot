@@ -13,7 +13,7 @@
 function webserver()
 {
 	local WEBCONFSRC="/opt/rootwyrm/conf/webserver.conf.orig"
-	local WEBCONFDEST="/usr/local/etc/conf.d/webserver.conf"
+	local WEBCONFDEST="/usr/local/etc/dnsdist/conf.d/webserver.conf"
 
 	## Calculate our subnet with best effort
 	DEVICE=$(ip route | grep ^default | awk '{print $(NF)}')
@@ -45,18 +45,18 @@ function webserver()
 	sed -i -e 's/%%DNSDIST_APIKEY%%/'$DNSDIST_APIKEY'/g' $WEBCONFDEST
 	
 	## Generate a new random password when necessary
-	PASSWD="/usr/local/etc/dnsdist.passwd"
+	PASSWD="/usr/local/etc/dnsdist/passwd"
 	if [ ! -f $PASSWD ] && [ -z $DNSDIST_PASSWD ]; then
 		## Use blocking randomness
 		cat /dev/random | tr -dc 'a-zA-Z0-9' | fold -w 16 | head -n 1 > $PASSWD
 		chmod 0700 $PASSWD
 		chown 0:0 $PASSWD
-		DNSDIST_PASSWD=$(cat $PASSWD)
+		export DNSDIST_PASSWD=$(cat $PASSWD)
 	elif [ ! -z $DNSDIST_PASSWD ]; then
 		echo "${DNSDIST_PASSWD}" > $PASSWD
-		DNSDIST_PASSWD=$(cat $PASSWD)
+		export DNSDIST_PASSWD=$(cat $PASSWD)
 	else
-		DNSDIST_PASSWD=$(cat $PASSWD)
+		export DNSDIST_PASSWD=$(cat $PASSWD)
 	fi
 	## Insert password
 	sed -i -e 's/%%DNSDIST_PASSWD%%/'$DNSDIST_PASSWD'/g' $WEBCONFDEST
@@ -64,9 +64,9 @@ function webserver()
 
 function config()
 {
-	export CONFIGDIR="/usr/local/etc/"
+	export CONFIGDIR="/usr/local/etc/dnsdist"
 	export CONFIGSRC="/opt/rootwyrm/conf/dnsdist.conf.orig"
-	export CONFIG="/usr/local/etc/dnsdist.conf"
+	export CONFIG="/usr/local/etc/dnsdist/dnsdist.conf"
 	
 	if [ -f /firstboot ]; then
 		printf '[dnsdist] Performing initial firstboot tasks.\n'
@@ -148,7 +148,7 @@ function config()
 
 	## Needs duplicated for message	
 	if [ -z $PASSWD ]; then
-		PASSWD="/usr/local/etc/dnsdist.passwd"
+		PASSWD="/usr/local/etc/dnsdist/passwd"
 	fi
 	if [ ! -f $PASSWD ] && [ -z $DNSDIST_PASSWD ]; then
 		DNSDIST_PASSWD=$(cat $PASSWD)
@@ -173,6 +173,8 @@ function message()
 	if [ -f $outfile ]; then
 		rm $outfile
 	fi
+	if [ -z $DNSDIST_PASSWD ]; then
+		DNSDIST_PASSWD=$(cat /usr/local/etc/dnsdist/passwd)
 	printf '**********************************************************************\n' >> $outfile
 	printf 'System IPv4 Address %s\n' "${DEFAULT_IP4}" >> $outfile
 	if [ ! -z ${DEFAULT_IP6} ]; then
