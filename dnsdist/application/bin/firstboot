@@ -68,10 +68,12 @@ function config()
 	export CONFIGSRC="/opt/rootwyrm/conf/dnsdist.conf.orig"
 	export CONFIG="/usr/local/etc/dnsdist/dnsdist.conf"
 	
-	if [ -f /firstboot ]; then
+	if [ -f /firstboot ] || [ ! -d ${CONFIGDIR} ]; then
 		printf '[dnsdist] Performing initial firstboot tasks.\n'
 		printf '[dnsdist] This may take some time!\n'
 		printf '\n'
+		mkdir ${CONFIGDIR}
+		chown dnsdocker:dnsdocker ${CONFIGDIR}
 		export FIRSTBOOT=1
 	fi
 	if [ ! -f ${CONFIG} ]; then 
