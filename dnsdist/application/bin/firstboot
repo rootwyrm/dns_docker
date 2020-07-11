@@ -175,6 +175,7 @@ function message()
 	fi
 	if [ -z $DNSDIST_PASSWD ]; then
 		DNSDIST_PASSWD=$(cat /usr/local/etc/dnsdist/passwd)
+	fi
 	printf '**********************************************************************\n' >> $outfile
 	printf 'System IPv4 Address %s\n' "${DEFAULT_IP4}" >> $outfile
 	if [ ! -z ${DEFAULT_IP6} ]; then

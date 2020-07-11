@@ -15,7 +15,7 @@ extra_commands="checkconfig"
 
 description="A high-performance, programmable, secure, load-balancing DNS proxy"
 
-: ${cfgfile:=${DNSDIST_CONFIG:-"/usr/local/etc/dnsdist.conf"}}
+: ${cfgfile:=${DNSDIST_CONFIG:-"/usr/local/etc/dnsdist/dnsdist.conf"}}
 
 command="/usr/local/bin/dnsdist"
 command_args="${DNSDIST_OPTS}"
