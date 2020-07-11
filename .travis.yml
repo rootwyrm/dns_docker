@@ -20,6 +20,7 @@ before_install:
   - sudo apt-get update
   - sudo apt-get -y -o Dpkg::Options="--force-confnew" install docker-ce
 script:
+  - env
   - docker build -t travis_${TRAVIS_BUILD_STAGE_NAME,,} ${TRAVIS_BUILD_STAGE_NAME,,}
 
 # vim:ft=yaml:sw=2:ts=2:et
