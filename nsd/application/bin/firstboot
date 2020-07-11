@@ -127,12 +127,12 @@ function config()
 function message()
 {
 	printf '**********************************************************************\n'
-	printf 'System IPv4 Address: %s\n' "$SYSTEM_LOCALIP4"
-	if [ ! -z $SYSTEM_LOCALIP6 ]; then
-		printf 'System IPv6 Address: %s\n' "$SYSTEM_LOCALIP6"
+	printf 'System IPv4 Address: %s\n' "${DEFAULT_IP4}"
+	if [ ! -z ${DEFAULT_IP6} ]; then
+		printf 'System IPv6 Address: %s\n' "${DEFAULT_IP6}"
 	fi
 	## Insert IP addresses
-	printf 'nsd binding to %s\n' "$SYSTEM_LOCALIP4"
+	printf 'nsd binding to %s\n' "${DEFAULT_IP4}"
 	## Insert IPv6 if present, delete if absent
 	if [ ! -z ${DEFAULT_IP6} ]; then
 		printf 'nsd binding to %s\n' "${DEFAULT_IP6}"
