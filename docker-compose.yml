@@ -47,7 +47,10 @@ services:
     ports:
       - "53"
       - "853"
-      - "10530:10530"
+      - target: 10530
+        published: 10530
+        protocol: udp
+        mode: host
     tmpfs:
       - /run
       - /tmp
@@ -77,7 +80,10 @@ services:
     ports:
       - "53"
       - "853"
-      - "10531:10531"
+      - target: 10531
+        published: 10531
+        protocol: udp
+        mode: host
     tmpfs:
       - /run
       - /tmp
