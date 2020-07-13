@@ -51,7 +51,12 @@ newServer( {address="172.16.53.11:10530", pool="localroot", name="localroot", tc
 ------------------------------------------------------------
 -- Fixed mapping
 ------------------------------------------------------------
--- Send our authoritative queries to local NSD
+-- Quick answer localhost queries
+addAction("localhost", SpoofAction("127.0.0.1", "::1", {aa=true}))
+addAction("1.0.0.127.in-addr.arpa", SpoofRawAction("\009localhost\000", {aa=true}))
+addAction("1.0.0.127.in-addr.arpa", SpoofRawAction("\009localhost\000", {aa=true}))
+addAction("1.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.ip6.arpa", SpoofRawAction("\009localhost\000", {aa=true}))
+-- Send certain authoritative queries to local NSD
 localroot = newSuffixMatchNode()
 localroot:add("root-servers.net")
 localroot:add("mcast.net")          
@@ -76,18 +81,17 @@ addAction(SuffixMatchNodeRule(localroot, true), PoolAction("localroot"))
 ------------------------------------------------------------
 -- Base cache settings; must set cache
 ------------------------------------------------------------
-cache_localroot     = newPacketCache(512)
-cache_authoritative = newPacketCache(2048, {numberOfShards=4})
-cache_recursor      = newPacketCache(8192, {numberOfShards=8})
+cache_localroot     = newPacketCache(64)
 getPool("localroot"):setCache(cache_localroot)
-getPool("authoritative"):setCache(cache_authoritative)
-getPool("recursor"):setCache(cache_recursor)
+--cache_authoritative = newPacketCache(2048, {numberOfShards=4})
+--cache_recursor      = newPacketCache(8192, {numberOfShards=8})
+--getPool("authoritative"):setCache(cache_authoritative)
+--getPool("recursor"):setCache(cache_recursor)
 
 ------------------------------------------------------------
 -- Include actions; order matters
 -- Subdirectories 
 ------------------------------------------------------------
--- XXX: need to 'if exists include webserver.conf'
 includeDirectory('/usr/local/etc/dnsdist/conf.d')
 includeDirectory('/usr/local/etc/dnsdist/lua')
 includeDirectory('/usr/local/etc/dnsdist/maps')

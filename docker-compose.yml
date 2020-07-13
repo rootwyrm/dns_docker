@@ -51,6 +51,10 @@ services:
         published: 10530
         protocol: udp
         mode: host
+      - target: 9530
+        published: 9530
+        protocol: tcp
+        mode: host
     tmpfs:
       - /run
       - /tmp
@@ -83,6 +87,10 @@ services:
       - target: 10531
         published: 10531
         protocol: udp
+        mode: host
+      - target: 9531
+        published: 9531
+        protocol: tcp
         mode: host
     tmpfs:
       - /run

@@ -115,7 +115,7 @@ function config()
 	if [ ! -z $FIRSTBOOT ]; then
 		while [ $dnsdist_listener -le ${DNSDIST_THREAD} ]; do
 			LISTENER="addLocal('"${DEFAULT_IP4}"', { reusePort=true, tcpFastOpenQueueSize=64 })"
-			sed -i -E '/--Local Listeners/a '"$LISTENER"'' ${CONFIG}
+			sed -i -e '/--Local Listeners/a '"$LISTENER"'' ${CONFIG}
 			dnsdist_listener=$(( $dnsdist_listener + 1 ))
 		done
 	fi
