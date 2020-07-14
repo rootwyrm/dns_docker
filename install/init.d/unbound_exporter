@@ -1,0 +1,28 @@
+#!/sbin/openrc-run
+################################################################################
+# Copyright (C) 2020-* Phillip "RootWyrm" Jaenke
+# All rights reserved
+#
+# Licensed under CC-BY-NC-3.0
+# See /LICENSE for details
+################################################################################
+# init.d/unbound_exporter
+################################################################################
+name="unbound_exporter"
+supervisor="supervise-daemon"
+
+description="A statistics exporter for nsd written in go"
+
+UNBOUND_CA="/usr/local/etc/unbound/unbound_server.pem"
+UNBOUND_CERT="/usr/local/etc/unbound/unbound_control.pem"
+UNBOUND_KEY="/usr/local/etc/unbound/unbound_control.key"
+
+command="/opt/rootwyrm/bin/unbound_exporter"
+command_args="-unbound.ca ${UNBOUND_CA} -unbound.cert ${UNBOUND_CERT} -unbound.key ${UNBOUND_KEY} -web.listen-address :9531"
+command_args_foreground=""
+
+depend() {
+	need net dcron rootwyrm unbound
+	use logger
+	after firewall unbound
+}
