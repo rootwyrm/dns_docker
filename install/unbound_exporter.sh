@@ -64,6 +64,11 @@ printf '\n'
 printf 'Press any key to continue to the license or ^C to decline\n'
 while [ true ]; do
 	read -t 3 -n 1
+	if [ $? = 0 ]; then
+		continue
+	else
+		break
+	fi
 done
 cat unbound_exporter/LICENSE | more
 printf '\n'
@@ -73,6 +78,6 @@ while [ true ]; do
 	if [ $? = 0 ]; then
 		install_unbound
 	else
-		exit 0
+		break
 	fi
 done
