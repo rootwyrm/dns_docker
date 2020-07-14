@@ -33,7 +33,7 @@ fi
 install_unbound()
 {
 	## XXX: don't use the build_static.sh script because it uses edge.
-	docker run --rm -i -v unbound_exporter:/unbound_exporter alpine:latest /bin/sh << 'EOF'
+	docker run --rm -i -v `pwd`/unbound_exporter:/unbound_exporter alpine:latest /bin/sh << 'EOF'
 set -ex
 apk update
 apk add ca-certificates git go go-bindata libc-dev make binutils
