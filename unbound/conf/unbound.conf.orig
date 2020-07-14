@@ -11,6 +11,7 @@ server:
 	logfile: ""
 	use-syslog: no
 	statistics-interval: 1800
+	extended-statistics: yes
 	shm-enable: no
 	num-threads: %%UNBOUND_NCPU%%
 
