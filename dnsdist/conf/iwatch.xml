@@ -1,0 +1,21 @@
+<?xml version="1.0" ?>
+<!DOCTYPE config SYSTEM "/etc/iwatch.dtd" >
+
+<config charset="utf-8">
+  <!-- Do not remove, will break iwatch. -->
+  <guard email="iwatch@localhost" name="IWatch"/>
+  <watchlist>
+    <title>iwatch</title>
+    <!-- watch for iwatch config updates -->
+      <path type="single" exec="service iwatch restart">/opt/rootwyrm/conf/iwatch.xml</path>
+    <title>dnsdist</title>
+    <!-- dnsdist REALLY doesn't like to reconfig on the fly, and it is very easy to ship a bad configuration, so we need to take extra care. -->
+      <path type="single" exec="/usr/local/bin/dnsdist --check-config && /etc/init.d/dnsdist restart" filter="*\.conf">/usr/local/etc/dnsdist</path>
+      <path type="single" exec="/usr/local/bin/dnsdist --check-config && /etc/init.d/dnsdist restart" filter="*\.conf">/usr/local/etc/dnsdist/conf.d</path>
+      <path type="single" exec="/usr/local/bin/dnsdist --check-config && /etc/init.d/dnsdist restart" filter="*\.conf">/usr/local/etc/dnsdist/lua</path>
+      <path type="single" exec="/usr/local/bin/dnsdist --check-config && /etc/init.d/dnsdist restart" filter="*\.conf">/usr/local/etc/dnsdist/maps</path>
+      <path type="single" exec="/usr/local/bin/dnsdist --check-config && /etc/init.d/dnsdist restart" filter="*\.conf">/usr/local/etc/dnsdist/passwd</path>
+      <!-- PKI always requires a restart -->
+      <path type="recursive" exec="/etc/init.d/dnsdist restart">/usr/local/etc/dnsdist/pki</path>
+  </watchlist>
+</config>

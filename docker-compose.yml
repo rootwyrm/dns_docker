@@ -21,6 +21,7 @@ services:
       - /opt/rootwyrm/etc/dnsdist/lua:/usr/local/etc/dnsdist/lua
       - /opt/rootwyrm/etc/dnsdist/maps:/usr/local/etc/dnsdist/maps
       - /opt/rootwyrm/etc/pki:/usr/local/etc/dnsdist/pki:ro
+      - /opt/rootwyrm/var/log/dnsdist:/var/log
     cap_add:
       - NET_ADMIN
       - NET_BIND_SERVICE
@@ -63,6 +64,7 @@ services:
       - /opt/rootwyrm/etc/nsd/zones:/usr/local/etc/nsd/zones
       - /opt/rootwyrm/var/db/nsd:/var/db/nsd
       - /opt/rootwyrm/etc/pki:/usr/local/etc/nsd/pki:ro
+      - /opt/rootwyrm/var/log/nsd:/var/log
     cap_add:
       - NET_BIND_SERVICE
   unbound:
@@ -77,6 +79,8 @@ services:
       - net.core.somaxconn=10240
       - net.ipv4.tcp_rmem=1024 87380 12582912
       - net.ipv4.tcp_wmem=1024 87380 12582912
+      # If TCP MTU probing is disabled, upstream TLS may fail.
+      - net.ipv4.tcp_mtu_probing=1
       - net.ipv4.tcp_fin_timeout=15
       - net.ipv4.tcp_tw_reuse=1
       - net.ipv4.tcp_fastopen=3
@@ -99,6 +103,7 @@ services:
       - /opt/rootwyrm/etc/unbound:/usr/local/etc/unbound/conf.d
       - /opt/rootwyrm/etc/unbound/zones:/usr/local/etc/unbound/zones
       - /opt/rootwyrm/etc/pki:/usr/local/etc/unbound/pki:ro
+      - /opt/rootwyrm/var/log/unbound:/var/log
     cap_add:
       - NET_ADMIN
       - NET_BIND_SERVICE

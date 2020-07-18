@@ -1,0 +1,18 @@
+<?xml version="1.0" ?>
+<!DOCTYPE config SYSTEM "/etc/iwatch.dtd" >
+
+<config charset="utf-8">
+  <!-- Do not remove, will break iwatch. -->
+  <guard email="iwatch@localhost" name="IWatch"/>
+  <watchlist>
+    <title>iwatch</title>
+    <!-- watch for iwatch config updates -->
+      <path type="single" exec="service iwatch restart">/opt/rootwyrm/conf/iwatch.xml</path>
+    <title>unbound</title>
+      <path type="single" exec="/usr/local/sbin/unbound-control reload" filter="*\.conf">/usr/local/etc/unbound</path>
+      <path type="recursive" exec="/usr/local/sbin/unbound-control reload">/usr/local/etc/unbound/conf.d</path>
+      <!-- PKI requires a restart -->
+      <path type="recursive" exec="/etc/init.d/unbound restart">/usr/local/etc/unbound/pki</path>
+  </watchlist>
+</config>
+

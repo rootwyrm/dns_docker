@@ -1,0 +1,24 @@
+#!/sbin/openrc-run
+################################################################################
+# Copyright (C) 2020-* Phillip R. Jaenke <prj+docker@rootwyrm.com>
+# All rights reserved
+#
+# CC-BY-NC-3.0
+# See /LICENSE for details
+################################################################################
+name="iwatch"
+
+description="iWatch is a realtime filesystem monitoring program."
+
+pidfile="${IWATCH_PIDFILE:-"/run/iwatch.pid"}"
+cfgfile="/opt/rootwyrm/conf/iwatch.xml"
+command="/usr/bin/iwatch"
+command_args="${IWATCH_ARGS:-} -d -p ${pidfile}"
+
+required_files="$cfgfile"
+
+depend() {
+	need net dcron
+	use logger
+	after unbound nsd dnsdist
+}

@@ -26,7 +26,10 @@ LABEL   maintainer="Phillip 'RootWyrm' Jaenke <prj+docker@rootwyrm.com>" \
         org.opencontainers.image.source="%%GITHUB_REPOSITORY%%" \
         org.opencontainers.image.created="%%RW_BUILDDATE%%" 
 
-VOLUME  [ "/run:/opt/rootwyrm/var/run" ]
+VOLUME  [ "/run" ]
+
+COPY [ "appbase/", "/opt/rootwyrm" ]
+ADD  [ "init.d/", "/etc/init.d" ]
 
 RUN mkdir -p /opt/rootwyrm && \
     mkdir -p /usr/local/src && \
@@ -34,7 +37,7 @@ RUN mkdir -p /opt/rootwyrm && \
     mkdir -p /run/lock && \
     chown root:uucp /run/lock && \
     apk update && apk upgrade && \
-    apk add --no-cache openrc file dcron apk-cron openssl bash; \
+    apk add --no-cache openrc file dcron apk-cron openssl bash curl iwatch; \
     sed -i -e '/^tty*/d' /etc/inittab && \
     sed -i -e '/^# Set up*/d' /etc/inittab && \
     sed -i -e '/^::ctrlalt*/d' /etc/inittab && \
@@ -50,11 +53,9 @@ RUN mkdir -p /opt/rootwyrm && \
     echo "dns_docker is Copyright (C) 2020-* Phillip Jaenke and its contributors" > /LICENSE ; \
     echo "https://github.com/rootwyrm/dns_docker/" >> /LICENSE ; \
     echo "" >> /LICENSE ; \
-    echo "This work is licensed under the Creative Commons Attribution-NonCommercial 3.0 Unported License. To view a copy of this license, visit http://creativecommons.org/licenses/by-nc/3.0/ or send a letter to Creative Commons, PO Box 1866, Mountain View, CA 94042, USA." >> /LICENSE
+    echo "This work is licensed under the Creative Commons Attribution-NonCommercial 3.0 Unported License. To view a copy of this license, visit http://creativecommons.org/licenses/by-nc/3.0/ or send a letter to Creative Commons, PO Box 1866, Mountain View, CA 94042, USA." >> /LICENSE 
 
 COPY [ "rc.conf", "/etc/rc.conf" ]
-COPY [ "appbase/", "/opt/rootwyrm" ]
-ADD  [ "init.d/", "/etc/init.d" ]
 
 ONBUILD ADD [ "application/", "/opt/rootwyrm" ]
 ONBUILD ADD [ "init.d/", "/etc/init.d" ]
@@ -65,7 +66,8 @@ ONBUILD RUN touch /firstboot && \
         /opt/rootwyrm/build/$bld ; \
     done && \
     echo "$(date '+%FT%T%z') [BUILD] phase complete..." ; \
-    /sbin/rc-update add $(cat /opt/rootwyrm/id.service) default
+    /sbin/rc-update add $(cat /opt/rootwyrm/id.service) default ; \
+    /sbin/rc-update add iwatch default
 
 ENTRYPOINT [ "/sbin/init" ]
 

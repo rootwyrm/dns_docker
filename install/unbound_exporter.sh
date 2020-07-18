@@ -47,6 +47,7 @@ EOF
 	fi
 	## This is to be run after the container is built, so.
 	docker cp unbound_exporter/unbound_exporter unbound:/opt/rootwyrm/bin/unbound_exporter
+	docker cp unbound_exporter/LICENSE unbound:/LICENSE.unbound_exporter
 	if [ $? -ne 0 ]; then
 		printf 'Error copying into the container!\n'
 		printf 'Did you docker-compose up --no-start first?\n'
@@ -54,6 +55,7 @@ EOF
 	fi
 	docker cp init.d/unbound_exporter unbound:/etc/init.d/unbound_exporter
 	docker exec -it unbound rc-update add unbound_exporter
+	rm -rf unbound_exporter
 	exit 0
 }
 
