@@ -14,8 +14,10 @@
 
 export BUILDNAME="dnsdist"
 export DISTSITE="https://downloads.powerdns.com/releases"
-if [ -z ${DISTVER} ]; then
-	export DISTVER="1.5.0-rc4"
+if [ -z ${SWVERSION} ]; then
+	export SWVERSION="1.5.0-rc4"
+else
+	export SWVERSION=${SWVERSION}
 fi
 
 ## Build
@@ -55,16 +57,16 @@ install_buildpkg()
 ######################################################################
 build()
 {
-	echo "$(date $DATEFMT) [${BUILDNAME}] Retrieving ${DISTVER}"
+	echo "$(date $DATEFMT) [${BUILDNAME}] Retrieving ${SWVERSION}"
 	if [ ! -d /usr/local/src ]; then
 		mkdir /usr/local/src
 	fi
 	cd /usr/local/src
-	local DISTFILE="${BUILDNAME}-${DISTVER}.tar.bz2"
+	local DISTFILE="${BUILDNAME}-${SWVERSION}.tar.bz2"
 	$curl_cmd ${DISTSITE}/${DISTFILE} > ${DISTFILE}
 	tar xf ${DISTFILE}
 	rm ${DISTFILE}
-	cd ${BUILDNAME}-${DISTVER}
+	cd ${BUILDNAME}-${SWVERSION}
 	## XXX: Work around a bug.
 	mkdir ibdir
 
@@ -98,17 +100,18 @@ clean()
 	echo "$(date $DATEFMT) [${BUILDNAME}] Cleaning up build."
 	make clean
 	cd /root
-	rm -rf /usr/local/src/dnsdist-${DISTVER}
+	rm -rf /usr/local/src/dnsdist-${SWVERSION}
 	CHECK_ERROR $? "dnsdist_clean_delete_source"
 	/sbin/apk --no-cache del $vbpkg
 	CHECK_ERROR $? "dnsdist_clean_apk"
 }
 
 CREATE_USER_DNSDOCKER
+software_version
 install_runtime
 install_buildpkg
 build
 clean
 
-echo "$(date $DATEFMT) [${BUILDNAME}] Build and install of ${DISTVER} complete."
+echo "$(date $DATEFMT) [${BUILDNAME}] Build and install of ${SWVERSION} complete."
 exit 0 

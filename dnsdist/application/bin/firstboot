@@ -72,7 +72,9 @@ function config()
 		printf '[dnsdist] Performing initial firstboot tasks.\n'
 		printf '[dnsdist] This may take some time!\n'
 		printf '\n'
-		mkdir ${CONFIGDIR}
+		if [ ! -d ${CONFIGDIR} ]; then
+			mkdir ${CONFIGDIR}
+		fi
 		chown dnsdocker:dnsdocker ${CONFIGDIR}
 		export FIRSTBOOT=1
 	fi
@@ -121,6 +123,9 @@ function config()
 	fi
 	## XXX: need the tls listeners in here, same way
 	## XXX: except there's the SNI trickery involved.
+
+	## Set default ACL to permit local subnet
+	sed -i -e 's/%%DNSDIST_SUBNET%%/'${DEFAULT_IP4NET}'/g' $CONFIG
 
 	## Insert IP addresses
 	sed -i -e 's/%%DNSDIST_LOCALIP4%%/'${DEFAULT_IP4}'/g' $CONFIG

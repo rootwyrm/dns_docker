@@ -49,7 +49,23 @@ function resperf_udp()
 	printf 'Running UDP - TARGET: %s DATASET: %s\n' "$TARGET" "$1"
 	resperf -f inet -M udp -C $client -P /tmp/$(hostname)_resperf.udp.gnuplot -c 300 -m 20000 -d $1 -s $TARGET -p $PORT
 	printf 'Running UDP DNSSEC - TARGET: %s DATASET: %s\n' "$TARGET" "$1"
-	resperf -f inet -M udp -C $client -P /tmp/$(hostname)_resperf.udp.gnuplot -D -c 300 -m 20000 -d $1 -s $TARGET -p $PORT
+	resperf -f inet -M udp -C $client -P /tmp/$(hostname)_resperf.udp_dnssec.gnuplot -D -c 300 -m 20000 -d $1 -s $TARGET -p $PORT
+}
+
+## Do it with TCP, because yes.
+function resperf_tcp()
+{
+	if [ -z $1 ]; then
+		printf 'No dataset file specified!\n' 
+		exit 1
+	fi
+	## Run 10 clients per CPU
+	cpucount=$(cat /proc/cpuinfo | grep ^processor | wc -l)
+	client=$(( $cpucount * 10 ))
+	printf 'Running TCP - TARGET: %s DATASET: %s\n' "$TARGET" "$1"
+	resperf -f inet -M tcp -C $client -P /tmp/$(hostname)_resperf.tcp.gnuplot -c 300 -m 20000 -d $1 -s $TARGET -p $PORT
+	printf 'Running TCP DNSSEC - TARGET: %s DATASET: %s\n' "$TARGET" "$1"
+	resperf -f inet -M tcp -C $client -P /tmp/$(hostname)_resperf.tcp_dnssec.gnuplot -D -c 300 -m 20000 -d $1 -s $TARGET -p $PORT
 }
 
 function dnsperf_udp()
@@ -81,7 +97,10 @@ function rapid7_forward_datafile()
 		printf 'Using the existing dataset %s\n' "$2"
 		return 0
 	fi
-	## Use the curl method, which still sucks.
+	## Don't download it a bunch of times if we already have it.
+	#zcat ${1##*/} | jq -r .name >> $2
+	#rm ${1##*/}
+	## Use the curl method since we'll hopefully have more bandwidth.
 	curl -L $1 | zcat | jq -r .name | awk '{print $0" '$BENCHMARK'"}' >> $2
 }
 
@@ -122,6 +141,7 @@ while [ true ]; do
 				#dnsblast
 				rapid7_forward_datafile $OPENDATA $DATA_FILE
 				resperf_udp $DATA_FILE
+				resperf_tcp $DATA_FILE
 				;;
 			[Aa])
 				OPENDATA="https://opendata.rapid7.com/sonar.fdns_v2/2020-06-27-1593295847-fdns_a.json.gz"
@@ -131,7 +151,8 @@ while [ true ]; do
 				## Oh boy, warn 'em...
 				printf 'WARNING: Working with a 23GB+(!!) dataset!\n'
 				rapid7_forward_datafile $OPENDATA $DATA_FILE
-				resperf_udp $OPEN
+				resperf_udp $DATA_FILE
+				resperf_tcp $DATA_FILE
 				;;
 			[Aa][Aa][Aa][Aa])
 				OPENDATA="https://opendata.rapid7.com/sonar.fdns_v2/2020-06-26-1593210450-fdns_aaaa.json.gz"
@@ -141,6 +162,7 @@ while [ true ]; do
 				## 4.1GB as of June, jeez.
 				rapid7_forward_datafile $OPENDATA $DATA_FILE
 				resperf_udp $DATA_FILE
+				resperf_tcp $DATA_FILE
 				;;
 			*)
 				printf 'Unsupported or unknown benchmark type, or not set.\n'

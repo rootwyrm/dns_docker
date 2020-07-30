@@ -23,6 +23,7 @@ setLocal('127.0.0.1', { reusePort=true, tcpFastOpenQueueSize=64})
 ------------------------------------------------------------
 setACL('127.0.0.0/8')
 addACL('172.16.0.0/12')
+addACL('%%DNSDIST_SUBNET%%')
 
 ------------------------------------------------------------
 -- XXX: DOH configuration goes here

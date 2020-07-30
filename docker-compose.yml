@@ -8,6 +8,9 @@ services:
     network_mode: "host"
     image: docker.io/rootwyrm/dnsdist:${RELEASE:-latest}
     restart: on-failure
+    env_file:
+      - /opt/rootwyrm/etc/dns_docker.env
+      - /opt/rootwyrm/etc/dnsdist.env
     ports:
       - "53:53"
       - "443:443/tcp"
@@ -31,6 +34,9 @@ services:
     ## If you need more than one nsd, you did it wrong.
     container_name: nsd
     restart: on-failure
+    env_file:
+      - /opt/rootwyrm/etc/dns_docker.env
+      - /opt/rootwyrm/etc/nsd.env
     networks:
       dns:
         ipv4_address: 172.16.53.11
@@ -71,6 +77,9 @@ services:
     ## If you need more than one unbound, you probably did it wrong.
     container_name: unbound
     restart: on-failure
+    env_file:
+      - /opt/rootwyrm/etc/dns_docker.env
+      - /opt/rootwyrm/etc/unbound.env
     networks:
       dns:
         ipv4_address: 172.16.53.12

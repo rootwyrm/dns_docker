@@ -98,6 +98,7 @@ function software_version()
 		verfile=/opt/rootwyrm/$(cat /opt/rootwyrm/id.service).version
 	fi
 	if [ -f $verfile ]; then
+		export SWNAME=$(cat /opt/rootwyrm/id.service)
 		export SWVERSION=$(cat $verfile)
 	fi
 }
