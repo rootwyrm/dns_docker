@@ -1,4 +1,5 @@
 **Documentation says these are disallowed and not supported but behavior under Alpine shows they get set on the host if set in the docker-compose!**
+```
 # Increase maximum connections; 10240 is good to about 1000 clients
 # of mixed type (udp/tcp/doh)
 * net.core.somaxconn=10240
@@ -18,4 +19,4 @@
 * net.ipv4.tcp_tw_reuse=1
 # Testing shows much better performance with htcp generally.
 * net.ipv4.tcp_congestion_control=htcp
-
+```
