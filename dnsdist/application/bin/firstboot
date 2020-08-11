@@ -125,13 +125,13 @@ function config()
 	## XXX: except there's the SNI trickery involved.
 
 	## Set default ACL to permit local subnet
-	sed -i -e 's/%%DNSDIST_SUBNET%%/'${DEFAULT_IP4NET}'/g' $CONFIG
+	sed -i -e 's,%%DNSDIST_SUBNET%%,'${DEFAULT_IP4NET}',g' $CONFIG
 
 	## Insert IP addresses
-	sed -i -e 's/%%DNSDIST_LOCALIP4%%/'${DEFAULT_IP4}'/g' $CONFIG
+	sed -i -e 's,%%DNSDIST_LOCALIP4%%,'${DEFAULT_IP4}',g' $CONFIG
 	## Insert IPv6 if present, delete if absent
 	if [ ! -z $SYSTEM_LOCALIP6 ]; then
-		sed -i -e 's/%%DNSDIST_LOCALIP6%%/'${DEFAULT_IP6}'/g' $CONFIG
+		sed -i -e 's,%%DNSDIST_LOCALIP6%%,'${DEFAULT_IP6}',g' $CONFIG
 	else
 		sed -i -e '/.*%%DNSDIST_LOCALIP6%%.*/d' $CONFIG
 	fi
