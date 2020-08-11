@@ -13,7 +13,7 @@ description="iWatch is a realtime filesystem monitoring program."
 pidfile="${IWATCH_PIDFILE:-"/run/iwatch.pid"}"
 cfgfile="/opt/rootwyrm/conf/iwatch.xml"
 command="/usr/bin/iwatch"
-command_args="${IWATCH_ARGS:-} -d -p ${pidfile}"
+command_args="${IWATCH_ARGS:-} -d -f $cfgfile -p ${pidfile}"
 
 required_files="$cfgfile"
 
