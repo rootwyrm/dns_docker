@@ -37,7 +37,7 @@ RUN mkdir -p /opt/rootwyrm && \
     mkdir -p /run/lock && \
     chown root:uucp /run/lock && \
     apk update && apk upgrade && \
-    apk add --no-cache openrc file dcron apk-cron openssl bash curl iwatch; \
+    apk add --no-cache openrc file dcron apk-cron openssl bash curl iwatch logrotate; \
     sed -i -e '/^tty*/d' /etc/inittab && \
     sed -i -e '/^# Set up*/d' /etc/inittab && \
     sed -i -e '/^::ctrlalt*/d' /etc/inittab && \
@@ -50,6 +50,7 @@ RUN mkdir -p /opt/rootwyrm && \
     rm -f /etc/init.d/modloop ; \
     sed -i 's/\tcgroup_add_service/\t#cgroup_add_service/g' /lib/rc/sh/openrc-run.sh && \
     sed -i 's/VSERVER/DOCKER/Ig' /lib/rc/sh/init.sh ; \
+    mv /opt/rootwyrm/conf/logrotate.conf /etc/logrotate.conf ; \
     echo "dns_docker is Copyright (C) 2020-* Phillip Jaenke and its contributors" > /LICENSE ; \
     echo "https://github.com/rootwyrm/dns_docker/" >> /LICENSE ; \
     echo "" >> /LICENSE ; \
