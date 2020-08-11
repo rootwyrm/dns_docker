@@ -8,7 +8,7 @@ server:
 
 	verbosity: 1
 	do-daemonize: no
-	logfile: ""
+	logfile: "/var/log/unbound.log"
 	use-syslog: no
 	statistics-interval: 1800
 	extended-statistics: yes
@@ -73,7 +73,6 @@ server:
 
 	val-nsec3-keysize-iterations: "1024 150 2048 500 4096 2500"
 
-	tls-port: 853
 	## DO NOT MODIFY - DYNAMICALLY GENERATED EACH BOOT!
 	tls-session-ticket-keys: "tls_secret0.key"
 	tls-session-ticket-keys: "tls_secret1.key"
