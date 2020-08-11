@@ -10,7 +10,6 @@ services:
     restart: on-failure
     env_file:
       - /opt/rootwyrm/etc/dns_docker.env
-      - /opt/rootwyrm/etc/dnsdist.env
     ports:
       - "53:53"
       - "443:443/tcp"
@@ -36,7 +35,6 @@ services:
     restart: on-failure
     env_file:
       - /opt/rootwyrm/etc/dns_docker.env
-      - /opt/rootwyrm/etc/nsd.env
     networks:
       dns:
         ipv4_address: 172.16.53.11
@@ -79,7 +77,6 @@ services:
     restart: on-failure
     env_file:
       - /opt/rootwyrm/etc/dns_docker.env
-      - /opt/rootwyrm/etc/unbound.env
     networks:
       dns:
         ipv4_address: 172.16.53.12
