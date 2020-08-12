@@ -50,7 +50,7 @@ mail.*                                              -/dev/null
 ## cron
 cron.*          /var/log/cron.log
 ## dnsdist
-local0.*        /var/log/dnsdist.log
+local1.*        /var/log/dnsdist.log
 
 EOF
 }
