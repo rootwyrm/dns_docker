@@ -54,7 +54,7 @@ jobs:
         docker login -u ${{ secrets.HUB_USER }} -p ${{ secrets.HUB_TOKEN }}
         docker buildx build --platform linux/${{ matrix.platform }} \
         --tag rootwyrm/$CONTAINER:$VERSION-$PLATFORM_TAG \
-        --pull --push $CONTAINER
+        --pull --push container/$CONTAINER
 #  dnsdist_publish:
 #    needs: dnsdist
 #    name: Package dnsdist ${{ github.ref }}
