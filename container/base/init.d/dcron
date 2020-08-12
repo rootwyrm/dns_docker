@@ -1,0 +1,21 @@
+#!/sbin/openrc-run
+
+name="$SVCNAME"
+command="/usr/sbin/crond"
+command_args="$DCRON_OPTS"
+pidfile="/var/run/$SVCNAME.pid"
+description="Dillon's lightweight cron daemon"
+
+## Don't start dcron before firstboot
+_need_firstboot()
+{
+	test -f /firstboot
+}
+
+depend() {
+	use logger clock hostname
+	provide cron
+	local _need=
+}
+
+

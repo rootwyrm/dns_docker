@@ -1,0 +1,46 @@
+#!/sbin/openrc-run
+################################################################################
+# Copyright (C) 2020-* Phillip "RootWyrm" Jaenke
+# All rights reserved
+#
+# Licensed under CC-BY-NC-3.0
+# See /LICENSE for details
+################################################################################
+# init.d/dnsdist
+################################################################################
+name="dnsdist"
+supervisor="supervise-daemon"
+
+extra_commands="checkconfig"
+
+description="A high-performance, programmable, secure, load-balancing DNS proxy"
+
+: ${cfgfile:=${DNSDIST_CONFIG:-"/usr/local/etc/dnsdist/dnsdist.conf"}}
+
+command="/usr/local/bin/dnsdist"
+command_args="${DNSDIST_OPTS}"
+command_args_foreground="--supervised"
+
+required_files="$cfgfile"
+
+depend() {
+	need net dcron rootwyrm
+	use logger
+	after firewall 
+	before opennhrp bgpd
+	provide dns
+}
+
+checkconfig() {
+	ebegin "Checking $name config file"
+	$command --check-config -C $cfgfile > /dev/null
+	eend $?
+}
+
+start_pre() {
+	/opt/rootwyrm/bin/identify.sh
+	if [ -f /message ]; then
+		cat /message
+	fi
+	checkconfig
+}

@@ -1,0 +1,101 @@
+--------------------------------------------------------------------------------
+-- Part of dns_docker by Phillip "RootWyrm" Jaenke
+-- https://github.com/rootwyrm/dns_docker
+-- 
+-- dnsdist.conf
+--------------------------------------------------------------------------------
+setSyslogFacility(136)
+
+------------------------------------------------------------
+-- Control Socket configuration
+------------------------------------------------------------
+%%DNSDIST_CONTROLKEY%%
+controlSocket('127.0.0.1:5199')
+setConsoleACL('127.0.0.0/8')
+
+------------------------------------------------------------
+-- Listener configuration
+------------------------------------------------------------
+setLocal('127.0.0.1', { reusePort=true, tcpFastOpenQueueSize=64})
+--Local Listeners
+
+------------------------------------------------------------
+-- Set default ACL
+------------------------------------------------------------
+setACL('127.0.0.0/8')
+addACL('172.16.0.0/12')
+addACL('%%DNSDIST_SUBNET%%')
+
+------------------------------------------------------------
+-- XXX: DOH configuration goes here
+------------------------------------------------------------
+
+------------------------------------------------------------
+-- Server pools
+------------------------------------------------------------
+-- XXX: DO NOT ALTER OR ADD TO THE "localroot" POOL!
+newServer( {address="172.16.53.11:10530", pool="localroot", name="localroot", tcpFastOpen=true, qps=100000} )
+-- Some reasonable public engagement servers as an example
+-- DO NOT CHANGE THE HEALTH CHECK SETTINGS!
+
+-- newServer( { address="9.9.9.9:53", pool="quad9",  name="dns9.quad9.net", qps=10, checkFunction=quad9_HealthCheck, checkInterval=120} )
+-- newServer( { address="149.112.112.112:53", pool="quad9",  name="rrdns.pch.net", qps=10, checkFunction=quad9_HealthCheck, checkInterval=120} )
+
+--function quad9_HealthCheck(qname, qtype, qclass, dh)
+--	dh:setCD(true)
+--	local randomName = { 'powerdns.com.', 'www.google.com.', 'www.bing.com.', 'facebook.com.', 'amazon.com.' }
+--	for k in pairs(randomName) do
+--		table.insert(names,k)
+--	end
+--	return newDNSName([math.random(#names)]), DNSQType.A, qclass
+--end
+
+------------------------------------------------------------
+-- Fixed mapping
+------------------------------------------------------------
+-- Quick answer localhost queries
+addAction("localhost", SpoofAction("127.0.0.1", "::1", {aa=true}))
+addAction("1.0.0.127.in-addr.arpa", SpoofRawAction("\009localhost\000", {aa=true}))
+addAction("1.0.0.127.in-addr.arpa", SpoofRawAction("\009localhost\000", {aa=true}))
+addAction("1.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.ip6.arpa", SpoofRawAction("\009localhost\000", {aa=true}))
+-- Send certain authoritative queries to local NSD
+localroot = newSuffixMatchNode()
+localroot:add("root-servers.net")
+localroot:add("mcast.net")          
+localroot:add("224.in-addr.arpa")
+localroot:add("225.in-addr.arpa")
+localroot:add("226.in-addr.arpa")
+localroot:add("227.in-addr.arpa")
+localroot:add("228.in-addr.arpa")
+localroot:add("229.in-addr.arpa")
+localroot:add("230.in-addr.arpa")
+localroot:add("231.in-addr.arpa")
+localroot:add("232.in-addr.arpa")
+localroot:add("233.in-addr.arpa")
+localroot:add("234.in-addr.arpa")
+localroot:add("235.in-addr.arpa")
+localroot:add("236.in-addr.arpa")
+localroot:add("237.in-addr.arpa")
+localroot:add("238.in-addr.arpa")
+localroot:add("239.in-addr.arpa")
+addAction(SuffixMatchNodeRule(localroot, true), PoolAction("localroot"))
+
+------------------------------------------------------------
+-- Base cache settings; must set cache
+------------------------------------------------------------
+cache_localroot     = newPacketCache(64)
+getPool("localroot"):setCache(cache_localroot)
+--cache_authoritative = newPacketCache(2048, {numberOfShards=4})
+--cache_recursor      = newPacketCache(8192, {numberOfShards=8})
+--getPool("authoritative"):setCache(cache_authoritative)
+--getPool("recursor"):setCache(cache_recursor)
+
+------------------------------------------------------------
+-- Include actions; order matters
+-- Subdirectories 
+------------------------------------------------------------
+includeDirectory('/usr/local/etc/dnsdist/conf.d')
+includeDirectory('/usr/local/etc/dnsdist/lua')
+includeDirectory('/usr/local/etc/dnsdist/maps')
+
+-- vim:ft=lua
