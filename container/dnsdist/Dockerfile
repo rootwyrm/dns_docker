@@ -1,5 +1,5 @@
 ARG     RELEASE=latest
-FROM    dns_docker_base:${RELEASE}
+FROM    rootwyrm/dns_base:${RELEASE}
 
 ## Set up our labels
 LABEL	maintainer="Phillip 'RootWyrm' Jaenke <prj+docker@rootwyrm.com>" \
@@ -34,6 +34,7 @@ EXPOSE	53/tcp
 EXPOSE	53/udp
 EXPOSE	80/tcp
 EXPOSE	443/tcp
+EXPOSE	853/tcp
 EXPOSE	8053/tcp
 
 VOLUME [ "/usr/local/etc/dnsdist/conf.d", "/usr/local/etc/dnsdist/lua", "/usr/local/etc/dnsdist/maps" ]

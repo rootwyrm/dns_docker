@@ -1,12 +1,10 @@
 ## dnsdist
-name: CICD - dnsdist
+name: (head) CICD - dnsdist
 on:
   push:
     branches:
+      - head
       - master
-      - release/*
-    tags:
-      - v*
     paths:
       - 'container/dnsdist/**'
   repository_dispatch:
@@ -18,13 +16,13 @@ jobs:
     strategy:
       matrix:
         platform: [ amd64, 386, arm64, arm/v7 ]
-    name: Build dnsdist/${{ matrix.platform }} - ${{ github.ref }}
+    name: Build dnsdist/${{ matrix.platform }} - ${{ github.ref }} @ ${{ github.sha }}
     runs-on: ubuntu-20.04
     env:
       CONTAINER: dnsdist
-      BINFMT: a7996909642ee92942dcd6cff44b9b95f08dad64
+      BINFMT: "docker.io/rootwyrm/advbinfmt:5.1.0"
     steps:
-    - name: Check out from ${{ github.ref }} 
+    - name: Check out from ${{ github.ref }} @ ${{ github.sha }}
       id: checkout
       uses: actions/checkout@v2
       with:
@@ -32,26 +30,8 @@ jobs:
     - name: Set up build environment
       id: buildenv
       run: |
-        docker run --rm --privileged docker/binfmt:$BINFMT
+        docker run --rm --privileged $BINFMT
         docker buildx create --name rootwyrm --use
-    - name: Build base container
-      id: container_base
-      run: |
-        VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
-        [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
-        [ "$VERSION" == "master" ] && VERSION=latest
-        [ "$VERSION" == "head" ] && VERSION=latest
-        docker buildx build --platform linux/${{ matrix.platform }} \
-        --tag dns_docker_base:$VERSION --pull container/base
-    - name: Debug
-      id: debugger
-      run: |
-        VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
-        [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
-        [ "$VERSION" == "master" ] && VERSION=latest
-        [ "$VERSION" == "head" ] && VERSION=latest
-        docker images
-        docker inspect dns_docker_base:$VERSION
     - name: Run pre-build hooks
       id: hooks
       run: |
