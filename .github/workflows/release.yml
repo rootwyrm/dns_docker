@@ -25,7 +25,7 @@ jobs:
     env:
       CONTAINER: base
       #BINFMT: "docker.io/rootwyrm/advbinfmt:5.1.0"
-      BINFMT: "linuxkit/binfmt"
+      BINFMT: "linuxkit/binfmt:v0.8"
       PLATFORM: "linux/amd64,linux/386,linux/arm64,linux/arm/v7,linux/arm/v8"
       RW_TAG: rootwyrm/dns_base
     steps:
@@ -61,7 +61,7 @@ jobs:
     env: 
       CONTAINER: nsd
       #BINFMT: "docker.io/rootwyrm/advbinfmt:5.1.0"
-      BINFMT: "linuxkit/binfmt"
+      BINFMT: "linuxkit/binfmt:v0.8"
       PLATFORM: "linux/amd64,linux/386,linux/arm64,linux/arm/v7,linux/arm/v8"
     name: Release - nsd ${{ github.ref }}
     runs-on: ubuntu-20.04
@@ -93,7 +93,7 @@ jobs:
     env: 
       CONTAINER: unbound
       #BINFMT: "docker.io/rootwyrm/advbinfmt:5.1.0"
-      BINFMT: "linuxkit/binfmt"
+      BINFMT: "linuxkit/binfmt:v0.8"
       PLATFORM: "linux/amd64,linux/386,linux/arm64,linux/arm/v7,linux/arm/v8"
     name: Release - unbound ${{ github.ref }}
     runs-on: ubuntu-20.04
@@ -125,7 +125,7 @@ jobs:
     env: 
       CONTAINER: dnsdist
       #BINFMT: "docker.io/rootwyrm/advbinfmt:5.1.0"
-      BINFMT: "linuxkit/binfmt"
+      BINFMT: "linuxkit/binfmt:v0.8"
       PLATFORM: "linux/amd64,linux/386,linux/arm64,linux/arm/v7,linux/arm/v8"
     name: Release - dnsdist ${{ github.ref }}
     runs-on: ubuntu-20.04

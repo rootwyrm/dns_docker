@@ -23,7 +23,7 @@ jobs:
     env:
       CONTAINER: dnsdist
       #BINFMT: "docker.io/rootwyrm/advbinfmt:5.1.0"
-      BINFMT: "linuxkit/binfmt"
+      BINFMT: "linuxkit/binfmt:v0.8"
     steps:
     - name: Check out from ${{ github.ref }} 
       id: checkout
