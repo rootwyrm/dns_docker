@@ -30,7 +30,8 @@ jobs:
     runs-on: ubuntu-20.04
     env:
       CONTAINER: nsd
-      BINFMT: a7996909642ee92942dcd6cff44b9b95f08dad64
+      #BINFMT: "docker.io/rootwyrm/advbinfmt:5.1.0"
+      BINFMT: "linuxkit/binfmt"
     steps:
     - name: Check out from ${{ github.ref }} 
       id: checkout
@@ -42,7 +43,7 @@ jobs:
     - name: Set up build environment
       id: buildenv
       run: |
-        docker run --rm --privileged docker/binfmt:$BINFMT
+        docker run --rm --privileged $BINFMT
         docker buildx create --name rootwyrm --use
     - name: Build for ${{ matrix.platform }}
       run: |

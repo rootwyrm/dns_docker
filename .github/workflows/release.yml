@@ -4,22 +4,16 @@
 ## the builds occurring less frequently.
 ################################################################################
 
-name: Build - All
+name: (release) CICD - Containers
 on:
   push:
     branches:
       - release/*
     tags:
       - v*
-  pull_request:
-    branches:
-      - release/*
-    tags:
-      - v*
-  pull_request_review:
-    types: [ submitted, edited ]
-  repository_dispatch:
-    types: [ release ]
+    paths:
+      - 'ci/**'
+      - 'containers/**'
 
 jobs:
 ################################################################################
@@ -29,9 +23,10 @@ jobs:
     name: Release ${{ github.ref }}
     runs-on: ubuntu-20.04
     env:
-      BINFMT: a7996909642ee92942dcd6cff44b9b95f08dad64
       CONTAINER: base
-      PLATFORM: "linux/amd64,linux/386,linux/arm64,linux/arm/v7"
+      #BINFMT: "docker.io/rootwyrm/advbinfmt:5.1.0"
+      BINFMT: "linuxkit/binfmt"
+      PLATFORM: "linux/amd64,linux/386,linux/arm64,linux/arm/v7,linux/arm/v8"
       RW_TAG: rootwyrm/dns_base
     steps:
     - name: Check out from ${{ github.ref }}
@@ -46,8 +41,8 @@ jobs:
     - name: Set up build environment
       id: buildenv
       run: |
-        docker run --rm --privileged docker/binfmt:$BINFMT
-        docker buildx create --name dns_docker --use
+        docker run --rm --privileged $BINFMT
+        docker buildx create --name buildx_${CONTAINER} --use
     - name: Build for platforms
       run: |
         PLATFORM_TAG=$(echo ${{ matrix.platform }} | sed -e 's,/,,g')
@@ -57,7 +52,7 @@ jobs:
         docker login -u ${{ secrets.HUB_USER }} -p ${{ secrets.HUB_TOKEN }}
         docker buildx build --platform $PLATFORM --pull --push \
         --build-arg RELEASE=${VERSION} --tag $RW_TAG:${VERSION} \
-        $CONTAINER 
+        container/$CONTAINER 
 ################################################################################
 # Consumers
 ################################################################################
@@ -65,8 +60,9 @@ jobs:
     needs: base
     env: 
       CONTAINER: nsd
-      BINFMT: a7996909642ee92942dcd6cff44b9b95f08dad64
-      PLATFORM: "linux/amd64,linux/386,linux/arm64,linux/arm/v7"
+      #BINFMT: "docker.io/rootwyrm/advbinfmt:5.1.0"
+      BINFMT: "linuxkit/binfmt"
+      PLATFORM: "linux/amd64,linux/386,linux/arm64,linux/arm/v7,linux/arm/v8"
     name: Release - nsd ${{ github.ref }}
     runs-on: ubuntu-20.04
     steps:
@@ -80,8 +76,8 @@ jobs:
     - name: Set up build environment
       id: buildenv
       run: |
-        docker run --rm --privileged docker/binfmt:$BINFMT
-        docker buildx create --name dns_docker --use
+        docker run --rm --privileged $BINFMT
+        docker buildx create --name buildx_${CONTAINER} --use
     - name: Build nsd ${{ github.ref }}
       run: |
         VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
@@ -90,14 +86,15 @@ jobs:
         docker login -u ${{ secrets.HUB_USER }} -p ${{ secrets.HUB_TOKEN }}
         docker buildx build --platform $PLATFORM --pull --push \
         --build-arg RELEASE=${VERSION} --tag rootwyrm/$CONTAINER:$VERSION \
-        $CONTAINER
+        container/$CONTAINER
         docker logout
   unbound:
     needs: base
     env: 
       CONTAINER: unbound
-      BINFMT: a7996909642ee92942dcd6cff44b9b95f08dad64
-      PLATFORM: "linux/amd64,linux/386,linux/arm64,linux/arm/v7"
+      #BINFMT: "docker.io/rootwyrm/advbinfmt:5.1.0"
+      BINFMT: "linuxkit/binfmt"
+      PLATFORM: "linux/amd64,linux/386,linux/arm64,linux/arm/v7,linux/arm/v8"
     name: Release - unbound ${{ github.ref }}
     runs-on: ubuntu-20.04
     steps:
@@ -111,8 +108,8 @@ jobs:
     - name: Set up build environment
       id: buildenv
       run: |
-        docker run --rm --privileged docker/binfmt:$BINFMT
-        docker buildx create --name dns_docker --use
+        docker run --rm --privileged $BINFMT
+        docker buildx create --name buildx_${CONTAINER} --use
     - name: Build unbound ${{ github.ref }}
       run: |
         VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
@@ -121,14 +118,15 @@ jobs:
         docker login -u ${{ secrets.HUB_USER }} -p ${{ secrets.HUB_TOKEN }}
         docker buildx build --platform $PLATFORM --pull --push \
         --build-arg RELEASE=${VERSION} --tag rootwyrm/$CONTAINER:$VERSION \
-        $CONTAINER
+        container/$CONTAINER
         docker logout
   dnsdist:
     needs: base
     env: 
       CONTAINER: dnsdist
-      BINFMT: a7996909642ee92942dcd6cff44b9b95f08dad64
-      PLATFORM: "linux/amd64,linux/386,linux/arm64,linux/arm/v7"
+      #BINFMT: "docker.io/rootwyrm/advbinfmt:5.1.0"
+      BINFMT: "linuxkit/binfmt"
+      PLATFORM: "linux/amd64,linux/386,linux/arm64,linux/arm/v7,linux/arm/v8"
     name: Release - dnsdist ${{ github.ref }}
     runs-on: ubuntu-20.04
     steps:
@@ -142,8 +140,8 @@ jobs:
     - name: Set up build environment
       id: buildenv
       run: |
-        docker run --rm --privileged docker/binfmt:$BINFMT
-        docker buildx create --name dns_docker --use
+        docker run --rm --privileged $BINFMT
+        docker buildx create --name buildx_${CONTAINER} --use
     - name: Build dnsdist ${{ github.ref }}
       run: |
         VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
@@ -152,7 +150,7 @@ jobs:
         docker login -u ${{ secrets.HUB_USER }} -p ${{ secrets.HUB_TOKEN }}
         docker buildx build --platform $PLATFORM --pull --push \
         --build-arg RELEASE=${VERSION} --tag rootwyrm/$CONTAINER:$VERSION \
-        $CONTAINER
+        container/$CONTAINER
         docker logout
 
 # vim:ts=2:sw=2:et
