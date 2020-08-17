@@ -109,7 +109,7 @@ services:
       - /opt/rootwyrm/etc/unbound:/usr/local/etc/unbound/conf.d
       - /opt/rootwyrm/etc/unbound/zones:/usr/local/etc/unbound/zones
       - /opt/rootwyrm/etc/pki:/usr/local/etc/unbound/pki:ro
-      - /opt/rootwyrm/var/log/unbound:/var/log
+      - /opt/rootwyrm/var/log/unbound:/usr/local/etc/unbound/var/log
     cap_add:
       - NET_ADMIN
       - NET_BIND_SERVICE
