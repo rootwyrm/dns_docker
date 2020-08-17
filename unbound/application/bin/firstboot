@@ -51,6 +51,15 @@ function config()
 	## Perform TLS Session key regeneration early on, and always.
 	session_regenerate
 
+	## Create logging directry if missing.
+	if [ ! -d /usr/local/etc/unbound/var/log ]; then
+		mkdir -p /usr/local/etc/unbound/var/log
+		chown -R dnsdocker:dnsdocker /usr/local/etc/unbound/var/log
+	else
+		## Always fix permissions
+		chown -R dnsdocker:dnsdocker /usr/local/etc/unbound/var/log
+	fi
+
 	## Symlink system certificates, always check this.
 	if [ ! -s /usr/local/etc/unbound/ca-certificates.crt ]; then
 		ln -s /etc/ssl/certs/ca-certificates.crt /usr/local/etc/unbound/ca-certificates.crt
