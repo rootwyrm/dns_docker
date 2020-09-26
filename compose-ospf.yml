@@ -14,12 +14,10 @@ services:
     env_file:
       - /opt/rootwyrm/etc/dns_docker.env
     ports:
-      - "172.16.53.10:53:53"
-      - "172.16.53.10:853:853"
-      - "172.16.53.10:443:443"
-      - "172.16.53.10:8053:8053"
-      # If you are doing intercept, use the following format
-      # - "10.53.10.53:53:53"
+      - "53"
+      - "853"
+      - "443"
+      - "8053"
       # regex_marker
     tmpfs:
       - /run
