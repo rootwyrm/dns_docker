@@ -1,0 +1,129 @@
+## compose-ospf.yml
+## This is for networks that want to use OSPF or BGP for anycast
+  
+version: "3.7"    # CAUTION: do not use 3.8, breaks on Alpine
+services:
+  dnsdist:
+    ## Never deploy more than 1 dnsdist instance per host.
+    container_name: dnsdist
+    networks:
+      dns:
+        ipv4_address: 172.16.53.10
+    image: docker.io/rootwyrm/dnsdist:${RELEASE:-latest}
+    restart: on-failure
+    env_file:
+      - /opt/rootwyrm/etc/dns_docker.env
+    ports:
+      - "172.16.53.10:53:53"
+      - "172.16.53.10:853:853"
+      - "172.16.53.10:443:443"
+      - "172.16.53.10:8053:8053"
+      # If you are doing intercept, use the following format
+      # - "10.53.10.53:53:53"
+      # regex_marker
+    tmpfs:
+      - /run
+      - /tmp
+    volumes:
+      - /opt/rootwyrm/etc/dnsdist:/usr/local/etc/dnsdist/conf.d
+      - /opt/rootwyrm/etc/dnsdist/lua:/usr/local/etc/dnsdist/lua
+      - /opt/rootwyrm/etc/dnsdist/maps:/usr/local/etc/dnsdist/maps
+      - /opt/rootwyrm/etc/pki:/usr/local/etc/dnsdist/pki:ro
+      - /opt/rootwyrm/var/log/dnsdist:/var/log
+    cap_add:
+      - NET_ADMIN
+      - NET_BIND_SERVICE
+      ## CAUTION: Uncomment the following if doing perf work
+      #- CAP_SYS_ADMIN
+  nsd:
+    ## If you need more than one nsd, you did it wrong.
+    container_name: nsd
+    restart: on-failure
+    env_file:
+      - /opt/rootwyrm/etc/dns_docker.env
+    networks:
+      dns:
+        ipv4_address: 172.16.53.11
+    image: docker.io/rootwyrm/nsd:${RELEASE:-latest}
+    sysctls:
+      - net.core.somaxconn=10240
+      - net.ipv4.tcp_rmem=1024 87380 12582912
+      - net.ipv4.tcp_wmem=1024 87380 12582912
+      # If TCP MTU probing is disabled, upstream TLS may fail.
+      - net.ipv4.tcp_mtu_probing=1
+      - net.ipv4.tcp_fin_timeout=15
+      - net.ipv4.tcp_tw_reuse=1
+      - net.ipv4.tcp_fastopen=3
+    restart: on-failure
+    ports:
+      - "53"
+      - "853"
+      - target: 10530
+        published: 10530
+        protocol: udp
+        mode: host
+      - target: 9530
+        published: 9530
+        protocol: tcp
+        mode: host
+    tmpfs:
+      - /run
+      - /tmp
+    volumes:
+      - /opt/rootwyrm/etc/nsd:/usr/local/etc/nsd/conf.d
+      - /opt/rootwyrm/etc/nsd/zones:/usr/local/etc/nsd/zones
+      - /opt/rootwyrm/var/db/nsd:/var/db/nsd
+      - /opt/rootwyrm/etc/pki:/usr/local/etc/nsd/pki:ro
+      - /opt/rootwyrm/var/log/nsd:/var/log
+    cap_add:
+      - NET_BIND_SERVICE
+  unbound:
+    ## If you need more than one unbound, you probably did it wrong.
+    container_name: unbound
+    restart: on-failure
+    env_file:
+      - /opt/rootwyrm/etc/dns_docker.env
+    networks:
+      dns:
+        ipv4_address: 172.16.53.12
+    image: docker.io/rootwyrm/unbound:${RELEASE:-latest}
+    sysctls:
+      - net.core.somaxconn=10240
+      - net.ipv4.tcp_rmem=1024 87380 12582912
+      - net.ipv4.tcp_wmem=1024 87380 12582912
+      # If TCP MTU probing is disabled, upstream TLS may fail.
+      - net.ipv4.tcp_mtu_probing=1
+      - net.ipv4.tcp_fin_timeout=15
+      - net.ipv4.tcp_tw_reuse=1
+      - net.ipv4.tcp_fastopen=3
+    restart: on-failure
+    ports:
+      - "53"
+      - "853"
+      - target: 10531
+        published: 10531
+        protocol: udp
+        mode: host
+      - target: 9531
+        published: 9531
+        protocol: tcp
+        mode: host
+    tmpfs:
+      - /run
+      - /tmp
+    volumes:
+      - /opt/rootwyrm/etc/unbound:/usr/local/etc/unbound/conf.d
+      - /opt/rootwyrm/etc/unbound/zones:/usr/local/etc/unbound/zones
+      - /opt/rootwyrm/etc/pki:/usr/local/etc/unbound/pki:ro
+      - /opt/rootwyrm/var/log/unbound:/usr/local/etc/unbound/var/log
+    cap_add:
+      - NET_ADMIN
+      - NET_BIND_SERVICE
+
+networks:
+  dns:
+    ipam:
+      config:
+        - subnet: "172.16.53.0/24"
+
+# vim:ts=2:sw=2:et
