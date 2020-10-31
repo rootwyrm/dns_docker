@@ -1,0 +1,77 @@
+#!/sbin/openrc-run
+
+extra_commands="checkconfig checkzones"
+extra_started_commands="reload"
+: ${NAMED_CONF:=/usr/local/etc/bind/named.conf}
+
+depend() {
+	need net
+	after firewall entropy
+	use logger
+	provide dns
+}
+
+_git_pidfile() {
+	[ -n "${PIDFILE}" ] || PIDFILE=$ (\
+			/usr/local/sbin/named-checkconf -p ${NAMED_CONF} | grep 'pid-file' | cut -d\" -f2)
+	[ -z "${PIDFILE}" ] && PIDFILE=/var/run/named/named.pid
+}
+
+checkconfig() {
+	ebegin "Checking bind configuration..."
+
+	if [ ! -f "${NAMED_CONF}" ]; then
+		eerror "${NAMED_CONF} missing!"
+		return 1
+	fi
+	/usr/local/sbin/named-checkconf ${NAMED_CONF} || {
+		eerror "named-checkconf failed."
+		return 1
+	} 
+	eend 0
+	return 0
+}
+
+checkzones() {
+	ebegin "Checking bind zones"
+	/usr/local/sbin/named-checkconf -z -j ${NAMED_CONF}
+	eend $?
+}
+
+start() {
+	local piddir
+	ebegin "Starting bind"
+	_get_pidfile
+	piddir="${PIDFILE%/*}"
+	if [ ! -d "${piddir}" ]; then
+		checkpath -q -d -o root:dnsdocker -m 0770 "${piddir}" || {
+			eend 1
+			return 1
+		}
+	fi
+	
+	if [ -n "${CPU}" ] && [ "${CPU}" -gt 0 ]; then
+		CPU="-n ${CPU}"
+	fi
+
+	start-stop-daemon --start --pidfile ${PIDFILE} \
+		--nicelevel ${NICELEVEL:-0} \
+		--exec /usr/local/bin/named \
+		-- -u dnsdocker ${CPU} ${OPTS}
+	eend $?
+}
+
+stop() {
+	ebegin "Stopping bind"
+	_get_pidfile
+	/usr/local/sbin/rndc sync
+	start-stop-daemon --stop --quiet --pidfile $PIDFILE
+	eend $?
+}
+
+reload() {
+	checkconfig
+	ebegin "Reloading bind"
+	/usr/local/sbin/rndc reload
+	eend $?
+}
