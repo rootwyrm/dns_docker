@@ -1,0 +1,6 @@
+#!/bin/sh
+## periodic/15min/bind
+## Write stats file
+/usr/local/sbin/rndc stats
+## Sync dynamic zones
+/usr/local/sbin/rndc sync
