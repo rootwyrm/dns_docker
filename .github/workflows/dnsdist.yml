@@ -48,34 +48,34 @@ jobs:
         docker buildx build --platform linux/${{ matrix.platform }} \
         --tag rootwyrm/$CONTAINER:$VERSION-$PLATFORM_TAG \
         --push container/$CONTAINER
-#  dnsdist_publish:
-#    needs: dnsdist
-#    name: Package dnsdist ${{ github.ref }}
-#    runs-on: ubuntu-20.04
-#    steps:
-#      - name: Check out from ${{ github.ref }}
-#        uses: actions/checkout@v2
-#      - name: Install manifest-tool
-#        run: |
-#          ${GITHUB_WORKSPACE}/ci/tools/install.manifest-tool.sh
-#      ## Doesn't print correctly due to python3 flux. 
-#      - name: Assemble and push manifest ${{ github.ref }}
-#        run: |
-#          VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
-#          [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
-#          [ "$VERSION" == "master" ] && VERSION=latest
-#          docker login -u ${{ secrets.HUB_USER }} -p ${{ secrets.HUB_TOKEN }}
-#          ${GITHUB_WORKSPACE}/ci/manifest-tool push from-args \
-#          --platforms linux/amd64,linux/386,linux/arm64,linux/arm/v7 \
-#          --template rootwyrm/dnsdist:$VERSION-ARCHVARIANT \
-#          --target rootwyrm/dnsdist:$VERSION
-#      - name: Run manifest cleaning tool
-#        run: |
-#          VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
-#          [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
-#          [ "$VERSION" == "master" ] && VERSION=latest
-#          for p in amd64 386 arm64 armv7; do
-#          ${GITHUB_WORKSPACE}/ci/tools/manifest_clean.py -u ${{ secrets.HUB_USER }} -p ${{ secrets.HUB_SECRET2 }} -c dnsdist -t $VERSION-$p
-#          done
+  dnsdist_publish:
+    needs: dnsdist
+    name: Package dnsdist ${{ github.ref }}
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Check out from ${{ github.ref }}
+        uses: actions/checkout@v2
+      - name: Install manifest-tool
+        run: |
+          ${GITHUB_WORKSPACE}/ci/tools/install.manifest-tool.sh
+      ## Doesn't print correctly due to python3 flux. 
+      - name: Assemble and push manifest ${{ github.ref }}
+        run: |
+          VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+          [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
+          [ "$VERSION" == "master" ] && VERSION=latest
+          docker login -u ${{ secrets.HUB_USER }} -p ${{ secrets.HUB_TOKEN }}
+          ${GITHUB_WORKSPACE}/ci/manifest-tool push from-args \
+          --platforms linux/amd64,linux/386,linux/arm64,linux/arm/v7 \
+          --template rootwyrm/dnsdist:$VERSION-ARCHVARIANT \
+          --target rootwyrm/dnsdist:$VERSION
+      - name: Run manifest cleaning tool
+        run: |
+          VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+          [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
+          [ "$VERSION" == "master" ] && VERSION=latest
+          for p in amd64 386 arm64 armv7; do
+          ${GITHUB_WORKSPACE}/ci/tools/manifest_clean.py -u ${{ secrets.HUB_USER }} -p ${{ secrets.HUB_SECRET2 }} -c dnsdist -t $VERSION-$p
+          done
 
 # vim:ts=2:sw=2:et
