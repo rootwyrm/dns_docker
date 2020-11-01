@@ -11,7 +11,7 @@ depend() {
 	provide dns
 }
 
-_git_pidfile() {
+_get_pidfile() {
 	[ -n "${PIDFILE}" ] || PIDFILE=$(\
 			/usr/local/sbin/named-checkconf -p ${NAMED_CONF} | grep 'pid-file' | cut -d\" -f2)
 	[ -z "${PIDFILE}" ] && PIDFILE=/var/run/named/named.pid
