@@ -40,11 +40,13 @@ checkzones() {
 
 start() {
 	local piddir
+	checkconfig
+	checkzones
 	ebegin "Starting bind"
 	_get_pidfile
 	piddir="${PIDFILE%/*}"
 	if [ ! -d "${piddir}" ]; then
-		checkpath -q -d -o root:dnsdocker -m 0770 "${piddir}" || {
+		checkpath -q -d -o dnsdocker:dnsdocker -m 0770 "${piddir}" || {
 			eend 1
 			return 1
 		}
@@ -56,7 +58,7 @@ start() {
 
 	start-stop-daemon --start --pidfile ${PIDFILE} \
 		--nicelevel ${NICELEVEL:-0} \
-		--exec /usr/local/bin/named \
+		--exec /usr/local/sbin/named \
 		-- -u dnsdocker ${CPU} ${OPTS}
 	eend $?
 }
