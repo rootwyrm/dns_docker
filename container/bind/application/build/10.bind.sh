@@ -81,6 +81,7 @@ build()
 		--enable-dnsrps \
 		--enable-dnsrps-dl \
 		--enable-full-report \
+		--disable-chroot \
 		--with-maxminddb=auto \
 		--with-libtool \
 		--with-lmdb \
