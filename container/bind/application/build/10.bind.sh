@@ -24,7 +24,7 @@ export DISTVER="${SWVERSION:-9.16.8}"
 
 ## Build
 export vbpkg="${BUILDNAME}_build"
-export vbpkg_content="gcc g++ make libevent-dev openssl-dev protobuf-c-dev fstrm-dev libxml2-dev libmaxminddb-dev libuv-dev lmdb-dev perl libcap-dev libidn2-dev json-c-dev"
+export vbpkg_content="gcc g++ make libevent-dev openssl-dev protobuf-c-dev fstrm-dev libxml2-dev libmaxminddb-dev libuv-dev lmdb-dev perl libcap-dev libidn2-dev json-c-dev python3-dev linux-headers"
 ## Runtime
 export vrpkg="${BUILDNAME}_run"
 export vrpkg_content="curl libevent openssl protobuf-c fstrm libmaxminddb libxml2 py3-ply libuv lmdb libcap libidn2 json-c"
@@ -76,19 +76,24 @@ build()
 	./configure \
 		--prefix=/usr/local \
 		--sysconfdir=/usr/local/etc/bind \
+		--with-openssl=/usr \
+		--with-python=python3 \
 		--enable-dnstap \
 		--enable-auto-validation \
 		--enable-dnsrps \
 		--enable-dnsrps-dl \
 		--enable-full-report \
+		--enable-linux-caps \
 		--disable-chroot \
-		--with-maxminddb=auto \
+		--with-dlopen=yes \
 		--with-libtool \
 		--with-lmdb \
 		--with-libidn2=yes \
 		--with-json-c \
+		--with-maxminddb=auto \
 		--with-dlz-stub \
-		--with-dlz-filesystem=yes
+		--with-dlz-filesystem=yes \
+		--disable-isc-spnego
 
 	CHECK_ERROR $? "${BUILDNAME}_configure"
 	echo "$(date $DATEFMT) [${BUILDNAME}] configure complete."
