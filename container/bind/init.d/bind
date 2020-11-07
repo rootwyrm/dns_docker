@@ -51,6 +51,10 @@ start() {
 			return 1
 		}
 	fi
+	if [ ! -d /usr/local/var/run/named ]; then
+		mkdir /usr/local/var/run/named
+		chown dnsdocker:dnsdocker /usr/local/var/run/named
+	fi
 	
 	if [ -n "${CPU}" ] && [ "${CPU}" -gt 0 ]; then
 		CPU="-n ${CPU}"
