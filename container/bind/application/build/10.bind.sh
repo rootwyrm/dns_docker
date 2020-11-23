@@ -24,7 +24,7 @@ export DISTVER="${SWVERSION:-9.16.8}"
 
 ## Build
 export vbpkg="${BUILDNAME}_build"
-export vbpkg_content="gcc g++ make libevent-dev openssl-dev protobuf-c-dev fstrm-dev libxml2-dev libmaxminddb-dev libuv-dev lmdb-dev perl libcap-dev libidn2-dev json-c-dev python3-dev linux-headers"
+export vbpkg_content="gcc g++ make libevent-dev openssl-dev protobuf-c-dev fstrm-dev libxml2-dev libmaxminddb-dev libuv-dev lmdb-dev perl libcap-dev libidn2-dev json-c-dev python3-dev linux-headers go"
 ## Runtime
 export vrpkg="${BUILDNAME}_run"
 export vrpkg_content="curl libevent openssl protobuf-c fstrm libmaxminddb libxml2 py3-ply libuv lmdb libcap libidn2 json-c"
@@ -107,6 +107,13 @@ build()
 	make install
 	CHECK_ERROR $? "${BUILDNAME}_install"
 	echo "$(date $DATEFMT) [${BUILDNAME}] install complete"
+
+	echo "$(date $DATEFMT) [${BUILDNAME}] adding bind_exporter..."
+	go get github.com/prometheus-community/bind_exporter
+	if [ $? -ne 0 ]; then
+		cp go/bin/bind_exporter /usr/local/sbin/
+		rc-update add bind_exporter
+	fi
 }
 
 clean()

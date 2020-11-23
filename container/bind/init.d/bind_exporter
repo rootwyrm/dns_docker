@@ -1,0 +1,27 @@
+#!/sbin/openrc-run
+################################################################################
+# Copyright (C) 2015-* Phillip "RootWyrm" Jaenke
+# All rights reserved
+# 
+# Licensed under CC-BY-NC-3.0
+# See /LICENSE for details
+################################################################################
+
+## Pre-check
+if [ -f /usr/local/etc/bind/exporter.conf ]; then
+	. /usr/local/etc/bind/exporter.conf
+else
+	echo "no configuration file!"
+	exit 1
+fi
+
+name="Prometheus bind_exporter"
+supervisor="supervise-daemon"
+command="/usr/local/sbin/bind_exporter"
+command_args="-bind.pid-file /run/named/pid -bind.stats-url $STATS_URL -web.listen-address $LISTEN_ADDRESS"
+
+depend() {
+	need net
+	after firewall entropy bind
+	use logger
+}
