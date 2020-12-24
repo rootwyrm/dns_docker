@@ -78,10 +78,8 @@ jobs:
           [ "$VERSION" == "master" ] && VERSION=latest
           [ "$VERSION" == "main" ] && VERSION=latest
           docker login -u ${{ secrets.HUB_USER }} -p ${{ secrets.HUB_TOKEN }}
-          ${GITHUB_WORKSPACE}/ci/manifest-tool push from-args \
-          --platforms linux/amd64,linux/386,linux/arm64,linux/arm/v7 \
-          --template rootwyrm/dns_base:$VERSION-ARCHVARIANT \ 
-          --target rootwyrm/dns_base:$VERSION
+          ${GITHUB_WORKSPACE}/ci/manifest-tool push from-spec \
+          ${GITHUB_WORKSPACE}/container/$CONTAINER/${VERSION}-manifest.yml
       - name: Run manifest cleaning tool
         run: |
           VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
