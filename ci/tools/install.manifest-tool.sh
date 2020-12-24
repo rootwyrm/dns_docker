@@ -18,7 +18,7 @@ fi
 
 install_manifest_tool()
 {
-	local VERSION="1.0.2"
+	local VERSION="1.0.3"
 	case $ARCH in
 		## Deal with Linux kiddies refusing to agree again...
 		x86_64)
