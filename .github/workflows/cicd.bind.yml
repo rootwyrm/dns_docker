@@ -30,7 +30,7 @@ jobs:
   base:
     strategy:
       matrix:
-        platform: [ amd64, 386, arm64, arm/v7 ]
+        platform: [ amd64, 386, arm64 ]
     name: Build ${{ github.ref }} base/${{ matrix.platform }}
     runs-on: ubuntu-latest
     env:
@@ -96,7 +96,7 @@ jobs:
     needs: base_package
     strategy:
       matrix:
-        platform: [ amd64, 386, arm64, arm/v7 ]
+        platform: [ amd64, 386, arm64 ]
     name: Build ${{ github.ref }} bind/${{ matrix.platform }}
     runs-on: ubuntu-20.04
     env:
