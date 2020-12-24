@@ -1,5 +1,5 @@
 ## bind
-name: CICD - bind
+name: (CICD) bind
 on:
   push:
     branches:
@@ -20,7 +20,7 @@ on:
       - 'container/base/**'
       - 'container/bind/**'
   repository_dispatch:
-    types: [ bind ]
+    types: [ cicd_bind ]
 
 ## Rebuild
 jobs:
