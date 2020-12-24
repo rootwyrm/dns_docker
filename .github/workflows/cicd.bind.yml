@@ -43,7 +43,7 @@ jobs:
     - name: Run pre-build hooks
       id: hooks
       run: |
-        $GITHUB_WORKSPACE/ci/hooks/pre_build $GITHUB_WORSKPACE/container/$CONTAINER/Dockerfile
+        $GITHUB_WORKSPACE/ci/hooks/pre_build $GITHUB_WORKSPACE/container/$CONTAINER/Dockerfile
     - name: Set up build environment
       id: buildenv
       run: |
@@ -95,6 +95,7 @@ jobs:
   ## bind
   ######################################################################
   bind:
+    needs: base_package
     strategy:
       matrix:
         platform: [ amd64, 386, arm64, arm/v7 ]
