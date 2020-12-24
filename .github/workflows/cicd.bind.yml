@@ -79,7 +79,7 @@ jobs:
           [ "$VERSION" == "main" ] && VERSION=latest
           docker login -u ${{ secrets.HUB_USER }} -p ${{ secrets.HUB_TOKEN }}
           ${GITHUB_WORKSPACE}/ci/manifest-tool push from-spec \
-          ${GITHUB_WORKSPACE}/container/$CONTAINER/${VERSION}-manifest.yml
+          ${GITHUB_WORKSPACE}/container/base/${VERSION}-manifest.yml
       - name: Run manifest cleaning tool
         run: |
           VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
