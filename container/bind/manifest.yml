@@ -1,4 +1,4 @@
-## nsd/manifest.yml
+## bind/manifest.yml
 image: docker.io/rootwyrm/bind:latest
 manifests:
   -
