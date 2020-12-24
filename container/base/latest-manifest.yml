@@ -2,22 +2,22 @@
 image: docker.io/rootwyrm/dns_base:latest
 manifests:
   -
-    image: docker.io/rootwyrm/dns_base:amd64
+    image: docker.io/rootwyrm/dns_base:latest-amd64
     platform:
       architecture: amd64
       os: linux
   -
-    image: docker.io/rootwyrm/dns_base:arm64
+    image: docker.io/rootwyrm/dns_base:latest-arm64
     platform:
       architecture: arm64
       os: linux
   -
-    image: docker.io/rootwyrm/dns_base:armv7
+    image: docker.io/rootwyrm/dns_base:latest-armv7
     platform:
       architecture: arm/v7
       os: linux
   -
-    image: docker.io/rootwyrm/dns_base:386
+    image: docker.io/rootwyrm/dns_base:latest-386
     platform:
       architecture: "386"
       os: linux
