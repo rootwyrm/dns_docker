@@ -1,5 +1,5 @@
 ## base
-name: (head) CICD - base
+name: (head) CICD - bind
 on:
   push:
     branches:
