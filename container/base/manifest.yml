@@ -1,0 +1,25 @@
+## base/manifest.yml
+image: docker.io/rootwyrm/dns_base:latest
+manifests:
+  -
+    image: docker.io/rootwyrm/dns_base:amd64
+    platform:
+      architecture: amd64
+      os: linux
+  -
+    image: docker.io/rootwyrm/dns_base:arm64
+    platform:
+      architecture: arm64
+      os: linux
+  -
+    image: docker.io/rootwyrm/dns_base:armv7
+    platform:
+      architecture: arm/v7
+      os: linux
+  -
+    image: docker.io/rootwyrm/dns_base:386
+    platform:
+      architecture: "386"
+      os: linux
+
+# vim:ts=2:sw=2:et
