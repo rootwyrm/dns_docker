@@ -77,7 +77,7 @@ jobs:
           [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
           [ "$VERSION" == "master" ] && VERSION=latest
           [ "$VERSION" == "main" ] && VERSION=latest
-          docker login -u ${{ secrest.HUB_USER }} -p ${{ secrets.HUB_TOKEN }}
+          docker login -u ${{ secrets.HUB_USER }} -p ${{ secrets.HUB_TOKEN }}
           ${GITHUB_WORKSPACE}/ci/manifest-tool push from-args \
           --platforms linux/amd64,linux/386,linux/arm64,linux/arm/v7 \
           --template rootwyrm/dns_base:$VERSION-ARCHVARIANT \ 
