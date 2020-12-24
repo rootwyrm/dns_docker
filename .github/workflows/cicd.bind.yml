@@ -95,6 +95,7 @@ jobs:
   ## bind
   ######################################################################
   bind:
+    needs: base_package
     strategy:
       matrix:
         platform: [ amd64, 386, arm64, arm/v7 ]
