@@ -13,7 +13,7 @@
 function webserver()
 {
 	local WEBCONFSRC="/opt/rootwyrm/conf/webserver.conf.orig"
-	local WEBCONFDEST="/usr/local/etc/dnsdist/conf.d/webserver.conf"
+	local WEBCONFDEST="${CONFIGDIR}/conf.d/webserver.conf"
 
 	## Calculate our subnet with best effort
 	DEVICE=$(ip route | grep ^default | awk '{print $(NF)}')
