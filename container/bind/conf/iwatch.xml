@@ -8,7 +8,7 @@
     <title>iwatch</title>
     <!-- watch for iwatch config updates -->
       <path type="single" exec="service iwatch restart">/opt/rootwyrm/conf/iwatch.xml</path>
-    <title>nsd</title>
-      <path type="recursive" exec="/usr/local/sbin/rndc reconfig">/usr/local/etc/bind</path>
+    <title>bind</title>
+	<path type="single" filter="conf" exec="/usr/local/sbin/rndc reconfig">/usr/local/etc/bind</path>
   </watchlist>
 </config>
