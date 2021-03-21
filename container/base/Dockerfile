@@ -1,4 +1,4 @@
-FROM    alpine:3.12
+FROM    alpine:3.13
 
 LABEL   maintainer="Phillip 'RootWyrm' Jaenke <prj+docker@rootwyrm.com>" \
         com.rootwyrm.project="dns_docker" \
@@ -6,7 +6,7 @@ LABEL   maintainer="Phillip 'RootWyrm' Jaenke <prj+docker@rootwyrm.com>" \
         com.rootwyrm.url="%%GITHUB_REPOSITORY%%" \
         com.rootwyrm.docker.base="alpine:3.12" \
         com.rootwyrm.docker.auto="%%GITHUB_ACTION%%" \
-        com.rootwyrm.docker.license="CC-BY-NC-3.0" \
+        com.rootwyrm.docker.license="CC-BY-NC-4.0" \
         com.rootwyrm.dns_docker.component="base" \
         com.rootwyrm.dns_docker.version="%%RW_VCSHASH%%" \
         ## label-schema.org
@@ -20,7 +20,7 @@ LABEL   maintainer="Phillip 'RootWyrm' Jaenke <prj+docker@rootwyrm.com>" \
         ## OCI
         org.opencontainers.image.authors="RootWyrm" \
         org.opencontainers.image.vendor="RootWyrm" \
-        org.opencontainers.image.licenses="CC-BY-NC-3.0" \
+        org.opencontainers.image.licenses="CC-BY-NC-4.0" \
         org.opencontainers.image.version="%%RW_VCSHASH%%" \
         org.opencontainers.image.revision="%%GITHUB_SHA%%" \
         org.opencontainers.image.source="%%GITHUB_REPOSITORY%%" \
