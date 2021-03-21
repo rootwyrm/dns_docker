@@ -15,6 +15,9 @@ Built for amd64, i686, arm64, and arm/v7 architectures.
 | nsd         | ![CICD - nsd](https://github.com/rootwyrm/dns_docker/workflows/CICD%20-%20nsd/badge.svg) ![Docker Image Size (latest semver)](https://img.shields.io/docker/image-size/rootwyrm/nsd) |
 |  |  |
 
+# Important Reminder: systemd-resolved is cancer
+[systemd-resolved is cancer and a significant security risk. Banish it and anyone installing or defending it from your systems at once.](https://github.com/rootwyrm/dns_docker/wiki/systemd-resolved-is-cancer) Running either clients or servers in an environment with so much as a functioning systemd-resolved binary will NEVER be supported. **USING SYSTEMD-RESOLVED BREAKS DNSSEC AND OTHER CRITICAL PIECES, AND WILL RESULT IN INSECURE DNS, PERIOD.**
+
 # Installation
 
 **Installation using the `master` branch is not generally recommended.**
