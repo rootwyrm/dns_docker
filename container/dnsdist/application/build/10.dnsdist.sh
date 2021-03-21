@@ -15,7 +15,7 @@
 export BUILDNAME="dnsdist"
 export DISTSITE="https://downloads.powerdns.com/releases"
 if [ -z ${SWVERSION} ]; then
-	export SWVERSION="1.5.0"
+	export SWVERSION="1.5.1"
 else
 	export SWVERSION=${SWVERSION}
 fi
