@@ -18,9 +18,8 @@ software_version
 #export IFS=$'\n'
 export BUILDNAME="bind"
 export DISTSITE="https://downloads.isc.org/isc/bind9"
-#/9.16.8/bind-9.16.8.tar.xz
-export DISTVER="${SWVERSION:-9.16.8}"
-# https://www.nlnetlabs.nl/downloads/nsd/nsd-4.3.1.tar.gz
+#/9.16.13/bind-9.16.13.tar.xz
+export DISTVER="${SWVERSION:-9.16.13}"
 
 ## Build
 export vbpkg="${BUILDNAME}_build"

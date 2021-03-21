@@ -4,7 +4,7 @@ FROM    docker.io/rootwyrm/dns_base:${RELEASE}
 ## Set up our labels
 LABEL   maintainer="Phillip 'RootWyrm' Jaenke <prj+docker@rootwyrm.com>" \
         com.rootwyrm.project="dns_docker/nsd" \
-        com.rootwyrm.product="NLnet nsd" \
+        com.rootwyrm.product="ISC bind" \
         com.rootwyrm.vcs-type="github" \
         com.rootwyrm.url="%%GITHUB_REPOSITORY%%" \
         com.rootwyrm.docker.base="rootwyrm/dns_base:latest" \

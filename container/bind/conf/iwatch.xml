@@ -9,6 +9,9 @@
     <!-- watch for iwatch config updates -->
       <path type="single" exec="service iwatch restart">/opt/rootwyrm/conf/iwatch.xml</path>
     <title>bind</title>
-	<path type="single" filter="conf" exec="/usr/local/sbin/rndc reconfig">/usr/local/etc/bind</path>
+		<path type="single" filter="conf" exec="/usr/local/sbin/rndc reconfig">/usr/local/etc/bind/named.conf</path>
+		<path type="single" filter="conf" exec="/usr/local/sbin/rndc reconfig">/usr/local/etc/bind/named.acl.conf</path>
+		<path type="single" filter="conf" exec="/usr/local/sbin/rndc reconfig">/usr/local/etc/bind/named.keys.conf</path>
+		<path type="single" filter="conf" exec="/usr/local/sbin/rndc reconfig">/usr/local/etc/bind/named.logging.conf</path>
   </watchlist>
 </config>
