@@ -35,12 +35,13 @@ jobs:
         id: buildx
         uses: docker/setup-buildx-action@v1
       - name: Set tag
+        id: tag
         run: |
           VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
           [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
           [ "$VERSION" == "master" ] && VERSION=latest
           [ "$VERSION" == "main" ] && VERSION=latest
-          export VERSION
+          echo "::set-output name=VERSION::$(echo $VERSION)"
       - name: Build base
         id: build
         uses: docker/build-push-action@v2
@@ -49,7 +50,7 @@ jobs:
           context: container/base
           pull: true
           push: true
-          tags: rootwyrm/dns_base:$VERSION
+          tags: rootwyrm/dns_base:${{ steps.tag.outputs.VERSION }}
   dnsdist:
     name: Build dnsdist - ${{ github.ref }}
     runs-on: ubuntu-latest
@@ -71,12 +72,13 @@ jobs:
         id: buildx
         uses: docker/setup-buildx-action@v1
       - name: Set tag
+        id: tab
         run: |
           VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
           [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
           [ "$VERSION" == "master" ] && VERSION=latest
           [ "$VERSION" == "main" ] && VERSION=latest
-          export VERSION
+          echo "::set-output name=VERSION::$(echo $VERSION)"
       - name: Build dnsdist
         id: build
         uses: docker/build-push-action@v2
@@ -85,5 +87,5 @@ jobs:
           context: container/base
           pull: true
           push: true
-          tags: rootwyrm/dnsdist:$VERSION
+          tags: rootwyrm/dnsdist:${{ steps.tag.outputs.VERSION }}
 
