@@ -3,7 +3,7 @@ name: PR - latest
 on:
   pull_request:
     branches:
-      - master
+      - main 
       - release/*
     tags:
       - v1*

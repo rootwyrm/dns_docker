@@ -3,7 +3,7 @@ name: push - latest
 on:
   push:
     branches:
-      - master
+      - main
       - release/*
     tags:
       - v1*
