@@ -29,6 +29,7 @@ LABEL   maintainer="Phillip 'RootWyrm' Jaenke <prj+docker@rootwyrm.com>" \
 VOLUME  [ "/run" ]
 
 COPY [ "appbase/", "/opt/rootwyrm" ]
+COPY [ "etc/", "/etc" ]
 ADD  [ "init.d/", "/etc/init.d" ]
 
 RUN mkdir -p /opt/rootwyrm && \
@@ -50,7 +51,6 @@ RUN mkdir -p /opt/rootwyrm && \
     rm -f /etc/init.d/modloop ; \
     sed -i 's/\tcgroup_add_service/\t#cgroup_add_service/g' /lib/rc/sh/openrc-run.sh && \
     sed -i 's/VSERVER/DOCKER/Ig' /lib/rc/sh/init.sh ; \
-    mv /opt/rootwyrm/conf/logrotate.conf /etc/logrotate.conf ; \
     echo "dns_docker is Copyright (C) 2020-* Phillip Jaenke and its contributors" > /LICENSE ; \
     echo "https://github.com/rootwyrm/dns_docker/" >> /LICENSE ; \
     echo "" >> /LICENSE ; \
