@@ -9,9 +9,9 @@ on:
       - v1*
     paths:
       - 'ci/hooks/**'
-      - 'container/base/**'
+      - 'container/**'
     repository_dispatch:
-      types: [ main ]
+      types: [ world ]
 
 ## Do our monster build.
 jobs:
