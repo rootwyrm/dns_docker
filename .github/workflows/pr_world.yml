@@ -55,7 +55,7 @@ jobs:
           platforms: linux/amd64
           context: container/base
           pull: true
-          push: true
+          push: false
           tags: rootwyrm/dns_base:${{ steps.tag.outputs.VERSION }}
 ################################################################################
 # Run children as a Matrix to cut down total runtime...
