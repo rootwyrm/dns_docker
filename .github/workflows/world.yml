@@ -1,5 +1,5 @@
 ## main.yml
-name: dns_docker - Push latest
+name: latest - push
 on:
   push:
     branches:
@@ -7,9 +7,9 @@ on:
       - release/*
     tags:
       - v1*
-    paths:
-      - 'ci/hooks/**'
-      - 'container/**'
+    #paths:
+    #  - 'ci/hooks/**'
+    #  - 'container/**'
     repository_dispatch:
       types: [ world ]
 
@@ -53,6 +53,7 @@ jobs:
   dnsdist:
     name: Build dnsdist - ${{ github.ref }}
     runs-on: ubuntu-latest
+    needs: base
     env:
       CONTAINER: dnsdist
     steps: 
