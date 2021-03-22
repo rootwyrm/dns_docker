@@ -1,0 +1,114 @@
+######################################################################
+# dns_docker - https://github.com/rootwyrm/dns_docker
+# Copyright (C) 2018-* Phillip R. Jaenke
+#
+# Licensed under CC-BY-NC-4.0
+# See /LICENSE for details
+######################################################################
+version: "3.7"
+services:
+  ######################################################################
+  # dnsdist 
+  ######################################################################
+  dnsdist:
+    container_name: dnsdist
+    image: docker.io/rootwyrm/dnsdist:${RELEASE:-latest}
+    env_file:
+      - /opt/rootwyrm/etc/dns_docker.env
+    restart: on-failure
+    network_mode: "host"
+    ports:
+      - "53:53"
+      - "443:443/tcp"
+      - "853:853/tcp"
+      - "8053:8053/tcp"
+    tmpfs:
+      - /run
+      - /tmp
+    cap_add:
+      - NET_ADMIN
+      - NET_BIND_SERVICE
+    volumes:
+      - /opt/rootwyrm/etc/dnsdist/conf.d:/usr/local/etc/dnsdist/conf.d
+      - /opt/rootwyrm/etc/dnsdist/maps:/usr/local/etc/dnsdist/maps
+      - /opt/rootwyrm/etc/dnsdist/lua:/usr/local/etc/dnsdist/lua
+      - /opt/rootwyrm/etc/pki:/usr/local/etc/dnsdist/pki:ro
+      - /opt/rootwyrm/var/log/dnsdist:/var/log
+      - /sys:/sys
+  ######################################################################
+  # Recursor
+  ######################################################################
+  recursor:
+    container_name: recursor
+    image: docker.io/rootwyrm/${RECURSOR:-unbound}:${RELEASE:-latest}
+    env_file:
+      - /opt/rootwyrm/etc/dns_docker.env
+    restart: on-failure
+    network:
+        dns:
+            ipv4_address: 172.20.53.2
+    ports:
+      - "5300:5300"
+      - "18053:18053/tcp"
+    sysctls:
+      - net.core.somaxconn=10240
+      - net.ipv4.tcp_rmem=1024 87380 12582912
+      - net.ipv4.tcp_wmem=1024 87380 12582912
+      - net.ipv4.tcp_mtu_probing=1
+      - net.ipv4.tcp_tw_reuse=2
+      - net.ipv4.tcp_fastopen=3
+    tmpfs:
+      - /run
+      - /tmp
+    cap_add:
+      - NET_ADMIN
+      - NET_BIND_SERVICE
+    volumes:
+      - /opt/rootwyrm/etc/recursor:/usr/local/etc/${RECURSOR:-unbound}
+      - /opt/rootwyrm/var/log/recursor:/var/log
+      - /sys:/sys
+  ######################################################################
+  # Authoritative
+  ######################################################################
+  authoritative:
+    container_name: authoritative 
+    image: docker.io/rootwyrm/${AUTHORITATIVE:-nsd}:${RELEASE:-latest}
+    env_file:
+      - /opt/rootwyrm/etc/dns_docker.env
+    restart: on-failure
+    network:
+        dns:
+            ipv4_address: 172.20.53.3
+    ports:
+      - "5301:5301"
+      - "28053:28053/tcp"
+    sysctls:
+      - net.core.somaxconn=10240
+      - net.ipv4.tcp_rmem=1024 87380 12582912
+      - net.ipv4.tcp_wmem=1024 87380 12582912
+      - net.ipv4.tcp_mtu_probing=1
+      - net.ipv4.tcp_tw_reuse=2
+      - net.ipv4.tcp_fastopen=3
+    tmpfs:
+      - /run
+      - /tmp
+    cap_add:
+      - NET_ADMIN
+      - NET_BIND_SERVICE
+    volumes:
+      - /opt/rootwyrm/etc/authoritative:/usr/local/etc/${AUTHORITATIVE:-nsd}
+      - /opt/rootwyrm/var/log/authoritative:/var/log
+      - /sys:/sys
+
+################################################################################
+# Network Definitions
+################################################################################
+networks:
+  dns:
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.20.53.0/30
+          gateway: 172.20.53.1
+
+# vim:ft=yaml:ts=2:sw=2:et
