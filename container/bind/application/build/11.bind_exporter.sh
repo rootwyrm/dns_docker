@@ -27,16 +27,6 @@ export vbpkg_content="go git make gcc g++"
 export DATEFMT="+%FT%T%z"
 export curl_cmd="/usr/bin/curl --tlsv1.2 -L --silent"
 
-install_runtime()
-{
-	######################################################################
-	## Install runtime packages first.
-	######################################################################
-	echo "$(date $DATEFMT) [${BUILDNAME}] Installing runtime dependencies as $vrpkg"
-	/sbin/apk --no-cache add --virtual $vrpkg $vrpkg_content > /dev/null 2>&1
-	CHECK_ERROR $? $vrpkg
-}
-
 install_buildpkg()
 {
 	######################################################################
@@ -82,8 +72,6 @@ clean()
 	CHECK_ERROR $? "${BUILDNAME}_clean_apk"
 }
 
-CREATE_USER_DNSDOCKER
-install_runtime
 install_buildpkg
 build
 clean
