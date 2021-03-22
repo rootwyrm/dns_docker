@@ -15,18 +15,13 @@
 ingest_environment
 software_version
 
-#export IFS=$'\n'
-export BUILDNAME="bind"
-export DISTSITE="https://downloads.isc.org/isc/bind9"
-#/9.16.13/bind-9.16.13.tar.xz
-export DISTVER="${SWVERSION:-9.16.13}"
+export BUILDNAME="bind_exporter"
+export GOPATH="/usr/local/go"
+export GOURL="github.com/prometheus-community/bind_exporter"
 
 ## Build
 export vbpkg="${BUILDNAME}_build"
-export vbpkg_content="gcc g++ make libevent-dev openssl-dev protobuf-c-dev fstrm-dev libxml2-dev libmaxminddb-dev libuv-dev lmdb-dev perl libcap-dev libidn2-dev json-c-dev python3-dev linux-headers go"
-## Runtime
-export vrpkg="${BUILDNAME}_run"
-export vrpkg_content="curl libevent openssl protobuf-c fstrm libmaxminddb libxml2 py3-ply libuv lmdb libcap libidn2 json-c"
+export vbpkg_content="go git make gcc g++"
 
 ## busybox doesn't support nanoseconds
 export DATEFMT="+%FT%T%z"
@@ -58,54 +53,19 @@ install_buildpkg()
 ################################################################################
 build()
 {
-	echo "$(date $DATEFMT) [${BUILDNAME}] Retrieving ${BUILDNAME} ${DISTVER}"
-	if [ ! -d /usr/local/src ]; then
-		mkdir /usr/local/src
+	if [ ! -d $GOPATH ]; then
+		mkdir -p $GOPATH
 	fi
-	cd /usr/local/src
-	local DISTFILE="${BUILDNAME}-${DISTVER}.tar.xz"
-	$curl_cmd ${DISTSITE}/${DISTVER}/${DISTFILE} > ${DISTFILE}
-	xzcat ${DISTFILE} | tar xf -
-	rm ${DISTFILE}
-	cd ${BUILDNAME}-${DISTVER}
-
-	echo "$(date $DATEFMT) [${BUILDNAME}] Configuring..."
-	## NOTE: Must be extremely explicit with paths for nsd
-	## testing
-	./configure \
-		--prefix=/usr/local \
-		--sysconfdir=/usr/local/etc/bind \
-		--with-openssl=/usr \
-		--with-python=python3 \
-		--enable-dnstap \
-		--enable-auto-validation \
-		--enable-dnsrps \
-		--enable-dnsrps-dl \
-		--enable-full-report \
-		--enable-linux-caps \
-		--disable-chroot \
-		--with-dlopen=yes \
-		--with-libtool \
-		--with-lmdb \
-		--with-libidn2=yes \
-		--with-json-c \
-		--with-maxminddb=auto \
-		--with-dlz-stub \
-		--with-dlz-filesystem=yes \
-		--disable-isc-spnego
-
-	CHECK_ERROR $? "${BUILDNAME}_configure"
-	echo "$(date $DATEFMT) [${BUILDNAME}] configure complete."
-
-	echo "$(date $DATEFMT) [${BUILDNAME}] Building..."
-	make 
-	CHECK_ERROR $? "${BUILDNAME}_build"
-	echo "$(date $DATEFMT) [${BUILDNAME}] Build complete."
-
-	echo "$(date $DATEFMT) [${BUILDNAME}] Doing install..."
-	make install
-	CHECK_ERROR $? "${BUILDNAME}_install"
-	echo "$(date $DATEFMT) [${BUILDNAME}] install complete"
+	echo "$(date $DATEFMT) [${BUILDNAME}] adding bind_exporter..."
+	go get -v $GOURL
+	CHECK_ERROR $? bind_exporter_go_get
+	cd $GOPATH/src/$GOURL
+	make
+	if [ $? -eq 0 ]; then
+		mv $GOPATH/bin/bind_exporter /usr/local/sbin/
+		mv $GOPATH/bin/promu /usr/local/sbin/
+		rc-update add bind_exporter
+	fi
 }
 
 clean()
@@ -114,10 +74,10 @@ clean()
 	## Clean up after ourselves.
 	######################################################################
 	echo "$(date $DATEFMT) [${BUILDNAME}] Cleaning up build."
-	make clean
 	cd /root
-	rm -rf /usr/local/src/${BUILDNAME}-${DISTVER}
-	CHECK_ERROR $? "${BUILDNAME}_clean_delete_source"
+	rm -rf $GOPATH/bin
+	rm -rf $GOPATH/src
+	rm -rf $GOPATH/pkg
 	/sbin/apk --no-cache del $vbpkg
 	CHECK_ERROR $? "${BUILDNAME}_clean_apk"
 }

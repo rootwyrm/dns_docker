@@ -1,37 +1,36 @@
 group "default" {
-	targets = [ "base" ]
+	targets = [ "base", "dnsdist", "nsd", "unbound", "bind" ]
+}
+variable "TAG" {
+	default = "latest"
 }
 
 target "base" {
-	targets = [ "base" ]
-	tags = ["docker.io/rootwyrm/dns_base"]
 	context = "base/"
-	platforms = [ "linux/amd64", "linux/arm64", "linux/386" ]
-	progress = "plain"
+	tags = ["docker.io/rootwyrm/dns_base"]
+	platforms = [ "linux/amd64", "linux/386", "linux/arm64" ] 
 }
 
 target "nsd" {
-	targets = [ "nsd" ]
-	tags = ["docker.io/rootwyrm/nsd"]
 	context = "nsd/"
-	platforms = [ "linux/amd64", "linux/arm64", "linux/arm/v7", "linux/386" ]
-	progress = "plain"
+	tags = ["docker.io/rootwyrm/nsd"]
+	platforms = [ "linux/amd64", "linux/386", "linux/arm64" ] 
 }
 
 target "unbound" {
-	targets = [ "unbound" ]
-	tags = ["docker.io/rootwyrm/unbound"]
 	context = "unbound/"
-	platforms = [ "linux/amd64", "linux/arm64", "linux/arm/v7", "linux/386" ]
-	progress = "plain"
+	tags = ["docker.io/rootwyrm/unbound"]
+	platforms = [ "linux/amd64", "linux/386", "linux/arm64" ] 
 }
 
 target "dnsdist" {
-	targets = [ "dnsdist" ]
-	tags = ["docker.io/rootwyrm/dnsdist"]
 	context = "dnsdist/"
-	platforms = [ "linux/amd64", "linux/arm64", "linux/arm/v7", "linux/386" ]
-	progress = "plain"
+	tags = ["docker.io/rootwyrm/dnsdist"]
+	platforms = [ "linux/amd64", "linux/386", "linux/arm64" ] 
 }
 
-
+target "bind" {
+	context = "bind/"
+	tags = ["docker.io/rootwyrm/bind"]
+	platforms = [ "linux/amd64", "linux/386", "linux/arm64" ] 
+}
