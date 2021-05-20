@@ -54,7 +54,8 @@ addACL('%%DNSDIST_SUBNET%%')
 -- Fixed mapping
 ------------------------------------------------------------
 -- Quick answer localhost queries
-addAction("localhost", SpoofAction("127.0.0.1", "::1", {aa=true}))
+addAction("localhost", SpoofAction("127.0.0.1", {aa=true}))
+addAction("localhost", SpoofAction("::1", {aa=true}))
 addAction("1.0.0.127.in-addr.arpa", SpoofRawAction("\009localhost\000", {aa=true}))
 addAction("1.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.ip6.arpa", SpoofRawAction("\009localhost\000", {aa=true}))
 -- Send certain authoritative queries to local NSD
