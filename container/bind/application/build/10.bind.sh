@@ -91,8 +91,7 @@ build()
 		--with-json-c \
 		--with-maxminddb=auto \
 		--with-dlz-stub \
-		--with-dlz-filesystem=yes \
-		--disable-isc-spnego
+		--with-dlz-filesystem=yes
 
 	CHECK_ERROR $? "${BUILDNAME}_configure"
 	echo "$(date $DATEFMT) [${BUILDNAME}] configure complete."
