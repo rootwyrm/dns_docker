@@ -3,15 +3,16 @@ name: push - latest
 on:
   push:
     branches:
-      - maint 
+      - main
       - release/*
     tags:
       - v1*
-    #paths:
-    #  - 'ci/hooks/**'
-    #  - 'container/**'
+    paths:
+      - 'ci/hooks/**'
+      - 'container/**'
     repository_dispatch:
       types: [ world ]
+  workflow_dispatch:
 
 ## Do our monster build.
 jobs:
