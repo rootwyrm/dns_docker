@@ -1,6 +1,8 @@
 ARG     RELEASE=latest
 FROM    docker.io/rootwyrm/dns_base:${RELEASE}
 
+ENV PROMETHEUS_PORT=${PROMETHEUS_PORT:-10530}
+
 ## Set up our labels
 LABEL   maintainer="Phillip 'RootWyrm' Jaenke <prj+docker@rootwyrm.com>" \
         com.rootwyrm.project="dns_docker/nsd" \
