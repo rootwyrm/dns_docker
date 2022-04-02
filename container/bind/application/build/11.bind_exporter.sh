@@ -27,14 +27,17 @@ install_package()
 {
 	local BINDIR=/opt/local/bind_exporter
 	local ARCH=$(uname -m)
-	local URL=https://github.com/prometheus-community/bind_exporter/releases/download/v${BIND_EXPORTER_VER}/bind_exporter-${BIND_EXPORTER_VER}.linux-${ARCH}.tar.gz
-	curl -o /tmp/bind_exporter.tgz $URL
-	if [ ! -d $BINDIR ]; then
-		mkdir $BINDIR
+	if [ $ARCH == 'aarch64' ]; then
+		ARCH=arm64
 	fi
-	tar -c ${BINDIR} --strip-components=1 -zxf /tmp/bind_exporter.tgz "bind_exporter-${BIND_EXPORTER_VER}.linux-${ARCH}/LICENSE"
-	tar -c ${BINDIR} --strip-components=1 -zxf /tmp/bind_exporter.tgz "bind_exporter-${BIND_EXPORTER_VER}.linux-${ARCH}/NOTICE"
-	tar -c ${BINDIR} --strip-components=1 -zxf /tmp/bind_exporter.tgz "bind_exporter-${BIND_EXPORTER_VER}.linux-${ARCH}/bind_exporter"
+	local URL=https://github.com/prometheus-community/bind_exporter/releases/download/v${BIND_EXPORTER_VER}/bind_exporter-${BIND_EXPORTER_VER}.linux-${ARCH}.tar.gz
+	curl -L -o /tmp/bind_exporter.tgz $URL
+	if [ ! -d $BINDIR ]; then
+		mkdir -p $BINDIR
+	fi
+	tar -C ${BINDIR} --strip-components=1 -zxf /tmp/bind_exporter.tgz "bind_exporter-${BIND_EXPORTER_VER}.linux-${ARCH}/LICENSE"
+	tar -C ${BINDIR} --strip-components=1 -zxf /tmp/bind_exporter.tgz "bind_exporter-${BIND_EXPORTER_VER}.linux-${ARCH}/NOTICE"
+	tar -C ${BINDIR} --strip-components=1 -zxf /tmp/bind_exporter.tgz "bind_exporter-${BIND_EXPORTER_VER}.linux-${ARCH}/bind_exporter"
 }
 
 install_package
