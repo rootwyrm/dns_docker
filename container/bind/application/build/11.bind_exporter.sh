@@ -17,7 +17,7 @@ software_version
 
 export BUILDNAME="bind_exporter"
 
-export BIND_EXPORTER_VER="${BIND_EXPORTER_VER:-0.5.0}"
+export BIND_EXPORTER_VER="${BIND_EXPORTER_VER:-0.6.1}"
 
 ## busybox doesn't support nanoseconds
 export DATEFMT="+%FT%T%z"
@@ -27,9 +27,15 @@ install_package()
 {
 	local BINDIR=/opt/local/bind_exporter
 	local ARCH=$(uname -m)
-	if [ $ARCH == 'aarch64' ]; then
-		ARCH=arm64
-	fi
+	case $ARCH in 
+		aarch64)
+			ARCH=arm64
+			;;
+		x86_64)
+			ARCH=amd64
+			;;
+	esac
+
 	local URL=https://github.com/prometheus-community/bind_exporter/releases/download/v${BIND_EXPORTER_VER}/bind_exporter-${BIND_EXPORTER_VER}.linux-${ARCH}.tar.gz
 	curl -L -o /tmp/bind_exporter.tgz $URL
 	if [ ! -d $BINDIR ]; then
@@ -42,5 +48,5 @@ install_package()
 
 install_package
 
-echo "$(date $DATEFMT) [${BUILDNAME}] Build and install of ${DISTVER} complete."
+echo "$(date $DATEFMT) [${BUILDNAME}] Build and install of bind_exporter ${BIND_EXPORTER_VER} complete."
 exit 0 
