@@ -1,9 +1,11 @@
 #!/bin/bash
 ## application/build/10.dnsdist.sh
-#
+
 # Copyright (C) 2015-* Phillip R. Jaenke <prj+docker@rootwyrm.com>
-# Licensed under CC-BY-NC-4.0
 #
+# NO COMMERCIAL REDISTRIBUTION IN ANY FORM IS PERMITTED WITHOUT
+# EXPRESS WRITTEN CONSENT
+
 ######################################################################
 ## Function Import and Setup
 ######################################################################
@@ -20,10 +22,10 @@ fi
 
 ## Build
 export vbpkg="dnsdist_build"
-export vbpkg_content="git gcc g++ make autoconf automake openssl-dev luajit-dev fstrm-dev libsodium-dev libedit-dev boost-dev lmdb-dev protobuf-dev re2-dev musl-dev nghttp2-dev"
+export vbpkg_content="git gcc g++ make autoconf automake openssl-dev luajit-dev fstrm-dev libsodium-dev libedit-dev boost-dev h2o-dev lmdb-dev protobuf-dev re2-dev musl-dev"
 ## Runtime
 export vrpkg="dnsdist_run"
-export vrpkg_content="curl gettext openssl luajit libedit libsodium boost lmdb libprotobuf libprotoc protoc re2 fstrm nghttp2 nghttp2-libs" 
+export vrpkg_content="curl gettext openssl luajit libedit libsodium boost h2o lmdb libprotobuf libprotoc protoc re2 fstrm" 
 
 ## busybox doesn't support nanoseconds
 export DATEFMT="+%FT%T%z"
@@ -74,8 +76,10 @@ build()
 		--sysconfdir=/usr/local/etc/dnsdist \
 		--with-re2 --with-ebpf \
 		--with-boost=/usr \
-		--enable-dnstap --enable-dnscrypt --enable-dns-over-tls \
-		--enable-dns-over-https --with-re2
+		--enable-dnstap \
+		--enable-dnscrypt \
+		--enable-dns-over-tls \
+		--enable-dns-over-https
 	CHECK_ERROR $? "dnsdist_configure"
 	echo "$(date $DATEFMT) [${BUILDNAME}] configure complete."
 

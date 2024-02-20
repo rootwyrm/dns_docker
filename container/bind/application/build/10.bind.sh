@@ -23,10 +23,10 @@ export DISTVER="${SWVERSION:-9.16.13}"
 
 ## Build
 export vbpkg="${BUILDNAME}_build"
-export vbpkg_content="gcc g++ make libevent-dev openssl-dev protobuf-c-dev fstrm-dev libxml2-dev libmaxminddb-dev libuv-dev lmdb-dev perl libcap-dev libidn2-dev json-c-dev python3-dev linux-headers go"
+export vbpkg_content="gcc g++ make libevent-dev openssl-dev protobuf-c-dev fstrm-dev libxml2-dev libmaxminddb-dev libuv-dev lmdb-dev perl libcap-dev libidn2-dev json-c-dev python3-dev linux-headers go nghttp2-dev jemalloc-dev"
 ## Runtime
 export vrpkg="${BUILDNAME}_run"
-export vrpkg_content="curl libevent openssl protobuf-c fstrm libmaxminddb libxml2 py3-ply libuv lmdb libcap libidn2 json-c"
+export vrpkg_content="curl libevent openssl protobuf-c fstrm libmaxminddb libxml2 py3-ply libuv lmdb libcap libidn2 json-c nghttp2 jemalloc"
 
 ## busybox doesn't support nanoseconds
 export DATEFMT="+%FT%T%z"
@@ -72,11 +72,11 @@ build()
 	echo "$(date $DATEFMT) [${BUILDNAME}] Configuring..."
 	## NOTE: Must be extremely explicit with paths for nsd
 	## testing
+	#./configure --help
 	./configure \
 		--prefix=/usr/local \
 		--sysconfdir=/usr/local/etc/bind \
 		--with-openssl=/usr \
-		--with-python=python3 \
 		--enable-dnstap \
 		--enable-auto-validation \
 		--enable-dnsrps \
@@ -84,14 +84,13 @@ build()
 		--enable-full-report \
 		--enable-linux-caps \
 		--disable-chroot \
-		--with-dlopen=yes \
-		--with-libtool \
 		--with-lmdb \
 		--with-libidn2=yes \
 		--with-json-c \
 		--with-maxminddb=auto \
-		--with-dlz-stub \
-		--with-dlz-filesystem=yes
+		--enable-dnsrps \
+		--enable-dnsrps-dl \
+		--with-python-sys-prefix
 
 	CHECK_ERROR $? "${BUILDNAME}_configure"
 	echo "$(date $DATEFMT) [${BUILDNAME}] configure complete."
