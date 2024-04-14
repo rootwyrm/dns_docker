@@ -22,10 +22,10 @@ fi
 
 ## Build
 export vbpkg="dnsdist_build"
-export vbpkg_content="git gcc g++ make autoconf automake openssl-dev luajit-dev fstrm-dev libsodium-dev libedit-dev boost-dev h2o-dev lmdb-dev protobuf-dev re2-dev musl-dev"
+export vbpkg_content="git gcc g++ make autoconf automake openssl-dev luajit-dev fstrm-dev libsodium-dev libedit-dev boost-dev lmdb-dev protobuf-dev re2-dev musl-dev nghttp2-dev"
 ## Runtime
 export vrpkg="dnsdist_run"
-export vrpkg_content="curl gettext openssl luajit libedit libsodium boost h2o lmdb libprotobuf libprotoc protoc re2 fstrm" 
+export vrpkg_content="curl gettext openssl luajit libedit libsodium boost h2o lmdb libprotobuf libprotoc protoc re2 fstrm nghttp2" 
 
 ## busybox doesn't support nanoseconds
 export DATEFMT="+%FT%T%z"
